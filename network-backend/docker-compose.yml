@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app  
+      - /app/node_modules
+    command: npm run start:dev
+    environment:
+      - DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@db:5432/${DB_DATABASE}
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=300
+      - WATCHPACK_POLLING=true
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - social.net
+
+  db:
+    image: postgres:17.3-alpine
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
+    volumes:
+      - network-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  
+    restart: unless-stopped
+    networks:
+      - social.net
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - redis:/data
+    networks:
+      - social.net
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      retries: 3
+      timeout: 3s
+
+  rabbitmq:
+    image: rabbitmq:4.0.7-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"    
+      - "15672:15672"  
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+    networks:
+      - social.net
+  
+volumes:
+  network-data:
+    name: network-data
+  redis:
+    name: network-redis
+
+networks:
+  social.net:
+    external: true
