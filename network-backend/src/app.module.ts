@@ -18,7 +18,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './modules/users/entities/user.entity';
 import { BullModule } from '@nestjs/bull';
 import { MailModule } from '@/mail/mail.module';
-import { MediaModule } from './media/media.module';
+import { ProfilesModule } from './modules/profiles/profiles.module';
+import { FollowsModule } from './modules/follows/follows.module';
+import { MediaModule } from './modules/media/media.module';
 
 
 @Module({
@@ -39,7 +41,7 @@ import { MediaModule } from './media/media.module';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
-        entities: [User],
+        entities: [__dirname + '/../**/*.entity.{ts,js}'],
         synchronize: true,
       }),
     }),
@@ -55,13 +57,13 @@ import { MediaModule } from './media/media.module';
       }),
     }),
     MailModule,
-
-    MediaModule,
     SocketModule,
     RedisModule,
-    UsersModule,
     AuthModule,
-
+    UsersModule,
+    ProfilesModule,
+    FollowsModule,
+    MediaModule
   ],
   controllers: [AppController],
   providers: [

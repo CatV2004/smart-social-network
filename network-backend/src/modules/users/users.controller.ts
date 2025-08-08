@@ -29,6 +29,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { LocalAuthGuard } from '../auth/guards/local-auth.guard';
+import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 
 @ApiTags('users')
 @Controller('users')
@@ -82,7 +83,6 @@ export class UsersController {
     return this.usersService.verifyEmail(token);
   }
 
-
   @ApiOperation({ summary: 'Resend verification email' })
   @ApiOkResponse({
     description: 'New verification email sent',
@@ -105,7 +105,6 @@ export class UsersController {
     return this.usersService.resendVerificationEmail(email);
   }
 
-
   @ApiOperation({
     summary: 'Get current user profile',
     description: 'Requires valid access token'
@@ -118,8 +117,8 @@ export class UsersController {
   @ApiBearerAuth()
   @Get('me')
   async getMe(
-    @ActiveUser('id') userId: string
+    @ActiveUser() user: ActiveUserData,
   ): Promise<UserResponseDto> {
-    return this.usersService.getMe(userId);
+    return this.usersService.getMe(user.id);
   }
 }

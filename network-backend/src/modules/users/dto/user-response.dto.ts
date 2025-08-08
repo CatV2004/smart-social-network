@@ -23,11 +23,17 @@ export class UserResponseDto {
   @ApiProperty({ description: 'Deleted date of user', nullable: true, required: false })
   deleted_at?: Date | null;
 
-  constructor(user: User) {
+  @ApiProperty({ description: 'Whether current user follows this user' })
+  isFollowed: boolean;
+
+  constructor(user: User, isFollowed: boolean = false) {
     this.id = user.id;
     this.email = user.email;
     this.first_name = user.firstName;
     this.last_name = user.lastName;
     this.created_at = user.createdAt;
+    this.updated_at = user.updatedAt;
+    this.deleted_at = user.deletedAt;
+    this.isFollowed = isFollowed;
   }
 }

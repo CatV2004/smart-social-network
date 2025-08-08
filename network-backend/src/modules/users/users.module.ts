@@ -7,10 +7,16 @@ import { UsersService } from './users.service';
 import { AuthModule } from '../auth/auth.module';
 import { BcryptService } from '../auth/bcrypt.service';
 import { MailModule } from '@/mail/mail.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), forwardRef(() => AuthModule), MailModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    forwardRef(() => AuthModule),
+    forwardRef(() => ProfilesModule),
+    MailModule
+  ],
   controllers: [UsersController],
   providers: [UsersService, BcryptService],
-  exports: [UsersService, TypeOrmModule]
+  exports: [UsersService]
 })
-export class UsersModule {}
+export class UsersModule { }

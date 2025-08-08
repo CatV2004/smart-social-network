@@ -8,10 +8,16 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
+import { Reaction } from '@/modules/reactions/entities/reaction.entity';
+import { Follow } from '@/modules/follows/entities/follow.entity';
+import { Profile } from '@/modules/profiles/entities/profile.entity';
+// import { ConfigService } from '@nestjs/config';
 
 export enum UserRole {
   USER = 'USER',
@@ -22,12 +28,17 @@ export enum UserRole {
   name: 'users',
 })
 export class User {
+  // constructor(private readonly configService: ConfigService) { }
+
   @ApiProperty({
     description: 'ID of user',
     example: '89c018cc-8a77-4dbd-94e1-dbaa710a2a9c',
   })
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @OneToOne(() => Profile, profile => profile.user)
+  profile: Profile;
 
   @ApiProperty({ description: 'Email of user', example: 'atest@email.com' })
   @Column({ unique: true })
@@ -49,6 +60,15 @@ export class User {
   @ApiProperty({ description: 'Role of user', example: 'USER' })
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
+
+  @OneToMany(() => Follow, follow => follow.follower)
+  following: Follow[];
+
+  @OneToMany(() => Follow, follow => follow.following)
+  followers: Follow[];
+
+  @OneToMany(() => Reaction, reaction => reaction.user)
+  reactions: Reaction[];
 
   @ApiProperty({ description: 'account is active?', example: 'True or False' })
   @Column({ default: true })
@@ -79,11 +99,12 @@ export class User {
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date | null;
 
-  @BeforeInsert()
-  generateVerificationToken() {
-    this.verificationToken = uuidv4();
-    this.verificationTokenExpires = dayjs().add(24, 'hour').toDate();
-  }
+  // @BeforeInsert()
+  // generateVerificationToken() {
+  //   const expiresInSeconds = this.configService.get<number>('VERIFICATION_TOKEN_EXPIRES_IN_SECONDS', 60);
+  //   this.verificationToken = uuidv4();
+  //   this.verificationTokenExpires = dayjs().add(expiresInSeconds, 'second').toDate();
+  // }
 
   isVerificationTokenValid(): boolean {
     return (

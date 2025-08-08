@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+:root {
+  --feed-suggestion-sidebar-width: 319px;
+  --feed-medium-sidebar-width: 272px;
+}
+
+.feed-suggestion-sidebar {
+  width: var(--feed-suggestion-sidebar-width);
+  height: 100vh;
+}
+
+.nav-medium-sidebar {
+  width: var(--feed-medium-sidebar-width);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

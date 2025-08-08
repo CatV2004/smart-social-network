@@ -1,12 +1,15 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { EntityManager, Repository } from 'typeorm';
+import { User, UserRole } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { BcryptService } from '@/modules/auth/bcrypt.service';
 import { UserResponseDto } from './dto/user-response.dto';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '@/mail/mail.service';
+import dayjs from 'dayjs';
+import { ProfilesService } from '../profiles/profiles.service';
+import { v4 as uuidv4 } from 'uuid';
 
 
 @Injectable()
@@ -20,6 +23,7 @@ export class UsersService {
     private readonly bcryptService: BcryptService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
+    private readonly profilesService: ProfilesService,
   ) {
     this.frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
   }
@@ -27,7 +31,7 @@ export class UsersService {
   async getMe(userId: string): Promise<UserResponseDto> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      select: ['id', 'email', 'firstName', 'lastName', 'role', 'isVerified', 'createdAt'],
+      select: ['id', 'email', 'firstName', 'lastName', 'role', 'isActive', 'isVerified', 'createdAt', 'updatedAt'],
     });
 
     if (!user) {
@@ -61,7 +65,12 @@ export class UsersService {
         password: hashedPassword,
       });
 
+      this.generateVerificationTokenForUser(user);
+
       const savedUser = await queryRunner.manager.save(user);
+      if (savedUser.role === UserRole.USER) {
+        await this.profilesService.create({}, savedUser.id, queryRunner.manager);
+      }
       await queryRunner.commitTransaction();
 
       await this.sendVerificationEmail(savedUser).catch(error => {
@@ -86,14 +95,15 @@ export class UsersService {
     }
 
     const verificationUrl = `${this.frontendUrl}/verify-email?token=${user.verificationToken}`;
-
+    const timestamp = dayjs().format('YYYY-MM-DD HH:mm:ss');
     await this.mailService.sendMail({
       to: user.email,
       subject: 'Email Verification',
       template: 'verify-email',
       context: {
-        name: `${user.firstName} ${user.lastName}`|| 'User',
+        name: `${user.firstName} ${user.lastName}` || 'User',
         username: `${user.email}`,
+        timestamp,
         verificationUrl,
       },
     });
@@ -141,7 +151,8 @@ export class UsersService {
       throw new BadRequestException('Email already verified');
     }
 
-    user.generateVerificationToken();
+    this.generateVerificationTokenForUser(user);
+
     await this.userRepository.save(user);
 
     await this.sendVerificationEmail(user);
@@ -154,5 +165,48 @@ export class UsersService {
       where: { email },
       select: ['id', 'email', 'firstName', 'lastName', 'password', 'role', 'isVerified', 'isActive'],
     });
+  }
+
+  private generateVerificationTokenForUser(user: User): void {
+    const expiresInSeconds = parseInt(this.configService.get<string>('VERIFICATION_TOKEN_EXPIRES_IN_SECONDS') || '60', 10);
+    user.verificationToken = uuidv4();
+    user.verificationTokenExpires = dayjs().add(expiresInSeconds, 'second').toDate();
+  }
+
+  async findById(id: string, manager?: EntityManager): Promise<User> {
+    const userRepo = manager?.getRepository(User) ?? this.userRepository;
+
+    const user = await userRepo.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return user;
+  }
+
+  async findByIdWithRelations(id: string, relations: string[] = []): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations,
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    return user;
+  }
+
+  async findByUsername(userName: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { email: userName }
+    })
+    if (!user)
+      throw new NotFoundException("User not found");
+
+    return user;
   }
 }

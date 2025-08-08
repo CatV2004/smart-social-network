@@ -10,15 +10,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './guards/strategies/jwt.strategy';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guards/roles.guard';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
 import { RefreshTokenStrategy } from './guards/strategies/refresh-token.strategy';
 import { LocalStrategy } from './guards/strategies/local.strategy';
+import { PostsModule } from '../posts/posts.module';
 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
     forwardRef(() => UsersModule),
     PassportModule,
     RedisModule,
