@@ -1,4 +1,3 @@
-import { ProfilePublicDto } from '@/modules/profiles/dto/profile-public.dto';
 import { Expose, Type } from 'class-transformer';
 
 export class UserPublicDto {
@@ -13,8 +12,4 @@ export class UserPublicDto {
 
   @Expose()
   lastName: string;
-
-  @Type(() => ProfilePublicDto)
-  @Expose()
-  profile: ProfilePublicDto;
 }

@@ -16,7 +16,7 @@ export class ProfilesService {
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
 
-    @Inject(forwardRef(() => FollowsService))
+    @Inject(forwardRef(() => PostsService))
     private readonly postsService: PostsService,
 
     @Inject(forwardRef(() => FollowsService))

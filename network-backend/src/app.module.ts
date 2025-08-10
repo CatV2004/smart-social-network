@@ -42,6 +42,7 @@ import { MediaModule } from './modules/media/media.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
         entities: [__dirname + '/../**/*.entity.{ts,js}'],
+        // migrations: [__dirname + '/migrations/*{.ts,.js}'],
         synchronize: true,
       }),
     }),

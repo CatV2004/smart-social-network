@@ -20,7 +20,7 @@ export class MediaService {
     files: Express.Multer.File[],
     dto: CreateMediaDto
   ): Promise<Media[]> {
-    const post = await this.postsService.findById(dto.postId);
+    const post = await this.postsService.findByIdWithRelations(dto.postId);
 
     if (!post) {
       throw new NotFoundException('Post not found');
@@ -51,7 +51,7 @@ export class MediaService {
 
 
   async getMediaByPost(postId: string): Promise<Media[]> {
-    const post = await this.postsService.findById(postId);
+    const post = await this.postsService.findByIdWithRelations(postId);
 
     if (!post) {
       throw new NotFoundException('Post not found');

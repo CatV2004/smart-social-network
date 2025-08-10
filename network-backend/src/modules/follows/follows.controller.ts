@@ -25,8 +25,7 @@ import { FollowsService } from './follows.service';
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { UserPublicDto } from '../users/dto/user-public.dto';
-import { FollowUserResponseDto } from './dto/follow-user-response.dto';
+import { FollowProfileResponseDto } from './dto/follow-profile-response.dto';
 
 @ApiTags('follows')
 @ApiBearerAuth()
@@ -44,9 +43,9 @@ export class FollowsController {
   @HttpCode(HttpStatus.OK)
   async follow(
     @ActiveUser() user: ActiveUserData,
-    @Param('userId') userId: string,
+    @Param('profileId') profileId: string,
   ) {
-    return this.followsService.requestFollow(user.id, userId);
+    return this.followsService.requestFollow(user.id, profileId);
   }
 
   @ApiOperation({ summary: 'Accept a follow request' })
@@ -92,7 +91,7 @@ export class FollowsController {
   @Get('followers')
   async getFollowers(
     @ActiveUser() user: ActiveUserData,
-  ):Promise<FollowUserResponseDto[]> {
+  ):Promise<FollowProfileResponseDto[]> {
     return this.followsService.getFollowers(user.id);
   }
 
@@ -101,7 +100,7 @@ export class FollowsController {
   @Get('following')
   async getFollowing(
     @ActiveUser() user: ActiveUserData,
-  ):Promise<FollowUserResponseDto[]> {
+  ):Promise<FollowProfileResponseDto[]> {
     return this.followsService.getFollowing(user.id);
   }
 
@@ -110,7 +109,7 @@ export class FollowsController {
   @Get('sent-requests')
   async getSentFollowRequests(
     @ActiveUser() user: ActiveUserData,
-  ):Promise<FollowUserResponseDto[]> {
+  ):Promise<FollowProfileResponseDto[]> {
     return this.followsService.getSentFollowRequests(user.id);
   }
 
@@ -119,7 +118,7 @@ export class FollowsController {
   @Get('received-requests')
   async getReceivedFollowRequests(
     @ActiveUser() user: ActiveUserData,
-  ):Promise<FollowUserResponseDto[]> {
+  ):Promise<FollowProfileResponseDto[]> {
     return this.followsService.getReceivedFollowRequests(user.id);
   }
 }

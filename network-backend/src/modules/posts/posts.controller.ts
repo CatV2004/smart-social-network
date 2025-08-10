@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpCode, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpCode, UseGuards, Query } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { ApiBadRequestResponse, ApiBody, ApiCreatedResponse, ApiForbiddenResponse, ApiNoContentResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
@@ -9,6 +9,10 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PostOwnerGuard } from './guards/post-owner.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
+import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
+import { PaginatedResponseDto } from '@/common/dtos/paginated-response.factory';
+import { PostResponseDto } from './dto/response-post.dto';
+import { IPaginated } from '@/common/dtos/paginated.interface';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -80,5 +84,24 @@ export class PostsController {
   @ApiForbiddenResponse({ description: 'Forbidden - Only admins can hard delete posts' })
   async hardDeletePost(@Param('id') id: string) {
     return this.postsService.hardDeletePost(id);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all posts with pagination' })
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: PaginatedResponseDto(PostResponseDto) })
+  async getAll(@Query() pagination: PaginationQueryDto): Promise<IPaginated<PostResponseDto>> {
+    return this.postsService.findAll(pagination);
+  }
+
+  @Get('profile/:profileId')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get posts by profileId with pagination' })
+  @ApiOkResponse({ type: PaginatedResponseDto(PostResponseDto) })
+  async getByProfile(
+    @Param('profileId') profileId: string,
+    @Query() pagination: PaginationQueryDto,
+  ): Promise<IPaginated<PostResponseDto>> {
+    return this.postsService.findByProfileId(profileId, pagination);
   }
 }

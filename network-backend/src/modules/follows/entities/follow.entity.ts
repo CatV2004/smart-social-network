@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '@/modules/users/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Profile } from '@/modules/profiles/entities/profile.entity';
 
 export enum FollowStatus {
   PENDING = 'PENDING',
@@ -24,14 +25,14 @@ export class Follow {
   id: string;
 
   @ApiProperty({ description: 'Người theo dõi (follower)' })
-  @ManyToOne(() => User, user => user.following, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Profile, profile => profile.following, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'follower_id' })
-  follower: User;
+  follower: Profile;
 
   @ApiProperty({ description: 'Người được theo dõi (following)' })
-  @ManyToOne(() => User, user => user.followers, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Profile, profile => profile.followers, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'following_id' })
-  following: User;
+  following: Profile;
 
   @ApiProperty({ enum: FollowStatus, description: 'Trạng thái theo dõi' })
   @Column({

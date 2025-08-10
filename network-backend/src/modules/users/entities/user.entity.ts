@@ -3,19 +3,15 @@ import { Exclude } from 'class-transformer';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  BeforeInsert,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import dayjs from 'dayjs';
-import { Reaction } from '@/modules/reactions/entities/reaction.entity';
-import { Follow } from '@/modules/follows/entities/follow.entity';
 import { Profile } from '@/modules/profiles/entities/profile.entity';
 // import { ConfigService } from '@nestjs/config';
 
@@ -60,15 +56,6 @@ export class User {
   @ApiProperty({ description: 'Role of user', example: 'USER' })
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
-
-  @OneToMany(() => Follow, follow => follow.follower)
-  following: Follow[];
-
-  @OneToMany(() => Follow, follow => follow.following)
-  followers: Follow[];
-
-  @OneToMany(() => Reaction, reaction => reaction.user)
-  reactions: Reaction[];
 
   @ApiProperty({ description: 'account is active?', example: 'True or False' })
   @Column({ default: true })

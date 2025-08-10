@@ -4,6 +4,11 @@ import { Post } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProfilesService } from '../profiles/profiles.service';
+import { PaginationQueryDto, SortOrder } from '@/common/dtos/pagination-query.dto';
+import { plainToInstance } from 'class-transformer';
+import { IPaginated } from '@/common/dtos/paginated.interface';
+import { PostResponseDto } from './dto/response-post.dto';
+import { PaginationMetaDto } from '@/common/dtos/pagination-meta.dto';
 
 @Injectable()
 export class PostsService {
@@ -65,6 +70,68 @@ export class PostsService {
     await this.postRepository.delete(postId);
   }
 
+  async findAll(pagination: PaginationQueryDto): Promise<IPaginated<PostResponseDto>> {
+    const {
+      page = 1,
+      limit = 3,
+      sortBy = 'createdAt',
+      sortOrder = SortOrder.DESC,
+    } = pagination;
+
+    const [items, total] = await this.postRepository.findAndCount({
+      relations: ['author', 'author.user', 'media'],
+      order: { [sortBy]: sortOrder },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    const data = plainToInstance(PostResponseDto, items, {
+      excludeExtraneousValues: true,
+    });
+
+    const meta: PaginationMetaDto = {
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    };
+
+    return { data, meta };
+  }
+
+  async findByProfileId(profileId: string, pagination: PaginationQueryDto): Promise<IPaginated<PostResponseDto>> {
+    const {
+      page = 1,
+      limit = 3,
+      sortBy = 'createdAt',
+      sortOrder = SortOrder.DESC,
+    } = pagination;
+
+    const [items, total] = await this.postRepository.findAndCount({
+      where: { author: { id: profileId } },
+      relations: {
+        author: true,
+        media: true,
+      },
+      order: { [sortBy]: sortOrder },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    const data = plainToInstance(PostResponseDto, items, {
+      excludeExtraneousValues: true,
+    });
+
+    const meta: PaginationMetaDto = {
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    };
+
+    return { data, meta };
+  }
+
   async findByIdWithRelations(id: string, relations: string[] = []): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
@@ -77,6 +144,4 @@ export class PostsService {
 
     return post;
   }
-
-
 }

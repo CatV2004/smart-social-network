@@ -6,22 +6,22 @@ import {
     Column,
     Unique,
 } from 'typeorm';
-import { User } from '@/modules/users/entities/user.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { ReactionType } from '@/modules/reactions/types/reaction.types';
+import { Profile } from '@/modules/profiles/entities/profile.entity';
 
 
 @Entity({ name: 'reactions' })
-@Unique(['user', 'post']) 
+@Unique(['profile', 'post'])
 export class Reaction {
     @ApiProperty({ description: 'ID of reaction' })
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @ApiProperty({ description: 'User who reacted' })
-    @ManyToOne(() => User, user => user.id, { onDelete: 'CASCADE' })
-    user: User;
+    @ManyToOne(() => Profile, profile => profile.id, { onDelete: 'CASCADE' })
+    profile: Profile;
 
     @ApiProperty({ description: 'Post that was reacted to' })
     @ManyToOne(() => Post, post => post.reactions, { onDelete: 'CASCADE' })
