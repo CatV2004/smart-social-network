@@ -2,22 +2,28 @@ import StoryList from "@/components/features/story/StoriesList";
 import PostList from "@/components/features/post/PostList";
 import { mockStories, mockPosts, mockSuggestions } from "@/lib/mock-data";
 import SuggestionsSidebar from "@/components/features/suggestion/SuggestionsSidebar";
-// Đây là một Server Component, nó sẽ fetch dữ liệu và truyền xuống client
-export default async function HomePage() {
-  // Trong thực tế, bạn sẽ gọi service/API để lấy dữ liệu ở đây
-  // const stories = await getStories();
-  // const posts = await getPosts();
+import { Suspense } from 'react';
+import LoadingSkeleton from '@/components/common/LoadingSkeleton';
 
+export default async function HomePage() {
   return (
     <div className="flex justify-center gap-6 py-6">
-      <div className="w-full max-w-[760px]">
-        <StoryList stories={mockStories} />
-        <PostList posts={mockPosts} />
+      <div className="w-full max-w-[630px]">
+        <Suspense fallback={<LoadingSkeleton type="stories" />}>
+          <StoryList stories={mockStories} />
+        </Suspense>
+        
+        <Suspense fallback={<LoadingSkeleton type="posts" count={3} />}>
+          <PostList posts={mockPosts} />
+        </Suspense>
       </div>
+      
       {/* Right Sidebar */}
-      <div className="hidden lg:block w-[330px]">
-        <div className="fixed top-6 right-40 w-[330px]">
-          <SuggestionsSidebar suggestions={mockSuggestions} />
+      <div className="hidden lg:block w-[350px]">
+        <div className="w-[350px]">
+          <Suspense fallback={<LoadingSkeleton type="suggestions" />}>
+            <SuggestionsSidebar suggestions={mockSuggestions} />
+          </Suspense>
         </div>
       </div>
     </div>

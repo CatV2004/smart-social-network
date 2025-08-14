@@ -1,58 +1,162 @@
-import { PostThumbnail } from '@/types/post';
-import { HeartIcon, MessageSquareIcon } from 'lucide-react';
-import Image from 'next/image';
+"use client";
+import { useEffect, useRef } from "react";
+import { MediaItem } from "@/types/post";
+import Image from "next/image";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  HeartIcon,
+  MessageSquareIcon,
+  PlayIcon,
+  GridIcon,
+} from "@/components/ui/Icons";
+import { EmptyPostState } from "./EmptyPostState";
 
 interface PostGridProps {
-  posts: PostThumbnail[];
+  posts: {
+    id: string;
+    media: MediaItem[];
+    likesCount: number;
+    commentsCount: number;
+  }[];
   isCurrentUser?: boolean;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoading?: boolean;
 }
 
-const PostGrid = ({ posts, isCurrentUser = false }: PostGridProps) => {
-  if (posts.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center text-center py-16">
-        <div className="w-16 h-16 border-2 border-black rounded-full flex items-center justify-center">
-          <svg aria-label="Máy ảnh" fill="currentColor" height="24" role="img" viewBox="0 0 24 24" width="24">
-            <path d="M12 9.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"></path>
-            <path d="M16.5 2.5a.5.5 0 0 1 .5.5v2h2a.5.5 0 0 1 0 1h-2v2a.5.5 0 0 1-1 0v-2h-2a.5.5 0 0 1 0-1h2v-2a.5.5 0 0 1 .5-.5Zm-2 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11Z" fillRule="evenodd"></path>
-            <path d="M2 5.5a3.5 3.5 0 0 1 3.5-3.5h13A3.5 3.5 0 0 1 22 5.5v13a3.5 3.5 0 0 1-3.5 3.5h-13A3.5 3.5 0 0 1 2 18.5v-13Zm3.5-1.5a1.5 1.5 0 0 0-1.5 1.5v13a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5v-13a1.5 1.5 0 0 0-1.5-1.5h-13Z" fillRule="evenodd"></path>
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold mt-4">
-          {isCurrentUser ? "Chưa có bài viết nào" : "Không có bài viết nào"}
-        </h2>
-        {isCurrentUser && (
-          <p className="text-gray-500 mt-2">Bắt đầu chia sẻ ảnh và video của bạn</p>
-        )}
-      </div>
+export const PostGrid = ({
+  posts,
+  isCurrentUser = false,
+  onLoadMore,
+  hasMore = false,
+  isLoading = false,
+}: PostGridProps) => {
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+
+  // Infinite scroll observer với debounce nhẹ
+  useEffect(() => {
+    if (!onLoadMore || !hasMore || isLoading) return;
+
+    let timer: NodeJS.Timeout;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isLoading && hasMore) {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            onLoadMore();
+          }, 200);
+        }
+      },
+      { threshold: 0.1 }
     );
+
+    const node = loaderRef.current;
+    if (node) observer.observe(node);
+
+    return () => {
+      clearTimeout(timer);
+      if (node) observer.unobserve(node);
+      observer.disconnect();
+    };
+  }, [onLoadMore, hasMore, isLoading]);
+
+  if (posts.length === 0 && !isLoading) {
+    return <EmptyPostState isCurrentUser={isCurrentUser} />;
   }
 
+  const SkeletonCard = () => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="aspect-square bg-gray-200 dark:bg-gray-800 animate-pulse rounded"
+    />
+  );
+
   return (
-    <div className="grid grid-cols-3 gap-1 md:gap-4">
-      {posts.map((post) => (
-        <div key={post.id} className="relative aspect-square group">
-          <Image
-            src={post.imageUrl}
-            alt={`Post by ${post.username}`}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 33vw, 20vw"
-          />
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-x-4 text-white font-bold transition-all duration-300">
-            <span className="flex items-center gap-1">
-              <HeartIcon className="w-4 h-4" />
-              {post.likesCount}
-            </span>
-            <span className="flex items-center gap-1">
-              <MessageSquareIcon className="w-4 h-4" />
-              {post.commentsCount}
-            </span>
-          </div>
-        </div>
-      ))}
+    <div className="w-full">
+      <div className="grid grid-cols-3 gap-1 sm:gap-6">
+        <AnimatePresence>
+          {posts.map((post, idx) => {
+            const firstMedia = post.media[0];
+            const hasMultipleMedia = post.media.length > 1;
+            const isVideo = firstMedia?.type === "VIDEO";
+
+            return (
+              <motion.div
+                key={`${post.id}-${firstMedia?.url}`}
+                initial={{ opacity: 0, scale: 0.96 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="relative group aspect-square overflow-hidden bg-gray-100 rounded"
+              >
+                <Link href={`/p/${post.id}`} className="block h-full w-full">
+                  {!firstMedia ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                      <span className="text-gray-500">No media</span>
+                    </div>
+                  ) : isVideo ? (
+                    <>
+                      <video
+                        src={firstMedia.url}
+                        className="w-full h-full object-cover"
+                        muted
+                        playsInline
+                        preload="metadata"
+                      />
+                      <div className="absolute top-2 right-2 bg-black bg-opacity-50 rounded-full p-1">
+                        <PlayIcon className="w-4 h-4 text-white" />
+                      </div>
+                    </>
+                  ) : (
+                    <Image
+                      src={firstMedia.url}
+                      alt="Post image"
+                      fill
+                      placeholder="blur"
+                      blurDataURL="/blur-placeholder.png"
+                      priority={idx < 3} // 3 ảnh đầu load ưu tiên
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  )}
+
+                  {hasMultipleMedia && (
+                    <div className="absolute top-2 right-2">
+                      <GridIcon className="w-5 h-5 text-white drop-shadow-md" />
+                    </div>
+                  )}
+
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div className="flex gap-6 text-white font-semibold">
+                      <div className="flex items-center gap-1">
+                        <HeartIcon className="w-5 h-5" />
+                        <span>{post.likesCount}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MessageSquareIcon className="w-5 h-5" />
+                        <span>{post.commentsCount}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
+
+          {/* Skeleton khi load thêm */}
+          {isLoading &&
+            Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={`skeleton-${i}`} />
+            ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Trigger infinite scroll */}
+      {hasMore && <div ref={loaderRef} className="h-8 mt-6" />}
     </div>
   );
 };
-
-export default PostGrid;

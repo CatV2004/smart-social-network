@@ -26,23 +26,27 @@ export class ProfilesService {
     private readonly usersService: UsersService,
   ) { }
 
-  async getProfileByUserId(userId: string): Promise<ProfileResponseDto> {
-    const profile = await this.profileRepository.findOne({
-      where: { user: { id: userId } },
-      relations: ['user'],
-    });
+  async getProfileByUserId(userId: string, currentUserId?: string): Promise<ProfileResponseDto> {
+    const profile = await this.findByUserId(userId);
 
     if (!profile) {
       throw new NotFoundException('Profile not found');
     }
 
-    const { followersCount, followingCount } = await this.followsService.countFollowersAndFollowing(userId);
+    const { followersCount, followingCount } = await this.followsService.countFollowersAndFollowing(profile.id);
+    const postsCount = await this.postsService.countPostsByProfileId(profile.id);
 
+    let isFollowed = false;
+    if (currentUserId && currentUserId !== userId) {
+      isFollowed = await this.followsService.isFollowing(currentUserId, userId);
+    }
 
     return plainToInstance(ProfileResponseDto, {
       ...profile,
       followersCount,
       followingCount,
+      postsCount,
+      isFollowed
     }, {
       excludeExtraneousValues: true,
     });
@@ -104,7 +108,7 @@ export class ProfilesService {
 
   async findByPostId(postId: string): Promise<Profile> {
     const post = await this.postsService.findByIdWithRelations(postId, ['author'])
-    
+
     if (!post) {
       throw new NotFoundException(`Post with ID ${postId} not found`);
     }

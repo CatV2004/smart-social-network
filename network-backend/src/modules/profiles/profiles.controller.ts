@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Put, ParseUUIDPipe } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ApiBadRequestResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
@@ -8,7 +8,7 @@ import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 
 @Controller('profiles')
 export class ProfilesController {
-  constructor(private readonly profilesService: ProfilesService) {}
+  constructor(private readonly profilesService: ProfilesService) { }
 
   @ApiOperation({
     summary: 'Get current user profile',
@@ -25,6 +25,23 @@ export class ProfilesController {
     @ActiveUser() user: ActiveUserData,
   ): Promise<ProfileResponseDto> {
     return this.profilesService.getProfileByUserId(user.id);
+  }
+
+  @ApiOperation({
+    summary: 'Get profile by user ID',
+    description: 'Get profile info by userID',
+  })
+  @ApiOkResponse({
+    description: 'Profile fetched successfully',
+    type: ProfileResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Get(':userId')
+  @HttpCode(HttpStatus.OK)
+  async getProfileById(
+    @Param('userId', new ParseUUIDPipe({ version: '4' })) userId: string
+  ): Promise<ProfileResponseDto> {
+    return this.profilesService.getProfileByUserId(userId);
   }
 
   @ApiOperation({

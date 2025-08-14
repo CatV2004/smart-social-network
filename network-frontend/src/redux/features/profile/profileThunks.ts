@@ -7,6 +7,7 @@ export const fetchMyProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await profileApi.getMyProfile();
+
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);

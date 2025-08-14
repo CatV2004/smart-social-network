@@ -2,9 +2,11 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { authApi } from '../../../lib/api/auth.api';
 import { setCookie, deleteCookie } from 'cookies-next';
 import { LoginPayload, RegisterPayload } from '../../../types/auth.d';
-import { setAuthError, clearAuth, setAuthLoading } from './authSlice';
+import { setAuthError, clearAuth, setAuthLoading, setAuthTokens } from './authSlice';
 import { fetchCurrentUser } from '../user/userThunks';
 import { fetchMyProfile } from '../profile/profileThunks';
+import { clearUser } from '../user/userSlice';
+import { clearProfile } from '../profile/profileSlice';
 
 export const login = createAsyncThunk(
     'auth/login',
@@ -15,9 +17,12 @@ export const login = createAsyncThunk(
 
             setCookie('accessToken', data.accessToken, { maxAge: 3600 }); // 1 hour
             setCookie('refreshToken', data.refreshToken, { maxAge: 86400 }); // 1 day
+            dispatch(setAuthTokens({
+                accessToken: data.accessToken,
+                refreshToken: data.refreshToken
+            }));
             await dispatch(fetchCurrentUser());
             await dispatch(fetchMyProfile());
-
 
             return data;
         } catch (error: any) {
@@ -63,6 +68,8 @@ export const logout = createAsyncThunk(
             deleteCookie('accessToken');
             deleteCookie('refreshToken');
             dispatch(clearAuth());
+            dispatch(clearUser()); 
+            dispatch(clearProfile());
         }
     }
 );

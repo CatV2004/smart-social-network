@@ -144,4 +144,13 @@ export class PostsService {
 
     return post;
   }
+
+  async countPostsByProfileId(profileId: string): Promise<number> {
+    return this.postRepository.count({
+      where: {
+        author: { id: profileId },
+      },
+    });
+  }
+
 }

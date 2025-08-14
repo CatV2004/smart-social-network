@@ -63,12 +63,19 @@ export class ProfileResponseDto {
 
   @ApiProperty()
   @Expose()
+  isFollowed: boolean;
+
+  @ApiProperty()
+  @Expose()
   followersCount: number;
 
   @ApiProperty()
   @Expose()
   followingCount: number;
 
+  @ApiProperty()
+  @Expose()
+  postsCount: number;
 
   @ApiProperty()
   @Expose()

@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, ForbiddenException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Follow, FollowStatus } from './entities/follow.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { FollowProfileResponseDto } from './dto/follow-profile-response.dto';
 import { UsersService } from '../users/users.service';
@@ -21,19 +21,21 @@ export class FollowsService {
 
   ) { }
 
-  async requestFollow(followerId: string, followingId: string): Promise<Follow> {
-    if (followerId === followingId) throw new BadRequestException('Cannot follow yourself');
+  async requestFollow(followerUserId: string, followingProfileId: string): Promise<Follow> {
+    const follower = await this.profilesService.findByUserId(followerUserId);
+    const following = await this.profilesService.findById(followingProfileId);
 
-    const follower = await this.profilesService.findByUserId(followerId);
-    const following = await this.profilesService.findById(followingId);
+    if (follower.id === following.id) {
+      throw new BadRequestException('Cannot follow yourself');
+    }
 
     const isPrivate = following.isPrivate;
 
     const existing = await this.followRepo.findOne({
       where: {
         follower: { id: follower.id },
-        following: { id: following.id }
-      }
+        following: { id: following.id },
+      },
     });
 
     if (existing) throw new ConflictException('Follow request already exists');
@@ -46,6 +48,7 @@ export class FollowsService {
 
     return this.followRepo.save(follow);
   }
+
 
   async acceptFollowRequest(followId: string, currentUserId: string): Promise<Follow> {
     const currentProfile = await this.profilesService.findByUserId(currentUserId);
@@ -68,7 +71,7 @@ export class FollowsService {
       where: { id: followId },
       relations: ['following'],
     });
-    
+
     if (!follow || follow.following.id !== currentProfile.id) throw new ForbiddenException('Not allowed');
 
     await this.followRepo.remove(follow);
@@ -100,7 +103,7 @@ export class FollowsService {
         following: { id: profile.id },
         status: FollowStatus.ACCEPTED,
       },
-      relations: ['follower','follower.user'],
+      relations: ['follower', 'follower.user'],
       order: { createdAt: 'DESC' },
     });
 
@@ -122,7 +125,7 @@ export class FollowsService {
         follower: { id: profile.id },
         status: FollowStatus.ACCEPTED,
       },
-      relations: ['follower','follower.user'],
+      relations: ['following', 'following.user'],
       order: { createdAt: 'DESC' },
     });
 
@@ -144,7 +147,7 @@ export class FollowsService {
         follower: { id: profile.id },
         status: FollowStatus.PENDING,
       },
-      relations: ['follower','follower.user'],
+      relations: ['follower', 'follower.user'],
       order: { createdAt: 'DESC' },
     });
 
@@ -166,7 +169,7 @@ export class FollowsService {
         following: { id: profile.id },
         status: FollowStatus.PENDING,
       },
-      relations: ['follower','follower.user'],
+      relations: ['follower', 'follower.user'],
       order: { createdAt: 'DESC' },
     });
 
@@ -195,9 +198,30 @@ export class FollowsService {
     return !!follow;
   }
 
-  async countFollowersAndFollowing(userId: string) {
-    const profile = await this.profilesService.findByUserId(userId);
-    
+  async getFollowedAuthorIds(
+    currentUserId: string,
+    authorProfileIds: string[]
+  ): Promise<Set<string>> {
+    if (authorProfileIds.length === 0) return new Set();
+
+    const currentProfile = await this.profilesService.findByUserId(currentUserId);
+
+    const follows = await this.followRepo.find({
+      where: {
+        follower: { id: currentProfile.id },
+        following: { id: In(authorProfileIds) },
+        status: FollowStatus.ACCEPTED,
+      },
+      relations: ['following'],
+    });
+
+    return new Set(follows.map(f => f.following.id));
+  }
+
+
+  async countFollowersAndFollowing(profileId: string) {
+    const profile = await this.profilesService.findById(profileId);
+
     const [followersCount, followingCount] = await Promise.all([
       this.followRepo.count({
         where: {

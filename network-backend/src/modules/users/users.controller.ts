@@ -9,6 +9,7 @@ import {
   ClassSerializerInterceptor,
   Query,
   UseGuards,
+  Param,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -20,6 +21,8 @@ import {
   ApiUnauthorizedResponse,
   ApiOperation,
   ApiQuery,
+  ApiNotFoundResponse,
+  ApiParam,
 } from '@nestjs/swagger';
 
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
@@ -119,6 +122,28 @@ export class UsersController {
   async getMe(
     @ActiveUser() user: ActiveUserData,
   ): Promise<UserResponseDto> {
-    return this.usersService.getMe(user.id);
+    return this.usersService.findUserById(user.id);
+  }
+
+  @ApiOperation({
+    summary: 'Get user profile by ID',
+    description: 'Fetch a user profile by its ID'
+  })
+  @ApiOkResponse({
+    description: 'Return user profile data',
+    type: UserResponseDto
+  })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'UUID of the user',
+    example: 'd8f2a3c9-f1f1-451d-9f97-ab0bd53ba8bc'
+  })
+  @Get(':id')
+  async getUserById(
+    @Param('id') id: string,
+  ): Promise<UserResponseDto> {
+    return this.usersService.findUserById(id);
   }
 }

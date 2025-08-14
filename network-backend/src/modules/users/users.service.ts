@@ -28,10 +28,9 @@ export class UsersService {
     this.frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
   }
 
-  async getMe(userId: string): Promise<UserResponseDto> {
+  async findUserById(userId: string): Promise<UserResponseDto> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      select: ['id', 'email', 'firstName', 'lastName', 'role', 'isActive', 'isVerified', 'createdAt', 'updatedAt'],
     });
 
     if (!user) {

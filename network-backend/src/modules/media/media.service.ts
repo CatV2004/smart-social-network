@@ -6,6 +6,8 @@ import { Media } from './entities/media.entity';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { CloudinaryService } from '@/cloudinary/cloudinary.service';
 import { PostsService } from '../posts/posts.service';
+import { MediaResponseDto } from './dto/response-media.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class MediaService {
@@ -19,7 +21,7 @@ export class MediaService {
   async uploadMultipleMedia(
     files: Express.Multer.File[],
     dto: CreateMediaDto
-  ): Promise<Media[]> {
+  ): Promise<MediaResponseDto[]> {
     const post = await this.postsService.findByIdWithRelations(dto.postId);
 
     if (!post) {
@@ -31,7 +33,7 @@ export class MediaService {
 
     for (const file of files) {
       const result = await this.cloudinary.uploadFile(file, folderPath);
-      this.logger.debug(`Cloudinary upload result: ${JSON.stringify(result, null, 2)}`);
+      // this.logger.debug(`Cloudinary upload result: ${JSON.stringify(result, null, 2)}`);
 
       const media = this.mediaRepo.create({
         type: dto.type,
@@ -45,8 +47,11 @@ export class MediaService {
 
       mediaEntities.push(media);
     }
+    const mediaSaved = await this.mediaRepo.save(mediaEntities);
 
-    return await this.mediaRepo.save(mediaEntities); 
+    return plainToInstance(MediaResponseDto, mediaSaved, {
+      excludeExtraneousValues: true,
+    });
   }
 
 

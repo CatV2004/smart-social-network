@@ -29,18 +29,24 @@ export class PostsController {
   @ApiBody({ type: CreatePostDto })
   @ApiCreatedResponse({
     description: 'Post created successfully',
-    type: PostEntity,
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Post created successfully' },
+        postId: { type: 'string', format: 'uuid', example: '550e8400-e29b-41d4-a716-446655440000' },
+      },
+    },
   })
   @ApiBadRequestResponse({ description: 'Invalid input data' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   async createPost(
     @Body() dto: CreatePostDto,
     @ActiveUser() user: ActiveUserData,
-  ): Promise<{ message: string; post: PostEntity }> {
+  ): Promise<{ message: string; postId: string }> {
     const post = await this.postsService.create(dto, user.id);
     return {
       message: 'Post created successfully',
-      post,
+      postId: post.id,
     };
   }
 

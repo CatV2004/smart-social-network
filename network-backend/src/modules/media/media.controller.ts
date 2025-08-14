@@ -18,15 +18,13 @@ import { Media } from './entities/media.entity';
 import {
   ApiTags,
   ApiOperation,
-  ApiOkResponse,
-  ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiQuery,
   ApiConsumes,
   ApiBody,
 } from '@nestjs/swagger';
-import { Public } from '@/common/decorators/public.decorator';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { MediaResponseDto } from './dto/response-media.dto';
 
 @ApiTags('Media')
 @Controller('media')
@@ -60,7 +58,7 @@ export class MediaController {
   async uploadMedia(
     @UploadedFiles() files: Express.Multer.File[],
     @Body(new ValidationPipe({ transform: true })) createMediaDto: CreateMediaDto,
-  ): Promise<Media[]> {
+  ): Promise<MediaResponseDto[]> {
     return this.mediaService.uploadMultipleMedia(files, createMediaDto);
   }
 

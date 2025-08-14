@@ -8,13 +8,21 @@ import {
   faHeart,
   faComment,
   faPaperPlane,
-  faBookmark 
+  faBookmark, 
+  faMoon,
+  faFlag
 } from '@fortawesome/free-regular-svg-icons';
 import {
   faSearch,
   faBars,
   faHeart as faHeartSolid,
-  faBookmark as faBookmarkSolid
+  faBookmark as faBookmarkSolid,
+  faCheck,
+  faEllipsis,
+  faGear,
+  faChartLine,
+  faUserGroup,
+  faRightFromBracket
 } from '@fortawesome/free-solid-svg-icons';
 
 export const Icons = {
@@ -31,5 +39,15 @@ export const Icons = {
   comment: faComment,
   share: faPaperPlane,
   saveWite: faBookmark,
-  saveBlack: faBookmarkSolid
+  saveBlack: faBookmarkSolid,
+  check: faCheck,
+  more: faEllipsis,
+  settings: faGear,
+  activity: faChartLine,
+  bookmark: faBookmark,
+  moon: faMoon,
+  flag: faFlag,
+  switch: faUserGroup, 
+  logout: faRightFromBracket,
+  
 };

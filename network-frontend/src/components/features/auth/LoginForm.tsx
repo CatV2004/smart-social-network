@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { toast } from "sonner";
 import { login } from "@/redux/features/auth/authThunks";
+import { Loader2 } from "lucide-react"; // Thêm icon loading
 
 const formSchema = z.object({
   email: z
@@ -30,9 +31,9 @@ const formSchema = z.object({
 export default function LoginForm() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const isLoading = useAppSelector((state) => state.auth.isLoading);
-  const error = useAppSelector((state) => state.auth.error);
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const { isLoading, error, isAuthenticated } = useAppSelector(
+    (state) => state.auth
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,13 +66,19 @@ export default function LoginForm() {
 
       toast.success("Đăng nhập thành công!");
     } catch (error) {
-      // Error đã được xử lý trong authActions
       console.error("Login error:", error);
     }
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Overlay loading */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-10 rounded-xl flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+        </div>
+      )}
+
       <Form form={form} onSubmit={onSubmit}>
         <div className="space-y-5">
           <FormField
@@ -84,6 +91,7 @@ export default function LoginForm() {
                     placeholder="abc@gmail.com"
                     {...field}
                     className="bg-white/5 border-white/10 text-white focus:ring-2 focus:ring-blue-500"
+                    disabled={isLoading}
                   />
                 </FormControl>
                 <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -110,6 +118,7 @@ export default function LoginForm() {
                     placeholder="••••••••"
                     {...field}
                     className="bg-white/5 border-white/10 text-white focus:ring-2 focus:ring-blue-500"
+                    disabled={isLoading}
                   />
                 </FormControl>
                 <FormMessage>{fieldState.error?.message}</FormMessage>
@@ -119,10 +128,17 @@ export default function LoginForm() {
 
           <Button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold cursor-pointer"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold cursor-pointer flex items-center justify-center gap-2"
             disabled={isLoading}
           >
-            {isLoading ? "Đang xử lý..." : "Đăng nhập"}
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Đang xử lý...</span>
+              </>
+            ) : (
+              "Đăng nhập"
+            )}
           </Button>
         </div>
       </Form>
@@ -142,6 +158,7 @@ export default function LoginForm() {
         <Button
           variant="outline"
           className="w-full bg-transparent border-white/20 hover:bg-white/10 text-white"
+          disabled={isLoading}
         >
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12.545 10.239v3.821h5.445c-0.712 2.315-2.647 3.972-5.445 3.972-3.332 0-6.033-2.701-6.033-6.032s2.701-6.032 6.033-6.032c1.498 0 2.866 0.549 3.921 1.453l2.814-2.814c-1.786-1.667-4.171-2.698-6.735-2.698-5.522 0-10 4.477-10 10s4.478 10 10 10c8.396 0 10-7.524 10-10 0-0.67-0.069-1.325-0.189-1.961h-9.811z" />

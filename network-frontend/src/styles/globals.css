@@ -21,7 +21,109 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 1.5s linear infinite;
+}
+
+.page-transition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#nprogress .bar {
+  background: linear-gradient(90deg, #3b82f6, #9333ea, #f43f5e);
+  height: 3px;
+}
+
+#nprogress .peg {
+  box-shadow: 0 0 10px #3b82f6, 0 0 5px #9333ea;
+}
+
+/* Dialog overlay & content animation */
+@keyframes fadeOverlayIn {
+  from {
+    opacity: 0
+  }
+
+  to {
+    opacity: 1
+  }
+}
+
+@keyframes fadeOverlayOut {
+  from {
+    opacity: 1
+  }
+
+  to {
+    opacity: 0
+  }
+}
+
+@keyframes scaleDialogIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.95)
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1)
+  }
+}
+
+@keyframes scaleDialogOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1)
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.95)
+  }
+}
+
+/* Tailwind-style utility classes */
+.animate-fadeOverlayIn {
+  animation: fadeOverlayIn 0.2s ease-out forwards;
+}
+
+.animate-fadeOverlayOut {
+  animation: fadeOverlayOut 0.15s ease-in forwards;
+}
+
+.animate-scaleDialogIn {
+  animation: scaleDialogIn 0.2s ease-out forwards;
+}
+
+.animate-scaleDialogOut {
+  animation: scaleDialogOut 0.15s ease-in forwards;
 }

@@ -1,39 +1,45 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../entities/user.entity';
+import { User, UserRole } from '../entities/user.entity';
+import { Expose } from 'class-transformer';
+import { Column } from 'typeorm';
 
 export class UserResponseDto {
   @ApiProperty({ description: 'ID of user' })
+  @Expose()
   id: string;
 
   @ApiProperty({ description: 'Email of user' })
+  @Expose()
   email: string;
 
   @ApiProperty({ description: 'First name of user' })
-  first_name: string;
+  @Expose()
+  firstName: string;
 
   @ApiProperty({ description: 'Last name of user' })
-  last_name: string;
+  @Expose()
+  lastName: string;
 
   @ApiProperty({ description: 'Created date of user' })
-  created_at: Date;
+  @Expose()
+  createdAt: Date;
 
   @ApiProperty({ description: 'Updated date of user' })
-  updated_at: Date;
+  @Expose()
+  updatedAt: Date;
 
-  @ApiProperty({ description: 'Deleted date of user', nullable: true, required: false })
-  deleted_at?: Date | null;
+  @ApiProperty({ description: 'Role of user', example: 'USER' })
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  @Expose()
+  role: UserRole;
 
-  @ApiProperty({ description: 'Whether current user follows this user' })
-  isFollowed: boolean;
-
-  constructor(user: User, isFollowed: boolean = false) {
+  constructor(user: User) {
     this.id = user.id;
     this.email = user.email;
-    this.first_name = user.firstName;
-    this.last_name = user.lastName;
-    this.created_at = user.createdAt;
-    this.updated_at = user.updatedAt;
-    this.deleted_at = user.deletedAt;
-    this.isFollowed = isFollowed;
+    this.firstName = user.firstName;
+    this.lastName = user.lastName;
+    this.createdAt = user.createdAt;
+    this.updatedAt = user.updatedAt;
+    this.role = user.role;
   }
 }

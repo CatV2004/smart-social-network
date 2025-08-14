@@ -39,7 +39,7 @@ export class FollowsController {
   @ApiBadRequestResponse({ description: 'Cannot follow yourself' })
   @ApiConflictResponse({ description: 'Follow request already exists' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @Post(':userId')
+  @Post(':profileId')
   @HttpCode(HttpStatus.OK)
   async follow(
     @ActiveUser() user: ActiveUserData,

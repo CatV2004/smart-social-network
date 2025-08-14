@@ -1,15 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Profile } from '@/types/profile';
-import { fetchMyProfile } from './profileThunks';
+import { fetchMyProfile, updateMyProfile } from './profileThunks';
 
 interface ProfileState {
-  currentProfile: Profile | null;
+  myProfile: Profile | null;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: ProfileState = {
-  currentProfile: null,
+  myProfile: null,
   loading: false,
   error: null,
 };
@@ -19,14 +19,14 @@ const profileSlice = createSlice({
   initialState,
   reducers: {
     setProfile: (state, action: PayloadAction<Profile>) => {
-      state.currentProfile = action.payload;
+      state.myProfile = action.payload;
     },
     clearProfile: (state) => {
-      state.currentProfile = null;
+      state.myProfile = null;
     },
     updateProfileInfo: (state, action: PayloadAction<Partial<Profile>>) => {
-      if (state.currentProfile) {
-        state.currentProfile = { ...state.currentProfile, ...action.payload };
+      if (state.myProfile) {
+        state.myProfile = { ...state.myProfile, ...action.payload };
       }
     },
   },
@@ -38,9 +38,23 @@ const profileSlice = createSlice({
       })
       .addCase(fetchMyProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentProfile = action.payload;
+        state.myProfile = action.payload;
       })
       .addCase(fetchMyProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updateMyProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateMyProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        if (state.myProfile) {
+          state.myProfile = { ...state.myProfile, ...action.payload };
+        }
+      })
+      .addCase(updateMyProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
