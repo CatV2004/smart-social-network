@@ -38,7 +38,7 @@ export const Icons = {
   heartRed: faHeartSolid,
   comment: faComment,
   share: faPaperPlane,
-  saveWite: faBookmark,
+  saveWhite: faBookmark,
   saveBlack: faBookmarkSolid,
   check: faCheck,
   more: faEllipsis,

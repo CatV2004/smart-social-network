@@ -13,6 +13,7 @@ export interface Post {
   isPinned: boolean;
   likesCount: number;
   commentsCount: number;
+  isReacted: boolean;
   isSaved: boolean;
   createdAt: string;
   updatedAt: string;

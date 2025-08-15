@@ -21,6 +21,8 @@ import { MailModule } from '@/mail/mail.module';
 import { ProfilesModule } from './modules/profiles/profiles.module';
 import { FollowsModule } from './modules/follows/follows.module';
 import { MediaModule } from './modules/media/media.module';
+import { ReactionsModule } from './modules/reactions/reactions.module';
+import { SavePostsModule } from './modules/save-posts/save-posts.module';
 
 
 @Module({
@@ -64,7 +66,9 @@ import { MediaModule } from './modules/media/media.module';
     UsersModule,
     ProfilesModule,
     FollowsModule,
-    MediaModule
+    MediaModule,
+    ReactionsModule,
+    SavePostsModule
   ],
   controllers: [AppController],
   providers: [

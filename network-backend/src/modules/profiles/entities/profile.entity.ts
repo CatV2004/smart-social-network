@@ -12,7 +12,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@/modules/users/entities/user.entity';
 import { Post } from '@/modules/posts/entities/post.entity';
 import { Follow } from '@/modules/follows/entities/follow.entity';
-import { Reaction } from '@/modules/reactions/entities/reaction.entity';
+import { ReactionPost } from '@/modules/reactions/entities/reaction-post.entity';
 
 export enum Gender {
   MALE = 'MALE',
@@ -88,8 +88,8 @@ export class Profile {
   @OneToMany(() => Follow, follow => follow.following)
   followers: Follow[];
 
-  @OneToMany(() => Reaction, reaction => reaction.profile)
-  reactions: Reaction[];
+  @OneToMany(() => ReactionPost, reaction => reaction.profile)
+  reactionPosts: ReactionPost[];
 
   @ApiProperty({ description: 'Created date of profile' })
   @CreateDateColumn({ name: 'created_at' })

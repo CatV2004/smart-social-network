@@ -1,26 +1,69 @@
-import { Injectable } from '@nestjs/common';
-import { CreateReactionDto } from './dto/create-reaction.dto';
-import { UpdateReactionDto } from './dto/update-reaction.dto';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ReactionPost } from './entities/reaction-post.entity';
+import { PostsService } from '../posts/posts.service';
+import { ProfilesService } from '../profiles/profiles.service';
+import { ToggleReactionPostDto } from '@/modules/reactions/dto/toggle-reaction-post.dto';
 
 @Injectable()
 export class ReactionsService {
-  create(createReactionDto: CreateReactionDto) {
-    return 'This action adds a new reaction';
+  private readonly logger = new Logger(ReactionPost.name)
+  constructor(
+    @InjectRepository(ReactionPost)
+    private readonly reactionPostRepository: Repository<ReactionPost>,
+
+    private readonly profilesService: ProfilesService,
+    private readonly postsService: PostsService,
+  ) { }
+
+  async togglePostReaction(userId: string, dto: ToggleReactionPostDto) {
+    this.logger.log(`Toggling reaction for userId=${userId}, postId=${dto.postId}, liked=${dto.liked}`);
+
+    const profile = await this.profilesService.findByUserId(userId);
+    this.logger.log(`Profile found: ${profile ? JSON.stringify(profile) : 'null'}`);
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    const post = await this.postsService.findByIdWithRelations(dto.postId);
+    this.logger.log(`Post found: ${post ? JSON.stringify(post) : 'null'}`);
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    if (dto.liked) {
+      const exists = await this.reactionPostRepository.exists({
+        where: { post: { id: dto.postId }, profile: { id: profile.id } },
+      });
+      this.logger.log(`Reaction exists? ${exists}`);
+
+      if (!exists) {
+        this.logger.log(`Creating new reaction...`);
+        const reaction = this.reactionPostRepository.create({
+          post,
+          profile,
+        });
+        this.logger.log(`Reaction object to save: ${JSON.stringify(reaction)}`);
+        const savedReaction = await this.reactionPostRepository.save(reaction);
+        await this.postsService.incrementLikesCount(dto.postId)
+        this.logger.log(`Saved reaction: ${JSON.stringify(savedReaction)}`);
+      } else {
+        this.logger.log(`Reaction already exists, skip adding`);
+      }
+      return { message: 'Reaction added' };
+    }
+
+    this.logger.log(`Removing reaction...`);
+    const deleteResult = await this.reactionPostRepository.delete({
+      post: { id: dto.postId },
+      profile: { id: profile.id },
+    });
+    await this.postsService.decrementLikesCount(dto.postId)
+    this.logger.log(`Delete result: ${JSON.stringify(deleteResult)}`);
+
+    return { message: 'Reaction removed' };
   }
 
-  findAll() {
-    return `This action returns all reactions`;
-  }
 
-  findOne(id: number) {
-    return `This action returns a #${id} reaction`;
-  }
-
-  update(id: number, updateReactionDto: UpdateReactionDto) {
-    return `This action updates a #${id} reaction`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} reaction`;
-  }
 }

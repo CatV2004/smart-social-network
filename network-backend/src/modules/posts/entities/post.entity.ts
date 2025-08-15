@@ -10,8 +10,9 @@ import {
 } from 'typeorm';
 import { Profile } from '@/modules/profiles/entities/profile.entity';
 import { Media } from '@/modules/media/entities/media.entity';
-import { Reaction } from '@/modules/reactions/entities/reaction.entity';
+import { ReactionPost } from '@/modules/reactions/entities/reaction-post.entity';
 import { Comment } from '@/modules/comments/entities/comment.entity';
+import { SavePost } from '@/modules/save-posts/entities/save-post.entity';
 
 @Entity({ name: 'posts' })
 export class Post {
@@ -33,8 +34,17 @@ export class Post {
     @OneToMany(() => Comment, comment => comment.post)
     comments: Comment[];
 
-    @OneToMany(() => Reaction, reaction => reaction.post)
-    reactions: Reaction[];
+    @OneToMany(() => ReactionPost, reaction => reaction.post)
+    reactions: ReactionPost[];
+
+    @OneToMany(() => SavePost, (savePost) => savePost.post)
+    savedBy: SavePost[];
+
+    @Column({ type: 'int', default: 0 })
+    likesCount: number;
+
+    @Column({ type: 'int', default: 0 })
+    commentsCount: number;
 
     @Column({ default: false })
     isEdited: boolean;

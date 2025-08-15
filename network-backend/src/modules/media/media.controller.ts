@@ -37,7 +37,7 @@ export class MediaController {
     schema: {
       type: 'object',
       properties: {
-        file: {
+        files: {
           type: 'string',
           format: 'binary',
         },
@@ -49,7 +49,7 @@ export class MediaController {
           enum: ['IMAGE', 'VIDEO'],
         },
       },
-      required: ['file', 'postId', 'type'],
+      required: ['files', 'postId', 'type'],
     },
   })
   @ApiCreatedResponse({ type: Media })

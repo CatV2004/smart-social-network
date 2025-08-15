@@ -31,6 +31,12 @@ const postApi = {
   ): Promise<AxiosResponse<CreatePostResponse>> => {
     return axiosClient.post('/posts', data);
   },
+
+  likePost: (postId: string, liked: boolean) =>
+    axiosClient.post('/reactions/posts/toggle', { postId, liked }),
+
+  savePost: (postId: string, saved: boolean) =>
+    axiosClient.post('/save-posts/toggle', { postId, saved }),
 };
 
 export default postApi;

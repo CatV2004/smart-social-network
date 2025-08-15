@@ -1,34 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post as HttpPost, Body, UseGuards, Req } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { ReactionsService } from './reactions.service';
-import { CreateReactionDto } from './dto/create-reaction.dto';
-import { UpdateReactionDto } from './dto/update-reaction.dto';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import { ActiveUser } from '@/common/decorators/active-user.decorator';
+import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
+import { ToggleReactionPostDto } from '@/modules/reactions/dto/toggle-reaction-post.dto';
 
+@ApiTags('Reactions')
+@ApiBearerAuth()
 @Controller('reactions')
 export class ReactionsController {
-  constructor(private readonly reactionsService: ReactionsService) {}
+  constructor(private readonly reactionsService: ReactionsService) { }
 
-  @Post()
-  create(@Body() createReactionDto: CreateReactionDto) {
-    return this.reactionsService.create(createReactionDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.reactionsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reactionsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReactionDto: UpdateReactionDto) {
-    return this.reactionsService.update(+id, updateReactionDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reactionsService.remove(+id);
+  @HttpPost('posts/toggle')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Toggle reaction for a post' })
+  async togglePostReaction(
+    @ActiveUser() user: ActiveUserData,
+    @Body() dto: ToggleReactionPostDto
+  ) {
+    return this.reactionsService.togglePostReaction(user.id, dto);
   }
 }

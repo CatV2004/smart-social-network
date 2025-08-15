@@ -7,8 +7,6 @@ import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PostOwnerGuard } from './guards/post-owner.guard';
-import { Roles } from '@/common/decorators/roles.decorator';
-import { UserRole } from '../users/entities/user.entity';
 import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
 import { PaginatedResponseDto } from '@/common/dtos/paginated-response.factory';
 import { PostResponseDto } from './dto/response-post.dto';
@@ -96,8 +94,11 @@ export class PostsController {
   @ApiOperation({ summary: 'Get all posts with pagination' })
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: PaginatedResponseDto(PostResponseDto) })
-  async getAll(@Query() pagination: PaginationQueryDto): Promise<IPaginated<PostResponseDto>> {
-    return this.postsService.findAll(pagination);
+  async getAll(
+    @Query() pagination: PaginationQueryDto,
+    @ActiveUser() user: ActiveUserData
+  ): Promise<IPaginated<PostResponseDto>> {
+    return this.postsService.findAll(pagination, user.id);
   }
 
   @Get('profile/:profileId')

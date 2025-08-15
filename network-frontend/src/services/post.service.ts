@@ -1,6 +1,6 @@
 import mediaApi from "@/lib/api/media.api";
 import postApi from "@/lib/api/post.api";
-import { MediaUploadResponse } from "@/types/media";
+import { MediaResponse } from "@/types/media";
 import { CreatePostPayload } from "@/types/post";
 
 interface CreatePostWithMediaPayload extends CreatePostPayload {
@@ -14,14 +14,14 @@ export const createPostWithMedia = async ({
     videos = [],
 }: CreatePostWithMediaPayload): Promise<{
     postId: string;
-    media: MediaUploadResponse[];
+    media: MediaResponse[];
 }> => {
     // 1. Tạo post
     const createPostRes = await postApi.createPost({ content });
     const postId = createPostRes.data.postId;
 
     // 2. Upload media song song
-    const uploadPromises: Promise<MediaUploadResponse[]>[] = [];
+    const uploadPromises: Promise<MediaResponse[]>[] = [];
 
     if (images.length > 0) {
         uploadPromises.push(
@@ -39,7 +39,7 @@ export const createPostWithMedia = async ({
     const results = await Promise.allSettled(uploadPromises);
 
     const allMedia = results
-        .filter((res): res is PromiseFulfilledResult<MediaUploadResponse[]> => res.status === "fulfilled")
+        .filter((res): res is PromiseFulfilledResult<MediaResponse[]> => res.status === "fulfilled")
         .flatMap((res) => res.value);
 
     return { postId, media: allMedia };

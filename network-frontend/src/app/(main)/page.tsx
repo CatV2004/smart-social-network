@@ -1,9 +1,9 @@
 import StoryList from "@/components/features/story/StoriesList";
-import PostList from "@/components/features/post/PostList";
-import { mockStories, mockPosts, mockSuggestions } from "@/lib/mock-data";
+import { mockStories, mockSuggestions } from "@/lib/mock-data";
 import SuggestionsSidebar from "@/components/features/suggestion/SuggestionsSidebar";
 import { Suspense } from 'react';
 import LoadingSkeleton from '@/components/common/LoadingSkeleton';
+import { PostContainer } from "@/components/features/post/PostContainer";
 
 export default async function HomePage() {
   return (
@@ -13,9 +13,7 @@ export default async function HomePage() {
           <StoryList stories={mockStories} />
         </Suspense>
         
-        <Suspense fallback={<LoadingSkeleton type="posts" count={3} />}>
-          <PostList posts={mockPosts} />
-        </Suspense>
+        <PostContainer />
       </div>
       
       {/* Right Sidebar */}

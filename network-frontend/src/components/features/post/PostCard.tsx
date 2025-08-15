@@ -1,85 +1,54 @@
+// components/features/post/PostCard.tsx
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Icons } from "@/lib/icons";
-import { formatNumber } from "@/lib/format";
-import { type Post } from "@/lib/mock-data";
+import { Post } from "@/types/post";
+import { PostHeader } from "./PostHeader";
+import { PostMedia } from "./PostMedia";
+import { PostActions } from "./PostActions";
+import { PostFooter } from "./PostFooter";
 
-export default function PostCard({ post }: { post: Post }) {
-  const [isLiked, setLiked] = useState(true);
-  const [isSaved, setSaved] = useState(true);
+interface PostCardProps {
+  post: Post;
+  onLike?: (postId: string, liked: boolean) => void;
+  onSave?: (postId: string, saved: boolean) => void;
+  onComment?: (postId: string) => void;
+  onShare?: (postId: string) => void;
+}
 
+export function PostCard({
+  post,
+  onLike,
+  onSave,
+  onComment,
+  onShare,
+}: PostCardProps) {
+  console.log("post.likesCoun: ", post);
   return (
-    <div className="bg-white border rounded-lg mb-6">
-      {/* Header */}
-      <div className="flex items-center p-3">
-        <Image
-          src={post.avatarUrl}
-          alt={post.username}
-          width={32}
-          height={32}
-          className="rounded-full"
-        />
-        <p className="font-semibold text-sm ml-3">{post.username}</p>
-        <button className="ml-auto text-xl font-bold">...</button>
-      </div>
+    <article className="bg-white border rounded-lg mb-6 overflow-hidden">
+      {/* Header hiển thị avatar + tên tác giả */}
+      <PostHeader author={post.author} />
 
-      {/* Image */}
-      <div className="relative w-full aspect-square">
-        <Image
-          src={post.imageUrl}
-          alt="Post content"
-          layout="fill"
-          objectFit="cover"
-        />
-      </div>
+      {/* Media hiển thị ảnh/video */}
+      <PostMedia media={post.media} />
 
-      {/* Actions */}
-      <div className="flex items-center gap-4 p-3">
-        <button onClick={() => setLiked(!isLiked)}>
-          <FontAwesomeIcon
-            icon={isLiked ? Icons.heartRed : Icons.heartWhite}
-            className={`text-2xl transition-colors duration-200 ${
-              isLiked ? "text-red-500" : "text-black"
-            }`}
-          />
-        </button>
+      {/* Actions: like, comment, share, save */}
+      <PostActions
+        isLiked={post.isReacted}
+        isSaved={post.isSaved}
+        onLike={(liked) => onLike?.(post.id, liked)}
+        onSave={(saved) => onSave?.(post.id, saved)}
+        onComment={() => onComment?.(post.id)}
+        onShare={() => onShare?.(post.id)}
+      />
 
-        <button>
-          <FontAwesomeIcon icon={Icons.comment} className="text-2xl" />
-        </button>
-
-        <button>
-          <FontAwesomeIcon icon={Icons.share} className="text-2xl" />
-        </button>
-
-        <button className="ml-auto" onClick={() => setSaved(!isSaved)}>
-          <FontAwesomeIcon
-            icon={isSaved ? Icons.saveBlack : Icons.saveWite}
-            className="text-2xl"
-          />
-        </button>
-      </div>
-
-      {/* Info */}
-      <div className="px-3 pb-3">
-        <p className="font-semibold text-sm">
-          {formatNumber(post.likes)} lượt thích
-        </p>
-        <p className="text-sm mt-1">
-          <span className="font-semibold">{post.username}</span> {post.caption}
-        </p>
-        <p className="text-sm text-gray-500 mt-1 cursor-pointer">
-          Xem tất cả {formatNumber(post.commentsCount)} bình luận
-        </p>
-        <input
-          type="text"
-          placeholder="Thêm bình luận..."
-          className="w-full text-sm outline-none bg-transparent mt-2"
-        />
-      </div>
-    </div>
+      {/* Footer: nội dung + số like/comment */}
+      <PostFooter
+        content={post.content}
+        author={post.author}
+        likesCount={post.likesCount}
+        commentsCount={post.commentsCount || 0}
+        createdAt={post.createdAt}
+      />
+    </article>
   );
 }

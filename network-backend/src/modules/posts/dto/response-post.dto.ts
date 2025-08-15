@@ -30,6 +30,22 @@ export class PostResponseDto {
     @Expose()
     isPinned: boolean;
 
+    @ApiProperty({ description: 'Is reacted post?' })
+    @Expose()
+    isReacted: boolean;
+
+    @ApiProperty({ description: 'Is saved post?' })
+    @Expose()
+    isSaved: boolean;
+
+    @ApiProperty({ description: 'Total likes' })
+    @Expose()
+    likesCount: number;
+
+    @ApiProperty({ description: 'Total comments' })
+    @Expose()
+    commentsCount: number;
+
     @ApiProperty()
     @Expose()
     createdAt: Date;

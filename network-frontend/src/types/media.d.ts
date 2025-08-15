@@ -4,7 +4,7 @@ interface MediaFile {
   file: File;
   previewUrl?: string; 
 }
-// Media cho ảnh
+
 export interface ImageMedia {
   id: string;
   type: 'IMAGE';
@@ -49,7 +49,7 @@ export interface UploadMediaPayload {
   type: Extract<MediaType, 'IMAGE' | 'VIDEO'>;
 }
 
-export interface MediaUploadResponse {
+export interface MediaResponse {
   id: string;
   type: 'IMAGE' | 'VIDEO';
   url: string;

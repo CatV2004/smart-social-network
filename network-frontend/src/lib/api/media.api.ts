@@ -1,11 +1,11 @@
 import axiosClient from './axiosClient';
 import { AxiosResponse } from 'axios';
-import { MediaUploadResponse, UploadMediaPayload } from '@/types/media';
+import { MediaResponse, UploadMediaPayload } from '@/types/media';
 
 const mediaApi = {
     uploadMedia: (
         { files, postId, type }: UploadMediaPayload
-    ): Promise<AxiosResponse<MediaUploadResponse[]>> => {
+    ): Promise<AxiosResponse<MediaResponse[]>> => {
         const formData = new FormData();
         files.forEach((file) => formData.append('files', file));
         formData.append('postId', postId);
