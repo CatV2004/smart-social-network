@@ -23,6 +23,7 @@ import { FollowsModule } from './modules/follows/follows.module';
 import { MediaModule } from './modules/media/media.module';
 import { ReactionsModule } from './modules/reactions/reactions.module';
 import { SavePostsModule } from './modules/save-posts/save-posts.module';
+import { CommentsModule } from './modules/comments/comments.module';
 
 
 @Module({
@@ -68,7 +69,8 @@ import { SavePostsModule } from './modules/save-posts/save-posts.module';
     FollowsModule,
     MediaModule,
     ReactionsModule,
-    SavePostsModule
+    SavePostsModule,
+    CommentsModule
   ],
   controllers: [AppController],
   providers: [

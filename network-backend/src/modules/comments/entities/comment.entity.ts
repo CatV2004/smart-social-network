@@ -3,44 +3,64 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
+  OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToMany,
-} from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
-import { Post } from '@/modules/posts/entities/post.entity';
-import { User } from '@/modules/users/entities/user.entity';
+  JoinColumn,
+} from "typeorm";
+import { Profile } from "@/modules/profiles/entities/profile.entity";
+import { Post } from "@/modules/posts/entities/post.entity";
 
-@Entity('comments')
+@Entity("comments")
 export class Comment {
-  @ApiProperty()
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @ApiProperty({ description: 'Nội dung comment' })
-  @Column({ type: 'text' })
+  /** Nội dung comment */
+  @Column({ type: "varchar", length: 500 })
   content: string;
 
-  @ApiProperty({ description: 'Người viết comment' })
-  @ManyToOne(() => User, user => user.id, { eager: true })
-  author: User;
+  /** Số lượng reply (cache) */
+  @Column({ type: "int", default: 0 })
+  repliesCount: number;
 
-  @ApiProperty({ description: 'Bài viết được comment' })
-  @ManyToOne(() => Post, post => post.comments, { onDelete: 'CASCADE' })
+  /** Đã chỉnh sửa chưa */
+  @Column({ default: false })
+  isEdited: boolean;
+
+  /** Được ghim bởi chủ post không */
+  @Column({ default: false })
+  isPinned: boolean;
+
+  /** Người tạo comment */
+  @ManyToOne(() => Profile, (profile) => profile.comments, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "author_id" })
+  author: Profile;
+
+  /** Bài post gốc */
+  @ManyToOne(() => Post, (post) => post.comments, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "post_id" })
   post: Post;
 
-  @ApiProperty({ description: 'Comment cha nếu là trả lời', nullable: true })
-  @ManyToOne(() => Comment, comment => comment.replies, { nullable: true, onDelete: 'CASCADE' })
-  parentComment?: Comment;
+  /** Nếu là reply thì parent comment */
+  @ManyToOne(() => Comment, (comment) => comment.replies, {
+    nullable: true,
+    onDelete: "CASCADE",
+  })
+  @JoinColumn({ name: "parent_id" })
+  parent: Comment | null;
 
-  @OneToMany(() => Comment, comment => comment.parentComment)
+  /** Danh sách reply */
+  @OneToMany(() => Comment, (comment) => comment.parent)
   replies: Comment[];
 
-  @ApiProperty()
-  @CreateDateColumn({ name: 'created_at' })
+  @ManyToOne(() => Profile, { nullable: true, onDelete: "SET NULL" })
+  @JoinColumn({ name: "reply_to_id" })
+  replyTo: Profile | null;
+
+  @CreateDateColumn({ name: "created_at" })
   createdAt: Date;
 
-  @ApiProperty()
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: "updated_at" })
   updatedAt: Date;
 }

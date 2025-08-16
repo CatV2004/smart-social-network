@@ -9,11 +9,11 @@ import { ToggleReactionPostDto } from '@/modules/reactions/dto/toggle-reaction-p
 @ApiTags('Reactions')
 @ApiBearerAuth()
 @Controller('reactions')
+@UseGuards(JwtAuthGuard)
 export class ReactionsController {
   constructor(private readonly reactionsService: ReactionsService) { }
 
   @HttpPost('posts/toggle')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Toggle reaction for a post' })
   async togglePostReaction(
     @ActiveUser() user: ActiveUserData,

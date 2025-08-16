@@ -2,13 +2,11 @@ import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundEx
 import { CreatePostDto } from './dto/create-post.dto';
 import { Post } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ObjectLiteral, Repository, SelectQueryBuilder } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { ProfilesService } from '../profiles/profiles.service';
 import { PaginationQueryDto, SortOrder } from '@/common/dtos/pagination-query.dto';
-import { plainToInstance } from 'class-transformer';
 import { IPaginated } from '@/common/dtos/paginated.interface';
 import { PostResponseDto } from './dto/response-post.dto';
-import { PaginationMetaDto } from '@/common/dtos/pagination-meta.dto';
 import { paginate } from '@/common/utils/pagination.util';
 
 @Injectable()
@@ -168,6 +166,18 @@ export class PostsService {
     }
 
     return post;
+  }
+
+  async findById(postId: string): Promise<Post> {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      throw new NotFoundException(`Post with id ${postId} not found`);
+    }
+
+    return post
   }
 
   async countPostsByProfileId(profileId: string): Promise<number> {

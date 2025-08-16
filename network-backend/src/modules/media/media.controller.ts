@@ -11,6 +11,7 @@ import {
   UploadedFile,
   ValidationPipe,
   UploadedFiles,
+  UseGuards,
 } from '@nestjs/common';
 import { MediaService } from './media.service';
 import { CreateMediaDto } from './dto/create-media.dto';
@@ -25,9 +26,11 @@ import {
 } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { MediaResponseDto } from './dto/response-media.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Media')
 @Controller('media')
+@UseGuards(JwtAuthGuard)
 export class MediaController {
   constructor(private readonly mediaService: MediaService) {}
 

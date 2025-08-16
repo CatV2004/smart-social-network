@@ -106,6 +106,19 @@ export class ProfilesService {
     return profile;
   }
 
+  async findByIdWithRelations(id: string, relations: string[] = []): Promise<Profile> {
+    const profile = await this.profileRepository.findOne({
+      where: { id },
+      relations,
+    });
+
+    if (!profile) {
+      throw new NotFoundException(`profile with id ${id} not found`);
+    }
+
+    return profile;
+  }
+
   async findByPostId(postId: string): Promise<Profile> {
     const post = await this.postsService.findByIdWithRelations(postId, ['author'])
 

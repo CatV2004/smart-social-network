@@ -31,7 +31,6 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
-import { LocalAuthGuard } from '../auth/guards/local-auth.guard';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 
 @ApiTags('users')

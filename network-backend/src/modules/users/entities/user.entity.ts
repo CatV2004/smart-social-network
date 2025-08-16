@@ -85,14 +85,7 @@ export class User {
   @ApiProperty({ description: 'Deleted date of user', required: false, nullable: true })
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date | null;
-
-  // @BeforeInsert()
-  // generateVerificationToken() {
-  //   const expiresInSeconds = this.configService.get<number>('VERIFICATION_TOKEN_EXPIRES_IN_SECONDS', 60);
-  //   this.verificationToken = uuidv4();
-  //   this.verificationTokenExpires = dayjs().add(expiresInSeconds, 'second').toDate();
-  // }
-
+  
   isVerificationTokenValid(): boolean {
     return (
       !!this.verificationToken &&
