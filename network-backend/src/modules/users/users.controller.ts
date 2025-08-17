@@ -145,4 +145,26 @@ export class UsersController {
   ): Promise<UserResponseDto> {
     return this.usersService.findUserById(id);
   }
+
+  @ApiOperation({
+    summary: 'Get user profile by username',
+    description: 'Fetch a user profile by its username'
+  })
+  @ApiOkResponse({
+    description: 'Return user profile data',
+    type: UserResponseDto
+  })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiParam({
+    name: 'username',
+    type: String,
+    description: 'username of the user',
+    example: 'catv2004'
+  })
+  @Get('username/:username')
+  async getUserByUsername(
+    @Param('username') username: string,
+  ): Promise<UserResponseDto> {
+    return this.usersService.findUserByUsername(username);
+  }
 }

@@ -154,6 +154,28 @@ export class PostsService {
     return paginate(qb, page, limit, PostResponseDto);
   }
 
+  async findByUserName(
+    username: string,
+    pagination: PaginationQueryDto
+  ): Promise<IPaginated<PostResponseDto>> {
+    const {
+      page = 1,
+      limit = 3,
+      sortBy = 'createdAt',
+      sortOrder = SortOrder.DESC,
+    } = pagination;
+
+    const qb = this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.author', 'author')
+      .leftJoinAndSelect('author.user', 'user')
+      .leftJoinAndSelect('post.media', 'media')
+      .where('user.username = :username', { username })
+      .orderBy(`post.${sortBy}`, sortOrder);
+
+    return paginate(qb, page, limit, PostResponseDto);
+  }
+
 
   async findByIdWithRelations(id: string, relations: string[] = []): Promise<Post> {
     const post = await this.postRepository.findOne({

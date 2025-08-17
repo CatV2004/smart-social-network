@@ -23,7 +23,7 @@ function SidebarComponent() {
 
   NProgress.configure({ showSpinner: false, trickleSpeed: 300, minimum: 0.3 });
 
-  const navItems = getSidebarNavItems(currentUser?.id);
+  const navItems = getSidebarNavItems(currentUser?.username);
 
   const userAvatar =
     currentProfile?.avatar ||

@@ -45,6 +45,23 @@ export class ProfilesController {
   }
 
   @ApiOperation({
+    summary: 'Get profile by user username',
+    description: 'Get profile info by username',
+  })
+  @ApiOkResponse({
+    description: 'Profile fetched successfully',
+    type: ProfileResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @Get('user/:username')
+  @HttpCode(HttpStatus.OK)
+  async getProfileByUsername(
+    @Param('username') username: string
+  ): Promise<ProfileResponseDto> {
+    return this.profilesService.getProfileByUsername(username);
+  }
+
+  @ApiOperation({
     summary: 'Update current user profile',
     description: 'Update profile info of the currently authenticated user',
   })

@@ -25,6 +25,13 @@ const formSchema = z.object({
     .regex(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/, "Email không hợp lệ"),
   firstName: z.string().min(2, "Tên phải có ít nhất 2 ký tự"),
   lastName: z.string().min(2, "Họ phải có ít nhất 2 ký tự"),
+  username: z
+    .string()
+    .min(3, "Username phải có ít nhất 3 ký tự")
+    .regex(
+      /^[a-zA-Z0-9._]+$/,
+      "Chỉ được chứa chữ, số, dấu chấm hoặc gạch dưới"
+    ),
   password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
 });
 
@@ -45,6 +52,7 @@ export default function RegisterForm() {
       email: "",
       firstName: "",
       lastName: "",
+      username: "",
       password: "",
     },
   });
@@ -173,7 +181,7 @@ export default function RegisterForm() {
                 <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="abc@gmail.com"
+                    placeholder="cuongnguyen@gmail.com"
                     {...field}
                     className="bg-white/5 border-white/10 text-white focus:ring-2 focus:ring-blue-500"
                   />
@@ -191,7 +199,7 @@ export default function RegisterForm() {
                   <FormLabel>Tên</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Nhập tên của bạn"
+                      placeholder="Cuong"
                       {...field}
                       className="bg-white/5 border-white/10 text-white focus:ring-2 focus:ring-blue-500"
                     />
@@ -208,7 +216,7 @@ export default function RegisterForm() {
                   <FormLabel>Họ</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Nhập họ của bạn"
+                      placeholder="Nguyen Manh"
                       {...field}
                       className="bg-white/5 border-white/10 text-white focus:ring-2 focus:ring-blue-500"
                     />
@@ -218,6 +226,23 @@ export default function RegisterForm() {
               )}
             />
           </div>
+
+          <FormField
+            name="username"
+            render={({ field, fieldState }) => (
+              <FormItem>
+                <FormLabel>Tên định danh</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="ví dụ: CatV-2004"
+                    {...field}
+                    className="bg-white/5 border-white/10 text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                </FormControl>
+                <FormMessage>{fieldState.error?.message}</FormMessage>
+              </FormItem>
+            )}
+          />
 
           <FormField
             name="password"

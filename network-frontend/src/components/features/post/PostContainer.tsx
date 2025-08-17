@@ -47,7 +47,7 @@ export function PostContainer() {
   };
 
   return (
-    <div>
+    <div className="max-w-xl mx-auto w-full">
       <PostList
         posts={posts}
         isLoading={isLoading && posts.length === 0}

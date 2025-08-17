@@ -23,7 +23,6 @@ export function PostList({
   if (isLoading) {
     return <LoadingSkeleton type="posts" count={3} />;
   }
-  console.log("posts: ", posts)
 
   return (
     <div className="mx-auto max-w-screen-sm">

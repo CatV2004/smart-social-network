@@ -10,6 +10,7 @@ import { MailService } from '@/mail/mail.service';
 import dayjs from 'dayjs';
 import { ProfilesService } from '../profiles/profiles.service';
 import { v4 as uuidv4 } from 'uuid';
+import { log } from 'console';
 
 
 @Injectable()
@@ -40,6 +41,18 @@ export class UsersService {
     return new UserResponseDto(user);
   }
 
+  async findUserByUsername(username: string): Promise<UserResponseDto> {
+    const user = await this.userRepository.findOne({
+      where: { username: username },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    return new UserResponseDto(user);
+  }
+
   async createUser(dto: CreateUserDto): Promise<UserResponseDto> {
     const queryRunner = this.userRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
@@ -61,6 +74,7 @@ export class UsersService {
         email: dto.email,
         firstName: dto.firstName,
         lastName: dto.lastName,
+        username: dto.username,
         password: hashedPassword,
       });
 
@@ -199,9 +213,9 @@ export class UsersService {
     return user;
   }
 
-  async findByUsername(userName: string): Promise<User> {
+  async findByUsername(username: string): Promise<User> {
     const user = await this.userRepository.findOne({
-      where: { email: userName }
+      where: { username: username }
     })
     if (!user)
       throw new NotFoundException("User not found");

@@ -19,4 +19,8 @@ export class UpdateUserDto {
   @MinLength(6)
   @IsOptional()
   password?: string;
+
+  @ApiPropertyOptional({ description: 'Last name of user', example: 'newUsername' })
+  @IsOptional()
+  username?: string;
 }

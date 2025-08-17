@@ -12,4 +12,7 @@ export class UserPublicDto {
 
   @Expose()
   lastName: string;
+
+  @Expose()
+  usrname: string;
 }

@@ -111,4 +111,15 @@ export class PostsController {
   ): Promise<IPaginated<PostResponseDto>> {
     return this.postsService.findByProfileId(profileId, pagination);
   }
+
+  @Get('user/:username')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get posts by profileId with pagination' })
+  @ApiOkResponse({ type: PaginatedResponseDto(PostResponseDto) })
+  async getByUsername(
+    @Param('username') username: string,
+    @Query() pagination: PaginationQueryDto,
+  ): Promise<IPaginated<PostResponseDto>> {
+    return this.postsService.findByUserName(username, pagination);
+  }
 }

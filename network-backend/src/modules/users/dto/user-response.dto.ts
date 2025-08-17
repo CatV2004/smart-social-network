@@ -20,6 +20,10 @@ export class UserResponseDto {
   @Expose()
   lastName: string;
 
+  @ApiProperty({ description: 'username of user' })
+  @Expose()
+  username: string;
+
   @ApiProperty({ description: 'Created date of user' })
   @Expose()
   createdAt: Date;
@@ -38,6 +42,7 @@ export class UserResponseDto {
     this.email = user.email;
     this.firstName = user.firstName;
     this.lastName = user.lastName;
+    this.username = user.username;
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
     this.role = user.role;

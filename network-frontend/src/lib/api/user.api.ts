@@ -9,6 +9,9 @@ const userApi = {
   getUserById: (userId: string): Promise<AxiosResponse<User>> => {
     return axiosClient.get(`/users/${userId}`);
   },
+  getUserByUsername: (username: string): Promise<AxiosResponse<User>> => {
+    return axiosClient.get(`/users/username/${username}`);
+  },
   updateUserInfo: (data: Partial<User>): Promise<AxiosResponse<User>> => {
     return axiosClient.patch('/users/me', data);
   },

@@ -8,9 +8,11 @@ import {
   faHeart,
   faComment,
   faPaperPlane,
-  faBookmark, 
+  faBookmark,
   faMoon,
-  faFlag
+  faFlag,
+  faFaceSmile,
+  faImage
 } from '@fortawesome/free-regular-svg-icons';
 import {
   faSearch,
@@ -22,7 +24,10 @@ import {
   faGear,
   faChartLine,
   faUserGroup,
-  faRightFromBracket
+  faRightFromBracket,
+  faXmark,
+  faSpinner
+
 } from '@fortawesome/free-solid-svg-icons';
 
 export const Icons = {
@@ -47,7 +52,10 @@ export const Icons = {
   bookmark: faBookmark,
   moon: faMoon,
   flag: faFlag,
-  switch: faUserGroup, 
+  switch: faUserGroup,
   logout: faRightFromBracket,
-  
+  close: faXmark,
+  emoji: faFaceSmile,
+  image: faImage,
+  spinner: faSpinner,
 };

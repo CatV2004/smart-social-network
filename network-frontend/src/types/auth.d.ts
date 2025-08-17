@@ -8,6 +8,7 @@ export interface RegisterPayload {
     firstName: string;
     lastName: string;
     password: string;
+    username: string;
 }
 
 export interface AuthResponse {
@@ -22,6 +23,7 @@ export interface UserResponse {
     email: string;
     first_name: string;
     last_name: string;
+    username: string;
     created_at: string;
 }
 

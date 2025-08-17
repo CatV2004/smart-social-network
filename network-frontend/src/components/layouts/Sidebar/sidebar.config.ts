@@ -1,7 +1,7 @@
 // components/layout/Sidebar/sidebar.config.ts
 import { Icons } from "@/lib/icons";
 
-export const getSidebarNavItems = (userId?: string) => [
+export const getSidebarNavItems = (username?: string) => [
   { name: "Trang chủ", icon: Icons.home, href: "/" },
   {
     name: "Tìm kiếm",
@@ -21,7 +21,7 @@ export const getSidebarNavItems = (userId?: string) => [
   { name: "Tạo", icon: Icons.create, action: "openPostCreate" },
   {
     name: "Trang cá nhân",
-    href: userId ? `/in/${userId}` : "/login",
+    href: username ? `/in/${username}` : "/login",
     isMyProfile: true,
   },
 ];

@@ -1,5 +1,6 @@
+import { ListResponse } from '@/types/pagination-meta';
 import axiosClient from './axiosClient';
-import { CreatePostPayload, CreatePostResponse, PostListResponse } from '@/types/post';
+import { CreatePostPayload, CreatePostResponse, Post } from '@/types/post';
 import { AxiosResponse } from 'axios';
 
 const postApi = {
@@ -8,7 +9,7 @@ const postApi = {
     limit = 3,
     sortBy = 'createdAt',
     sortOrder: 'ASC' | 'DESC' = 'DESC'
-  ): Promise<AxiosResponse<PostListResponse>> => {
+  ): Promise<AxiosResponse<ListResponse<Post>>> => {
     return axiosClient.get('/posts', {
       params: { page, limit, sortBy, sortOrder },
     });
@@ -20,8 +21,20 @@ const postApi = {
     limit = 3,
     sortBy = 'createdAt',
     sortOrder: 'ASC' | 'DESC' = 'DESC'
-  ): Promise<AxiosResponse<PostListResponse>> => {
+  ): Promise<AxiosResponse<ListResponse<Post>>> => {
     return axiosClient.get(`/posts/profile/${profileId}`, {
+      params: { page, limit, sortBy, sortOrder },
+    });
+  },
+
+  getPostsByUsername: (
+    username: string,
+    page = 1,
+    limit = 3,
+    sortBy = 'createdAt',
+    sortOrder: 'ASC' | 'DESC' = 'DESC'
+  ): Promise<AxiosResponse<ListResponse<Post>>> => {
+    return axiosClient.get(`/posts/user/${username}`, {
       params: { page, limit, sortBy, sortOrder },
     });
   },

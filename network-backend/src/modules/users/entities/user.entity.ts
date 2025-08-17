@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -52,6 +53,14 @@ export class User {
   @Column()
   @Exclude({ toPlainOnly: true })
   password: string;
+  
+  @ApiProperty({
+    description: 'Unique username for the profile',
+    example: 'catv2004',
+  })
+  @Column({ unique: true, length: 30 })
+  @Index()
+  username: string;
 
   @ApiProperty({ description: 'Role of user', example: 'USER' })
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
@@ -85,7 +94,7 @@ export class User {
   @ApiProperty({ description: 'Deleted date of user', required: false, nullable: true })
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date | null;
-  
+
   isVerificationTokenValid(): boolean {
     return (
       !!this.verificationToken &&

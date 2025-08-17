@@ -8,6 +8,8 @@ interface CarouselProps<T> {
   currentIndex: number;
   onChange: (index: number) => void;
   renderItem: (item: T, index: number) => React.ReactNode;
+  width?: number | string;
+  height?: number | string;
 }
 
 export function Carousel<T>({
@@ -15,6 +17,8 @@ export function Carousel<T>({
   currentIndex,
   onChange,
   renderItem,
+  width = "100%",
+  height = 600,
 }: CarouselProps<T>) {
   const prev = useCallback(() => {
     onChange((currentIndex - 1 + items.length) % items.length);
@@ -25,17 +29,24 @@ export function Carousel<T>({
   }, [currentIndex, items.length, onChange]);
 
   return (
-    <div className="relative w-full overflow-hidden">
+    <div
+      className="relative overflow-hidden bg-black flex justify-center items-center"
+      style={{ width, height }}
+    >
       {/* Slides */}
       <div
-        className="flex transition-transform duration-300"
+        className="flex transition-transform duration-300 h-full"
         style={{
           transform: `translateX(-${currentIndex * 100}%)`,
           width: `${items.length * 100}%`,
         }}
       >
         {items.map((item, idx) => (
-          <div key={idx} className="w-full flex-shrink-0">
+          <div
+            key={idx}
+            className="flex-shrink-0 flex justify-center items-center"
+            style={{ width: typeof width === "number" ? `${width}px` : width, height }}
+          >
             {renderItem(item, idx)}
           </div>
         ))}

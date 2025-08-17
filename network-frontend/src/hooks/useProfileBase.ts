@@ -9,7 +9,7 @@ import { useAppSelector } from '@/redux/hooks';
 import { selectCurrentUser } from '@/redux/features/user/userSelectors';
 import { selectMyProfile } from '@/redux/features/profile/profileSelectors';
 
-export function useProfileBase(userId: string, isMyProfile = false) {
+export function useProfileBase(username: string, isMyProfile = false) {
   const currentUser = useAppSelector(selectCurrentUser);
   const myProfile = useAppSelector(selectMyProfile);
   
@@ -28,8 +28,8 @@ export function useProfileBase(userId: string, isMyProfile = false) {
         setProfile(myProfile);
       } else {
         const [userRes, profileRes] = await Promise.all([
-          userApi.getUserById(userId),
-          profileApi.getProfileByUserId(userId)
+          userApi.getUserByUsername(username),
+          profileApi.getProfileByUserName(username)
         ]);
         setUser(userRes.data);
         setProfile(profileRes.data);
@@ -39,11 +39,12 @@ export function useProfileBase(userId: string, isMyProfile = false) {
     } finally {
       setLoading(false);
     }
-  }, [userId, isMyProfile, currentUser, myProfile]);
+  }, [username, isMyProfile, currentUser, myProfile]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+  console.log("userProfilebase: ", user);
 
   return {
     user,
@@ -51,6 +52,6 @@ export function useProfileBase(userId: string, isMyProfile = false) {
     loading,
     error,
     reload: fetchData,
-    isCurrentUser: isMyProfile || currentUser?.id === userId,
+    isCurrentUser: isMyProfile || currentUser?.username === username,
   };
 }

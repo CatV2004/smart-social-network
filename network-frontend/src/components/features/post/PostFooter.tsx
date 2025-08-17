@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
 import { formatNumber } from "@/lib/format";
+import clsx from "clsx";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -18,6 +19,7 @@ interface PostFooterProps {
   likesCount?: number;
   commentsCount?: number;
   createdAt: string;
+  className?: string; // 👈 thêm className
 }
 
 export function PostFooter({
@@ -26,6 +28,7 @@ export function PostFooter({
   likesCount = 0,
   commentsCount = 0,
   createdAt,
+  className,
 }: PostFooterProps) {
   const fullName = author.user
     ? `${author.user.firstName} ${author.user.lastName}`
@@ -33,10 +36,10 @@ export function PostFooter({
   const formattedDate = dayjs(createdAt).fromNow();
 
   return (
-    <div className="p-3">
+    <div className={clsx("p-3", className)}>
       <p className="font-semibold text-sm">
         {formatNumber(likesCount)} lượt thích
-      </p> 
+      </p>
       <div className="text-sm mt-1">
         <span className="font-semibold">{fullName}</span> {content}
       </div>

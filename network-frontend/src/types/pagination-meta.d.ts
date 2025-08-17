@@ -4,3 +4,8 @@ export interface PaginationMeta {
   limit: number;
   totalPages: number;
 }
+
+export interface ListResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
+}

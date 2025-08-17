@@ -1,5 +1,5 @@
 import { AudioMedia, ImageMedia, VideoMedia } from "./media";
-import { PaginationMeta } from "./pagination-meta";
+// import { PaginationMeta } from "./pagination-meta";
 import { AuthorProfile } from "./profile";
 
 export type MediaItem = ImageMedia | VideoMedia | AudioMedia;
@@ -19,10 +19,10 @@ export interface Post {
   updatedAt: string;
 }
 
-export interface PostListResponse {
-  data: Post[];
-  meta: PaginationMeta;
-}
+// export interface PostListResponse {
+//   data: Post[];
+//   meta: PaginationMeta;
+// }
 
 export interface CreatePostPayload {
   content?: string;

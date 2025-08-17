@@ -38,7 +38,7 @@ export default function StoryList({ stories }: { stories: Story[] }) {
   };
 
   return (
-    <div className="relative w-full p-4 mb-8 ">
+    <div className="relative w-full mb-8 ">
       {/* Gradient trái */}
       {showLeft && (
         <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-[#f9fafb] to-transparent z-10 pointer-events-none" />
@@ -82,7 +82,7 @@ export default function StoryList({ stories }: { stories: Story[] }) {
       {/* Danh sách stories */}
       <div
         ref={scrollRef}
-        className="flex space-x-4 overflow-x-auto scrollbar-hide px-6"
+        className="flex space-x-4 overflow-x-auto scrollbar-hide"
       >
         {stories.map((story) => (
           <StoryCircle key={story.id} story={story} />

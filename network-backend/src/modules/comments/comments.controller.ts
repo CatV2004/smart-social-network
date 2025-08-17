@@ -19,6 +19,7 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
   ApiCreatedResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
@@ -61,12 +62,29 @@ export class CommentsController {
   @Get("post/:postId")
   @ApiOperation({ summary: "Get top-level comments of a post" })
   @ApiOkResponse({ type: PaginatedCommentResponseDto })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number, default 1' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page, default 4' })
   async getTopLevelComments(
     @Param("postId") postId: string,
-    @Query("page") page = 1,
-    @Query("limit") limit = 4,
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 4,
   ): Promise<PaginatedCommentResponseDto> {
-    return this.commentsService.findTopLevelByPostId(postId, +page, +limit);
+    return this.commentsService.findTopLevelByPostId(postId, page, limit);
   }
+
+  @Get(':parentCommentId/replies')
+  @ApiOperation({ summary: 'Get replies (child comments) of a parent comment' })
+  @ApiOkResponse({ type: PaginatedCommentResponseDto })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number, default 1' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page, default 4' })
+  async getReplies(
+    @Param('parentCommentId') parentCommentId: string,
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 4,
+  ): Promise<PaginatedCommentResponseDto> {
+    return this.commentsService.findRepliesByParentId(parentCommentId, page, limit);
+  }
+
+
 
 }

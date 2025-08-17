@@ -52,6 +52,32 @@ export class ProfilesService {
     });
   }
 
+  async getProfileByUsername(username: string, currentUserId?: string): Promise<ProfileResponseDto> {
+    const profile = await this.findByUsername(username);
+
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    const { followersCount, followingCount } = await this.followsService.countFollowersAndFollowing(profile.id);
+    const postsCount = await this.postsService.countPostsByProfileId(profile.id);
+
+    let isFollowed = false;
+    if (currentUserId && currentUserId !== username) {
+      isFollowed = await this.followsService.isFollowing(currentUserId, username);
+    }
+
+    return plainToInstance(ProfileResponseDto, {
+      ...profile,
+      followersCount,
+      followingCount,
+      postsCount,
+      isFollowed
+    }, {
+      excludeExtraneousValues: true,
+    });
+  }
+
   async create(
     createProfileDto: CreateProfileDto,
     userId: string,
@@ -96,6 +122,20 @@ export class ProfilesService {
     const profile = await this.profileRepository.findOne({
       where: {
         user: { id: userId }
+      }
+    });
+
+    if (!profile) {
+      throw new NotFoundException("Profile not found")
+    }
+
+    return profile;
+  }
+
+  async findByUsername(username: string): Promise<Profile> {
+    const profile = await this.profileRepository.findOne({
+      where: {
+        user: { username: username }
       }
     });
 

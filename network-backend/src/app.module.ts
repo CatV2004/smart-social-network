@@ -47,7 +47,9 @@ import { CommentsModule } from './modules/comments/comments.module';
         entities: [__dirname + '/../**/*.entity.{ts,js}'],
         // migrations: [__dirname + '/migrations/*{.ts,.js}'],
         synchronize: true,
+        logging: ['query', 'error'],
       }),
+  
     }),
 
     BullModule.forRootAsync({

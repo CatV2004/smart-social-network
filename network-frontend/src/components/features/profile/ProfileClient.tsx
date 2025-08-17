@@ -16,12 +16,12 @@ import { motion } from "framer-motion";
 import { fadeIn } from "@/lib/motion";
 
 interface ProfileClientProps {
-  userId: string;
+  username: string;
   isMyProfile?: boolean;
 }
 
 export default function ProfileClient({
-  userId,
+  username,
   isMyProfile = false,
 }: ProfileClientProps) {
   const [activeTab, setActiveTab] = useState<"posts" | "saved" | "tagged">(
@@ -36,9 +36,9 @@ export default function ProfileClient({
     loading: loadingProfile,
     isCurrentUser,
     reload: reloadProfile,
-  } = useProfileBase(userId, isMyProfile);
-  console.log("user: ",user)
-  console.log("profile: ",profile)
+  } = useProfileBase(username, isMyProfile);
+  console.log("user: ", user);
+  console.log("profile: ", profile);
 
   const canViewPosts = useMemo(() => {
     return isCurrentUser || profile?.isPrivate === false;
@@ -48,7 +48,7 @@ export default function ProfileClient({
     items: posts,
     hasMore,
     loadMore,
-    isLoading, // từ hook
+    isLoading, 
   } = useProfilePosts(profile?.id, !canViewPosts);
 
   const fallbackImageMedia: ImageMedia = useMemo(
@@ -116,7 +116,9 @@ export default function ProfileClient({
           animate={{ opacity: 1 }}
           className="text-center py-12"
         >
-          <p className="text-lg font-medium">Profile này đang ở chế độ riêng tư</p>
+          <p className="text-lg font-medium">
+            Profile này đang ở chế độ riêng tư
+          </p>
         </motion.div>
       );
     }
@@ -127,23 +129,27 @@ export default function ProfileClient({
           <SkeletonGrid />
         ) : safePosts.length > 0 ? (
           <motion.div variants={fadeIn}>
-          <PostGrid
-            posts={safePosts}
-            isCurrentUser={isCurrentUser}
-            hasMore={hasMore}
-            onLoadMore={loadMore}
-            isLoading={isLoading}
-          />
-        </motion.div>
+            <PostGrid
+              posts={safePosts}
+              isCurrentUser={isCurrentUser}
+              hasMore={hasMore}
+              onLoadMore={loadMore}
+              isLoading={isLoading}
+            />
+          </motion.div>
         ) : (
           <EmptyPostState isCurrentUser={isCurrentUser} />
         );
 
       case "saved":
-        return <div className="text-center py-12 text-gray-500">Chưa hỗ trợ</div>;
+        return (
+          <div className="text-center py-12 text-gray-500">Chưa hỗ trợ</div>
+        );
 
       case "tagged":
-        return <div className="text-center py-12 text-gray-500">Chưa hỗ trợ</div>;
+        return (
+          <div className="text-center py-12 text-gray-500">Chưa hỗ trợ</div>
+        );
 
       default:
         return null;
@@ -157,7 +163,11 @@ export default function ProfileClient({
       variants={fadeIn}
       className="container mx-auto py-4 px-4 lg:px-0"
     >
-      <ProfileHeader user={user} profile={profile} isCurrentUser={isCurrentUser} />
+      <ProfileHeader
+        user={user}
+        profile={profile}
+        isCurrentUser={isCurrentUser}
+      />
 
       <motion.div variants={fadeIn}>
         <ProfileStats activeTab={activeTab} onTabChange={setActiveTab} />
