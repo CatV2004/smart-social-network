@@ -14,5 +14,5 @@ export class UserPublicDto {
   lastName: string;
 
   @Expose()
-  usrname: string;
+  username: string;
 }

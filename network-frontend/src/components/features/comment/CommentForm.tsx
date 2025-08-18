@@ -31,7 +31,7 @@ export function CommentForm({
 
   useEffect(() => {
     if (replyingTo) {
-      setContent(`@${replyingTo.author.user?.firstName} `);
+      setContent(`@${replyingTo.author.user?.username}`);
     } else {
       setContent("");
     }
@@ -62,8 +62,7 @@ export function CommentForm({
       {replyingTo && (
         <div className="flex items-center justify-between mb-2 px-2 py-1 bg-blue-50 rounded">
           <span className="text-sm text-blue-600">
-            Đang phản hồi @{replyingTo.author.user?.firstName}{" "}
-            {replyingTo.author.user?.lastName}
+            Đang phản hồi @{replyingTo.author.user?.firstName}{" "}{replyingTo.author.user?.lastName}
           </span>
           <button
             type="button"

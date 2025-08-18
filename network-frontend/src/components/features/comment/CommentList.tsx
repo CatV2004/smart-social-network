@@ -32,15 +32,11 @@ export function CommentList({
     );
   }
 
-  if (comments.length === 0) {
-    return null; // Render CommentEmpty thay vì null nếu muốn
-  }
-
   return (
     <div className="divide-y">
       {comments.map((comment) => (
         <CommentItem
-          key={comment.id}
+          key={`comment-${comment.id}`}
           comment={comment}
           onReply={onReplyComment}
           isReplying={replyingTo?.id === comment.id}

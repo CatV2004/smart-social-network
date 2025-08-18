@@ -10,6 +10,7 @@ import { CommentResponseDto } from './dto/comment-response.dto';
 import { paginate } from '@/common/utils/pagination.util';
 import { PaginatedCommentResponseDto } from './dto/paginated-comment-response.dto';
 import { Profile } from '../profiles/entities/profile.entity';
+import { Post } from '../posts/entities/post.entity';
 
 @Injectable()
 export class CommentsService {
@@ -23,6 +24,7 @@ export class CommentsService {
     private readonly profilesService: ProfilesService,
 
     private readonly dataSource: DataSource,
+
   ) { }
 
   async create(dto: CreateCommentDto, userId: string): Promise<CommentResponseDto> {
@@ -60,6 +62,8 @@ export class CommentsService {
       if (parentComment) {
         await manager.increment(Comment, { id: parentComment.id }, 'repliesCount', 1);
       }
+
+      await manager.increment(Post, { id: post.id }, 'commentsCount', 1);
 
       const fullComment = await manager
         .createQueryBuilder(Comment, 'comment')
@@ -121,6 +125,7 @@ export class CommentsService {
         "authorUser.email",
         "authorUser.firstName",
         "authorUser.lastName",
+        "authorUser.username",
       ])
       .where("comment.post_id = :postId", { postId })
       .andWhere("comment.parent_id IS NULL")
@@ -159,6 +164,7 @@ export class CommentsService {
         'authorUser.email',
         'authorUser.firstName',
         'authorUser.lastName',
+        'authorUser.username',
         'replyTo.id',
         'replyTo.avatar',
         'replyTo.bio',
@@ -166,17 +172,34 @@ export class CommentsService {
         'replyToUser.email',
         'replyToUser.firstName',
         'replyToUser.lastName',
+        'replyToUser.username',
       ])
       .where('comment.parent_id = :parentCommentId', { parentCommentId })
       .orderBy('comment.createdAt', 'ASC');
 
-    return paginate<Comment>(
+    const result = await paginate<Comment>(
       qb,
       page,
       limit,
       CommentResponseDto,
-    ) as Promise<PaginatedCommentResponseDto>;
+    ) as PaginatedCommentResponseDto;
+
+    result.data = result.data.map(reply => ({
+      ...reply,
+      parentId: parentCommentId,
+    }));
+
+    return result;
   }
 
+  async fineById(id: string): Promise<Comment> {
+    const comment = await this.commentsRepo.findOne({
+      where: { id },
+    })
+    if (!comment) {
+      throw new NotFoundException('Comment not found');
+    }
 
+    return comment;
+  }
 }

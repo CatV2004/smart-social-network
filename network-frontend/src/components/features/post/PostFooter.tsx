@@ -20,6 +20,7 @@ interface PostFooterProps {
   commentsCount?: number;
   createdAt: string;
   className?: string; // 👈 thêm className
+  onComment?: () => void;
 }
 
 export function PostFooter({
@@ -29,6 +30,7 @@ export function PostFooter({
   commentsCount = 0,
   createdAt,
   className,
+  onComment,
 }: PostFooterProps) {
   const fullName = author.user
     ? `${author.user.firstName} ${author.user.lastName}`
@@ -44,7 +46,10 @@ export function PostFooter({
         <span className="font-semibold">{fullName}</span> {content}
       </div>
       {commentsCount > 0 && (
-        <p className="text-sm text-gray-500 mt-1 cursor-pointer">
+        <p
+          className="text-sm text-gray-500 mt-1 cursor-pointer"
+          onClick={onComment}
+        >
           Xem tất cả {formatNumber(commentsCount)} bình luận
         </p>
       )}

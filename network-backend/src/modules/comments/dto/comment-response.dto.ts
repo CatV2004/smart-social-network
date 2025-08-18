@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose, Type } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { ProfilePublicDto } from '@/modules/profiles/dto/profile-public.dto';
 
 export class CommentResponseDto {
@@ -32,6 +32,10 @@ export class CommentResponseDto {
     @Expose()
     @Type(() => ProfilePublicDto)
     replyTo?: ProfilePublicDto;
+
+    @ApiPropertyOptional({ description: 'Parent comment ID nếu là reply' })
+    @Expose()
+    parentId: string | null;
 
     @ApiProperty()
     @Expose()

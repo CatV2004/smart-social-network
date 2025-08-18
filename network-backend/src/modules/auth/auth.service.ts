@@ -78,7 +78,7 @@ export class AuthService {
   }
 
   async validateUser(userName: string, password: string): Promise<Partial<User>> {
-    const user = await this.usersService.findByUsername(userName);
+    const user = await this.usersService.findByUsernameOrEmail(userName);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }

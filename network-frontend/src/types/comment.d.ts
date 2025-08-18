@@ -3,6 +3,7 @@ export interface UserInfo {
     email: string;
     firstName: string;
     lastName: string;
+    username: string;
 }
 
 export interface Author {
@@ -20,6 +21,7 @@ export interface Comment {
     isPinned: boolean;
     author: Author;
     replyTo?: Author;
+    parentId?:string;
     createdAt: string;
     updatedAt: string;
 }

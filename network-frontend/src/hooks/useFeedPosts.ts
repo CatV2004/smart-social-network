@@ -1,4 +1,3 @@
-// hooks/useFeedPosts.ts
 import { useCallback } from "react";
 import { usePaginatedData } from "./usePaginatedData";
 import postApi from "@/lib/api/post.api";
@@ -9,10 +8,20 @@ export function useFeedPosts() {
         return postApi.getPosts(page, limit);
     }, []);
 
-    return usePaginatedData<Post>(
+    const { loadMore, ...rest } = usePaginatedData<Post>(
         fetchFn,
         true, // enabled by default
-        [], // no dependencies
-        3 // initial limit
+        [],   // no dependencies
+        3     // initial limit
     );
+
+    // 👉 Bọc lại để chắc chắn loadMore trả về Promise
+    const wrappedLoadMore = useCallback(async () => {
+        return await loadMore();
+    }, [loadMore]);
+
+    return {
+        loadMore: wrappedLoadMore,
+        ...rest,
+    };
 }

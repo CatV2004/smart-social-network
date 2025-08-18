@@ -50,6 +50,7 @@ export function PostCard({
           likesCount={post.likesCount}
           commentsCount={post.commentsCount || 0}
           createdAt={post.createdAt}
+          onComment={handleCommentClick}
         />
       </article>
 

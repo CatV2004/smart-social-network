@@ -5,11 +5,11 @@ import { Comment } from "@/types/comment";
 import { ListResponse } from "@/types/pagination-meta";
 
 export function useGetReplies(commentId: string, enabled = true) {
-    return useInfiniteQuery<ListResponse<Comment>, Error, ListResponse<Comment>, [string, string], number>({
+    return useInfiniteQuery({
         queryKey: ["replies", commentId],
         queryFn: async ({ pageParam = 1 }) => {
             const res = await commentApi.getReplies(commentId, pageParam);
-            return res.data;
+            return res.data as ListResponse<Comment>;
         },
         getNextPageParam: (lastPage) => {
             const { page, totalPages } = lastPage.meta;

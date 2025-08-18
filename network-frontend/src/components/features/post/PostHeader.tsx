@@ -10,6 +10,7 @@ interface PostHeaderProps {
       id: string;
       firstName: string;
       lastName: string;
+      username: string;
     };
   };
   className?: string;
@@ -27,7 +28,7 @@ export function PostHeader({
 
   return (
     <div className={cn("flex items-center p-3 border-b", className)}>
-      <Link href={`/in/${author.user?.id}`} className="flex items-center">
+      <Link href={`/in/${author.user?.username}`} className="flex items-center">
         <Image
           src={author.avatar}
           alt={fullName}
