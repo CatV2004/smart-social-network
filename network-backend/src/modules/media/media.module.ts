@@ -9,7 +9,7 @@ import { PostsModule } from '../posts/posts.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Media]),
-    PostsModule,
+    forwardRef(() => PostsModule),
     CloudinaryModule,
   ],
   controllers: [MediaController],

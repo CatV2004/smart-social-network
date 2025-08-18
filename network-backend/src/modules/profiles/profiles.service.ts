@@ -159,8 +159,8 @@ export class ProfilesService {
     return profile;
   }
 
-  async findByPostId(postId: string): Promise<Profile> {
-    const post = await this.postsService.findByIdWithRelations(postId, ['author'])
+  async findByPostId(postId: string, withDeleted = false): Promise<Profile> {
+    const post = await this.postsService.findByIdWithRelations(postId, ['author'], withDeleted)
 
     if (!post) {
       throw new NotFoundException(`Post with ID ${postId} not found`);

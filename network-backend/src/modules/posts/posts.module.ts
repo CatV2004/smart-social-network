@@ -6,12 +6,14 @@ import { Post } from './entities/post.entity';
 import { ProfilesModule } from '../profiles/profiles.module';
 import { UsersModule } from '../users/users.module';
 import { FollowsModule } from '../follows/follows.module';
+import { MediaModule } from '../media/media.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Post]),
     forwardRef(() => UsersModule),
     forwardRef(() => ProfilesModule),
+    forwardRef(() => MediaModule),
     FollowsModule,
   ],
   controllers: [PostsController],

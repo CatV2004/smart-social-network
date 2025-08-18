@@ -14,7 +14,10 @@ export class MediaService {
   private readonly logger = new Logger(MediaService.name);
   constructor(
     @InjectRepository(Media) private mediaRepo: Repository<Media>,
+
+    @Inject(forwardRef(() => PostsService))
     private readonly postsService: PostsService,
+    
     private cloudinary: CloudinaryService,
   ) { }
 
@@ -38,6 +41,7 @@ export class MediaService {
       const media = this.mediaRepo.create({
         type: dto.type,
         url: result.secure_url,
+        publicId: result.public_id,
         thumbnail: result.thumbnail_url ?? null,
         duration: result.duration ?? null,
         width: result.width ?? null,
@@ -67,6 +71,49 @@ export class MediaService {
       order: { createdAt: 'DESC' },
     });
   }
+
+  async deleteMediaById(mediaId: string): Promise<void> {
+    const media = await this.mediaRepo.findOne({ where: { id: mediaId } });
+    if (!media) throw new NotFoundException('Media not found');
+
+    // Xoá file trên Cloudinary
+    await this.cloudinary.deleteFile(media.publicId);
+
+    // Xoá trong DB
+    await this.mediaRepo.remove(media);
+  }
+
+  async deleteMediaByPostId(postId: string): Promise<void> {
+    const mediaList = await this.mediaRepo.find({ where: { post: { id: postId } } });
+    for (const media of mediaList) {
+      await this.cloudinary.deleteFile(media.publicId);
+    }
+    await this.mediaRepo.remove(mediaList);
+  }
+
+  async updateMedia(mediaId: string, newFile: Express.Multer.File): Promise<MediaResponseDto> {
+    const media = await this.mediaRepo.findOne({ where: { id: mediaId } });
+    if (!media) throw new NotFoundException('Media not found');
+
+    // Xoá trên Cloudinary
+    await this.cloudinary.deleteFile(media.publicId);
+
+    // Upload file mới
+    const result = await this.cloudinary.uploadFile(newFile, `posts/${media.type}`);
+
+    media.url = result.secure_url;
+    media.publicId = result.public_id;
+    media.width = result.width;
+    media.height = result.height;
+    media.thumbnail = result.thumbnail_url ?? null;
+    media.duration = result.duration ?? null;
+
+    await this.mediaRepo.save(media);
+
+    return plainToInstance(MediaResponseDto, media, { excludeExtraneousValues: true });
+  }
+
+
 
   // Upload avatar, cover, logo
   async uploadAvatar(file: Express.Multer.File) {

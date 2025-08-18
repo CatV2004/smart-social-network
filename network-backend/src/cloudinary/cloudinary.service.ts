@@ -19,9 +19,9 @@ export class CloudinaryService {
     ): Promise<UploadApiResponse> {
         return new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
-                { 
+                {
                     folder,
-                    resource_type: 'auto', 
+                    resource_type: 'auto',
                 },
                 (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
                     if (error || !result) return reject(error || new Error('Upload failed'));
@@ -31,4 +31,14 @@ export class CloudinaryService {
             uploadStream.end(file.buffer);
         });
     }
+
+    async deleteFile(publicId: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            cloudinary.uploader.destroy(publicId, (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+            });
+        });
+    }
+
 }

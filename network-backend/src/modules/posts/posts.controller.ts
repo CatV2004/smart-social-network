@@ -11,6 +11,7 @@ import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
 import { PaginatedResponseDto } from '@/common/dtos/paginated-response.factory';
 import { PostResponseDto } from './dto/response-post.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface';
+import { PostOwnerGuardForRestore } from './guards/post-owner-restore.gaurd';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -61,8 +62,18 @@ export class PostsController {
     await this.postsService.softDelete(id);
   }
 
+  @Get('deleted')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get soft-deleted posts with pagination' })
+  @ApiOkResponse({ type: PaginatedResponseDto(PostResponseDto) })
+  async getSoftDeletedPosts(
+    @Query() pagination: PaginationQueryDto,
+  ): Promise<IPaginated<PostResponseDto>> {
+    return this.postsService.getSoftDeletedPosts(pagination);
+  }
+
   @Patch(':id/restore')
-  @UseGuards(JwtAuthGuard, PostOwnerGuard)
+  @UseGuards(JwtAuthGuard, PostOwnerGuardForRestore)
   @ApiOperation({
     summary: 'Restore a soft-deleted post',
     description: 'Restores a post that was previously soft-deleted.',

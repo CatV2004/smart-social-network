@@ -36,7 +36,7 @@ export class Profile {
   @Column({
     nullable: true,
     default:
-      'https://res.cloudinary.com/dohsfqs6d/image/upload/v1754206154/avatarDefault_nbrjul.jpg',
+      'https://res.cloudinary.com/dohsfqs6d/image/upload/v1755532065/0b1fc966-29af-4528-9857-33d1025ff241.png',
   })
   avatar?: string;
 
@@ -45,7 +45,7 @@ export class Profile {
     name: 'cover_image',
     nullable: true,
     default:
-      'http://res.cloudinary.com/dohsfqs6d/image/upload/v1754492693/covers/mr7yk18zxykv1mbllxy1.jpg',
+      'https://res.cloudinary.com/dohsfqs6d/image/upload/v1755532008/04a3adf3-9142-41ac-9d33-8232b84246fb.png',
   })
   coverImage?: string;
 

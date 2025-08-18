@@ -2,12 +2,13 @@ import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundEx
 import { CreatePostDto } from './dto/create-post.dto';
 import { Post } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { IsNull, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { ProfilesService } from '../profiles/profiles.service';
 import { PaginationQueryDto, SortOrder } from '@/common/dtos/pagination-query.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface';
 import { PostResponseDto } from './dto/response-post.dto';
 import { paginate } from '@/common/utils/pagination.util';
+import { MediaService } from '../media/media.service';
 
 @Injectable()
 export class PostsService {
@@ -18,6 +19,9 @@ export class PostsService {
 
     @Inject(forwardRef(() => ProfilesService))
     private readonly profilesService: ProfilesService,
+
+    @Inject(forwardRef(() => MediaService))
+    private readonly mediaService: MediaService,
 
   ) { }
   async create(dto: CreatePostDto, userId: string): Promise<Post> {
@@ -59,11 +63,21 @@ export class PostsService {
     const post = await this.postRepository.findOne({
       where: { id: postId },
       withDeleted: true,
-      relations: ['author'],
+      relations: ['media', 'author'],
     });
 
     if (!post) {
       throw new NotFoundException('Post not found');
+    }
+
+    if (post.media && post.media.length > 0) {
+      for (const media of post.media) {
+        try {
+          await this.mediaService.deleteMediaById(media.id);
+        } catch (err) {
+          this.logger.error(`Failed to delete media ${media.id}`, err);
+        }
+      }
     }
 
     await this.postRepository.delete(postId);
@@ -108,6 +122,22 @@ export class PostsService {
     return qb;
   }
 
+  async getSoftDeletedPosts(
+    pagination: PaginationQueryDto,
+  ): Promise<IPaginated<PostResponseDto>> {
+    const { page = 1, limit = 3, sortBy = 'deletedAt', sortOrder = 'DESC' } =
+      pagination;
+
+    const qb = this.postRepository
+      .createQueryBuilder('post')
+      .withDeleted()
+      .leftJoinAndSelect('post.author', 'author')
+      .leftJoinAndSelect('post.media', 'media')
+      .where('post.deletedAt IS NOT NULL')
+      .orderBy(`post.${sortBy}`, sortOrder as 'ASC' | 'DESC');
+
+    return paginate(qb, page, limit, PostResponseDto);
+  }
 
   /**
    * Hàm findAll public
@@ -177,10 +207,11 @@ export class PostsService {
   }
 
 
-  async findByIdWithRelations(id: string, relations: string[] = []): Promise<Post> {
+  async findByIdWithRelations(id: string, relations: string[] = [], withDeleted = false): Promise<Post> {
     const post = await this.postRepository.findOne({
       where: { id },
       relations,
+      withDeleted,
     });
 
     if (!post) {

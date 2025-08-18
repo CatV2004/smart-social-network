@@ -20,6 +20,10 @@ export class Media {
   @Column({ type: 'enum', enum: MediaType })
   type: MediaType;
 
+  @ApiProperty({ description: 'Cloudinary public id of the file' })
+  @Column()
+  publicId: string;
+
   @ApiProperty({ description: 'URL to the media file (image/video)' })
   @Column()
   url: string;
