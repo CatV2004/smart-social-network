@@ -23,12 +23,12 @@ export default function MainLayout({
   // }, []);
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-gray-50">
+      {" "}
       {/* Sidebar wrapper */}
       <div className="w-1/6 min-w-[88px] lg:w-1/6 lg:min-w-[280px]">
         <Sidebar />
       </div>
-
       {/* Main content */}
       <main className="flex-1 transition-all duration-300">
         <div className="max-w-[935px] mx-auto w-full p-4">{children}</div>

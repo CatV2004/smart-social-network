@@ -7,6 +7,7 @@ import { ReduxProvider } from "./ReduxProvider";
 import AppInitializer from "../AppInitializer";
 import TopLoader from "@/components/common/TopLoader";
 import AppLoadingGate from "../AppLoadingGate";
+import { Toaster } from "@/components/ui/sonner";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +18,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
             <AppLoadingGate>
               <TopLoader />
               {children}
+              <Toaster richColors position="top-center" />
             </AppLoadingGate>
           </AppInitializer>
         </QueryClientProvider>

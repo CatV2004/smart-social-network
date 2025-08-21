@@ -5,6 +5,10 @@ import { SavePost } from '@/modules/save-posts/entities/save-post.entity';
 import { ToggleSavePostDto } from './dto/toggle-save-post.dto';
 import { ProfilesService } from '@/modules/profiles/profiles.service';
 import { PostsService } from '@/modules/posts/posts.service';
+import { paginate } from '@/common/utils/pagination.util';
+import { PostResponseDto } from '../posts/dto/response-post.dto';
+import { PaginationQueryDto, SortOrder } from '@/common/dtos/pagination-query.dto';
+import { IPaginated } from '@/common/dtos/paginated.interface';
 
 @Injectable()
 export class SavePostsService {
@@ -42,14 +46,31 @@ export class SavePostsService {
   }
 
 
-  async getSavedPosts(userId: string) {
+  async getSavedPosts(
+    userId: string,
+    pagination: PaginationQueryDto,
+  ): Promise<IPaginated<PostResponseDto>> {
     const profile = await this.profilesService.findByUserId(userId);
-    if (!profile) throw new NotFoundException('Profile not found');
+    console.log("profileId: ", profile.id)
 
-    return this.savePostRepo.find({
-      where: { profile: { id: profile.id } },
-      relations: ['post', 'post.author', 'post.media'],
-      order: { createdAt: 'DESC' },
-    });
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt',
+      sortOrder = SortOrder.DESC,
+    } = pagination;
+
+    const qb = this.savePostRepo
+      .createQueryBuilder('savePost')
+      .leftJoinAndSelect('savePost.post', 'post')
+      .leftJoinAndSelect('post.author', 'author')
+      .leftJoinAndSelect('author.user', 'user')
+      .leftJoinAndSelect('post.media', 'media')
+      .where('savePost.profileId = :profileId', { profileId: profile.id })
+      .orderBy(`savePost.${sortBy}`, sortOrder);
+      // .orderBy(`post.${sortBy}`, sortOrder)
+
+    return paginate(qb, page, limit, PostResponseDto);
   }
+
 }

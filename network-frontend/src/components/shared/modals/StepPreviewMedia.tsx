@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import MediaCropper from "@/components/features/post/MediaCropper"; 
+import MediaCropper from "@/components/features/post/MediaCropper";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface StepPreviewMediaProps {
@@ -59,7 +59,7 @@ export function StepPreviewMedia({
         )}
       </div>
 
-      <div className="flex gap-2 p-4 justify-center border-t">
+      <div className="flex gap-2 p-4 justify-center border-t flex-wrap">
         <Button
           variant={aspectRatio === 1 ? "default" : "outline"}
           size="sm"
@@ -80,6 +80,20 @@ export function StepPreviewMedia({
           onClick={() => onAspectRatioChange(16 / 9)}
         >
           16:9
+        </Button>
+        <Button
+          variant={aspectRatio === 3 / 2 ? "default" : "outline"}
+          size="sm"
+          onClick={() => onAspectRatioChange(3 / 2)}
+        >
+          3:2
+        </Button>
+        <Button
+          variant={aspectRatio === 4 / 3 ? "default" : "outline"}
+          size="sm"
+          onClick={() => onAspectRatioChange(4 / 3)}
+        >
+          4:3
         </Button>
         <Button
           variant={aspectRatio === null ? "default" : "outline"}

@@ -53,4 +53,8 @@ export class PostResponseDto {
     @ApiProperty()
     @Expose()
     updatedAt: Date;
+
+    @ApiProperty()
+    @Expose()
+    deletedAt: Date | null;
 }

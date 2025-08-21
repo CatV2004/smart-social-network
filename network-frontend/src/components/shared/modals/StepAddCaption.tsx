@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FancySwitch } from "@/components/ui/switch";
+import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { selectCurrentUser } from "@/redux/features/user/userSelectors";
 import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
@@ -131,7 +131,7 @@ export function StepAddCaption({
                 Facebook
               </Label>
             </div>
-            <FancySwitch defaultChecked color="blue" />
+            <Switch defaultChecked color="blue" />
           </div>
 
           <div className="flex items-center justify-between">
@@ -141,7 +141,7 @@ export function StepAddCaption({
                 Threads
               </Label>
             </div>
-            <FancySwitch defaultChecked color="pink" />
+            <Switch defaultChecked color="pink" />
           </div>
         </div>
       </div>

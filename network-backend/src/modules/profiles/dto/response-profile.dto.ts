@@ -30,7 +30,12 @@ export class ProfileResponseDto {
 
   @ApiProperty({ type: String, format: 'date', nullable: true })
   @Expose()
-  @Transform(({ value }) => value?.toISOString().split('T')[0])
+  @Transform(({ value }) => {
+    if (!value) return null;
+    if (typeof value === 'string') return value; 
+    if (value instanceof Date) return value.toISOString().split('T')[0]; 
+    return null;
+  })
   dateOfBirth?: string;
 
   @ApiProperty({ enum: Gender, nullable: true })

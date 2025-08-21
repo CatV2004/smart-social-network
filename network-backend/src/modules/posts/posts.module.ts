@@ -7,6 +7,7 @@ import { ProfilesModule } from '../profiles/profiles.module';
 import { UsersModule } from '../users/users.module';
 import { FollowsModule } from '../follows/follows.module';
 import { MediaModule } from '../media/media.module';
+import { SearchModule } from '../search/search.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { MediaModule } from '../media/media.module';
     forwardRef(() => ProfilesModule),
     forwardRef(() => MediaModule),
     FollowsModule,
+    SearchModule,
   ],
   controllers: [PostsController],
   providers: [PostsService],

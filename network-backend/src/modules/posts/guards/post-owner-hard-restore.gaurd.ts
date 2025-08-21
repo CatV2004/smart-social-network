@@ -4,7 +4,7 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFound
 
 // Guard cho restore
 @Injectable()
-export class PostOwnerGuardForRestore implements CanActivate {
+export class PostOwnerGuardForHardDeleteAndRestore implements CanActivate {
     constructor(private profilesService: ProfilesService) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {

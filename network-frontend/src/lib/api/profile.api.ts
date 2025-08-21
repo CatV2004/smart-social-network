@@ -5,9 +5,14 @@ const profileApi = {
     getMyProfile: () => axiosClient.get<Profile>('/profiles/me'),
     getProfileByUserId: (userId: string) => axiosClient.get<Profile>(`/profiles/${userId}`),
     getProfileByUserName: (userName: string) => axiosClient.get<Profile>(`/profiles/user/${userName}`),
-    updateProfile: (data: ProfileUpdatePayload) => axiosClient.patch<Profile>('/profiles/me', data),
-    uploadAvatar: (file: FormData) => axiosClient.post('/profiles/me/avatar', file),
-    uploadCover: (file: FormData) => axiosClient.post('/profiles/me/cover', file),
+    updateProfile: (data: FormData) =>
+        axiosClient.put<Profile>("/profiles/me", data, {
+            headers: { "Content-Type": "multipart/form-data" },
+        }),
+    uploadImage: async (formData: FormData): Promise<Profile> => {
+        const res = await axiosClient.put<Profile>('/profiles/upload-image', formData);
+        return res.data;
+    },
 };
 
 export default profileApi;

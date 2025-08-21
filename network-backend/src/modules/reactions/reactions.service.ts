@@ -18,16 +18,12 @@ export class ReactionsService {
   ) { }
 
   async togglePostReaction(userId: string, dto: ToggleReactionPostDto) {
-    this.logger.log(`Toggling reaction for userId=${userId}, postId=${dto.postId}, liked=${dto.liked}`);
-
     const profile = await this.profilesService.findByUserId(userId);
-    this.logger.log(`Profile found: ${profile ? JSON.stringify(profile) : 'null'}`);
     if (!profile) {
       throw new NotFoundException('Profile not found');
     }
 
     const post = await this.postsService.findByIdWithRelations(dto.postId);
-    this.logger.log(`Post found: ${post ? JSON.stringify(post) : 'null'}`);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
@@ -36,31 +32,24 @@ export class ReactionsService {
       const exists = await this.reactionPostRepository.exists({
         where: { post: { id: dto.postId }, profile: { id: profile.id } },
       });
-      this.logger.log(`Reaction exists? ${exists}`);
 
       if (!exists) {
-        this.logger.log(`Creating new reaction...`);
         const reaction = this.reactionPostRepository.create({
           post,
           profile,
         });
-        this.logger.log(`Reaction object to save: ${JSON.stringify(reaction)}`);
         const savedReaction = await this.reactionPostRepository.save(reaction);
         await this.postsService.incrementLikesCount(dto.postId)
-        this.logger.log(`Saved reaction: ${JSON.stringify(savedReaction)}`);
       } else {
-        this.logger.log(`Reaction already exists, skip adding`);
       }
       return { message: 'Reaction added' };
     }
 
-    this.logger.log(`Removing reaction...`);
     const deleteResult = await this.reactionPostRepository.delete({
       post: { id: dto.postId },
       profile: { id: profile.id },
     });
     await this.postsService.decrementLikesCount(dto.postId)
-    this.logger.log(`Delete result: ${JSON.stringify(deleteResult)}`);
 
     return { message: 'Reaction removed' };
   }

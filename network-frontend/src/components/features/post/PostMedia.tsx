@@ -31,19 +31,31 @@ export function PostMedia({
 
   if (media.length === 0) return null;
 
+  const numericWidth = typeof width === "number" ? width : 800;
+  const fallbackHeight = typeof height === "number" ? height : 600;
+
+  const calculatedHeights: number[] = media.map((m) =>
+    m.width && m.height ? (m.height / m.width) * numericWidth : fallbackHeight
+  );
+
+  const minHeight = Math.min(...calculatedHeights);
+
   const renderMedia = (item: MediaItem) => {
     if (item.type === "IMAGE") {
       return (
         <div
-          className={clsx("relative w-full h-full overflow-hidden", className)}
-          style={{ width, height }}
+          className={clsx(
+            "relative flex justify-center items-center",
+            className
+          )}
+          style={{ width: "100%" }}
         >
           <Image
             src={item.url}
             alt="Post image"
-            fill
-            className="object-contain"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
+            width={item.width || 800}
+            height={item.height || 600}
+            className="w-full h-full object-cover rounded-lg shadow-[0_6px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.06)]"
           />
         </div>
       );
@@ -51,12 +63,13 @@ export function PostMedia({
 
     if (item.type === "VIDEO") {
       return (
-        <video
-          src={item.url}
-          controls
-          className={clsx("w-full h-full object-contain", className)}
-          style={{ width, height }}
-        />
+        <div className="flex justify-center items-center w-full">
+          <video
+            src={item.url}
+            controls
+            className="max-h-[600px] max-w-full object-contain rounded-lg shadow-[0_6px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.06)]"
+          />
+        </div>
       );
     }
 
@@ -68,7 +81,7 @@ export function PostMedia({
   };
 
   return (
-    <div className="relative w-full bg-black">
+    <div className="relative w-full">
       {media.length > 1 ? (
         <Carousel
           items={media}
@@ -76,7 +89,7 @@ export function PostMedia({
           onChange={setCurrentIndex}
           renderItem={renderMedia}
           width={width}
-          height={height}
+          height={minHeight}
         />
       ) : (
         renderMedia(media[0])

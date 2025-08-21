@@ -19,15 +19,15 @@ export class Post {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ type: 'text', nullable: true })
-    content?: string;
+    @Column({ type: 'text', nullable: false })
+    content: string;
 
     @ManyToOne(() => Profile, (profile) => profile.posts, { onDelete: 'CASCADE' })
     author: Profile;
 
     @OneToMany(() => Media, (media) => media.post, {
         cascade: true,
-        eager: true, // Optional: load media when loading post
+        eager: true,
     })
     media: Media[];
 

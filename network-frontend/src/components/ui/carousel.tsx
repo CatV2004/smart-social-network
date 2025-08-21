@@ -30,8 +30,8 @@ export function Carousel<T>({
 
   return (
     <div
-      className="relative overflow-hidden bg-black flex justify-center items-center"
-      style={{ width, height }}
+      className="relative overflow-hidden flex justify-center items-center"
+      style={{ width, height: "auto" }}
     >
       {/* Slides */}
       <div
@@ -45,7 +45,7 @@ export function Carousel<T>({
           <div
             key={idx}
             className="flex-shrink-0 flex justify-center items-center"
-            style={{ width: typeof width === "number" ? `${width}px` : width, height }}
+            style={{ width: typeof width === "number" ? `${width}px` : width }}
           >
             {renderItem(item, idx)}
           </div>

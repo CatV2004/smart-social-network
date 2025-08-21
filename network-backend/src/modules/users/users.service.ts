@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, IsNull, Repository } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { BcryptService } from '@/modules/auth/bcrypt.service';
@@ -11,6 +11,8 @@ import dayjs from 'dayjs';
 import { ProfilesService } from '../profiles/profiles.service';
 import { v4 as uuidv4 } from 'uuid';
 import { log } from 'console';
+import { SearchService } from '../search/search.service';
+import { UserSearchDto } from '../search/dto/user-search.dto';
 
 
 @Injectable()
@@ -25,6 +27,7 @@ export class UsersService {
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
     private readonly profilesService: ProfilesService,
+    private readonly searchService: SearchService,
   ) {
     this.frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
   }
@@ -86,6 +89,16 @@ export class UsersService {
       }
       await queryRunner.commitTransaction();
 
+      // const userSearchDto: UserSearchDto = {
+      //   id: savedUser.id,
+      //   username: savedUser.username,
+      //   fullName: `${savedUser.firstName} ${savedUser.lastName}`,
+      //   email: savedUser.email,
+      // };
+      // this.searchService.addUser(userSearchDto).catch(err => {
+      //   console.error('Failed to enqueue user indexing', err);
+      // });
+
       await this.sendVerificationEmail(savedUser).catch(error => {
         this.logger.error(`Failed to send email, but user was created: ${error}`);
       });
@@ -126,30 +139,84 @@ export class UsersService {
 
 
   async verifyEmail(token: string): Promise<{ message: string }> {
-    const user = await this.userRepository.findOne({
-      where: { verificationToken: token },
-    });
+    try {
+      this.logger.log("Start verifyEmail with token: " + token);
 
-    if (!user) {
-      throw new BadRequestException('Invalid verification token');
+      this.logger.log(`Looking for user with token: ${token}`);
+      const user = await this.userRepository.findOne({
+        where: { verificationToken: token },
+      });
+      this.logger.log("User found: " + JSON.stringify(user));
+      this.logger.log("After findOne");
+
+      if (!user) {
+        const alreadyVerified = await this.userRepository.findOne({
+          where: { isVerified: true, verificationToken: IsNull() },
+        });
+        if (alreadyVerified) {
+          this.logger.warn(`Token already used. User ${alreadyVerified.email} is verified.`);
+          return { message: 'Email already verified' };
+        }
+
+        throw new BadRequestException('Invalid verification token');
+      }
+
+      if (user.isVerified) {
+        this.logger.log("User already verified");
+        return { message: 'Email already verified' };
+      }
+
+      if (!user.isVerificationTokenValid()) {
+        this.logger.log("Token expired");
+        throw new BadRequestException('Verification token has expired');
+      }
+
+      user.isVerified = true;
+      user.verificationToken = null;
+      user.verificationTokenExpires = null;
+
+      try {
+        await this.userRepository.save(user);
+        this.logger.log("User saved successfully");
+      } catch (err) {
+        this.logger.error("Error when saving user", err.stack || err);
+        throw err;
+      }
+
+      this.logger.log("line 162 before findByUserId");
+
+      let profile;
+      try {
+        profile = await this.profilesService.findByUserId(user.id);
+        this.logger.log("line 164 after findByUserId");
+      } catch (err) {
+        this.logger.error("Error when findByUserId", err.stack || err);
+        throw err;
+      }
+
+      const userSearchDto: UserSearchDto = {
+        id: user.id,
+        username: user.username,
+        fullName: `${user.firstName} ${user.lastName}`,
+        email: user.email,
+        avatar: profile?.avatar ?? null,
+      };
+
+      try {
+        await this.searchService.addUser(userSearchDto);
+        this.logger.log("User indexed in Elasticsearch");
+      } catch (err) {
+        this.logger.error("Failed to index verified user into Elasticsearch", err.stack || err);
+      }
+
+      this.logger.log(`Email verified for ${user.email}`);
+      return { message: 'Email successfully verified' };
+    } catch (err) {
+      this.logger.error("verifyEmail failed", err.stack || err);
+      throw err; // ném lại để controller trả về response lỗi
     }
-
-    if (user.isVerified) {
-      return { message: 'Email already verified' };
-    }
-
-    if (!user.isVerificationTokenValid()) {
-      throw new BadRequestException('Verification token has expired');
-    }
-
-    user.isVerified = true;
-    user.verificationToken = null;
-    user.verificationTokenExpires = null;
-    await this.userRepository.save(user);
-
-    this.logger.log(`Email verified for ${user.email}`);
-    return { message: 'Email successfully verified' };
   }
+
 
   async resendVerificationEmail(email: string): Promise<{ message: string }> {
     const user = await this.userRepository.findOne({
@@ -226,5 +293,5 @@ export class UsersService {
     }
 
     return user;
-  }s
+  }
 }

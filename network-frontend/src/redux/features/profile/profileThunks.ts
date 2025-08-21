@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { Profile, ProfileUpdatePayload } from '@/types/profile';
+import { ProfileUpdatePayload } from '@/types/profile';
 import profileApi from '@/lib/api/profile.api';
+import { profileService } from '@/services/profile.service';
 
 export const fetchMyProfile = createAsyncThunk(
   'profile/fetchMyProfile',
@@ -17,9 +18,9 @@ export const fetchMyProfile = createAsyncThunk(
 
 export const updateMyProfile = createAsyncThunk(
   'profile/updateMyProfile',
-  async (data: ProfileUpdatePayload, { rejectWithValue }) => {
+  async (data: ProfileUpdatePayload & { avatar?: File; coverImage?: File }, { rejectWithValue }) => {
     try {
-      const response = await profileApi.updateProfile(data);
+      const response = await profileService.updateProfile(data);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || error.message);

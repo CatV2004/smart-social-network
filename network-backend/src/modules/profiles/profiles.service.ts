@@ -1,4 +1,4 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +9,9 @@ import { plainToInstance } from 'class-transformer';
 import { UsersService } from '../users/users.service';
 import { FollowsService } from '../follows/follows.service';
 import { PostsService } from '../posts/posts.service';
+import { UpdateProfileImageDto } from './dto/update-profile-image.dto';
+import { CloudinaryService } from '@/cloudinary/cloudinary.service';
+import { SearchService } from '../search/search.service';
 
 @Injectable()
 export class ProfilesService {
@@ -24,6 +27,10 @@ export class ProfilesService {
 
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
+
+    private readonly cloudinaryService: CloudinaryService,
+
+    private readonly searchService: SearchService,
   ) { }
 
   async getProfileByUserId(userId: string, currentUserId?: string): Promise<ProfileResponseDto> {
@@ -54,11 +61,6 @@ export class ProfilesService {
 
   async getProfileByUsername(username: string, currentUserId?: string): Promise<ProfileResponseDto> {
     const profile = await this.findByUsername(username);
-
-    if (!profile) {
-      throw new NotFoundException('Profile not found');
-    }
-
     const { followersCount, followingCount } = await this.followsService.countFollowersAndFollowing(profile.id);
     const postsCount = await this.postsService.countPostsByProfileId(profile.id);
 
@@ -97,6 +99,37 @@ export class ProfilesService {
     });
 
     const saved = await profileRepo.save(profile);
+
+    return plainToInstance(ProfileResponseDto, saved, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  async updateProfileImage(
+    userId: string,
+    file: Express.Multer.File,
+    dto: UpdateProfileImageDto,
+  ): Promise<ProfileResponseDto> {
+    if (!file) throw new BadRequestException('File is required');
+
+    const profile = await this.profileRepository.findOne({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    });
+    if (!profile) throw new NotFoundException('Profile not found');
+
+    // Upload lên Cloudinary
+    const folder = dto.type === 'avatar' ? 'avatars' : 'covers';
+    const uploadResult = await this.cloudinaryService.uploadFile(file, folder);
+
+    // Cập nhật profile
+    if (dto.type === 'avatar') {
+      profile.avatar = uploadResult.secure_url;
+    } else {
+      profile.coverImage = uploadResult.secure_url;
+    }
+
+    const saved = await this.profileRepository.save(profile);
 
     return plainToInstance(ProfileResponseDto, saved, {
       excludeExtraneousValues: true,
@@ -172,6 +205,10 @@ export class ProfilesService {
   async updateProfile(
     userId: string,
     updateProfileDto: UpdateProfileDto,
+    files?: {
+      avatar?: Express.Multer.File[];
+      coverImage?: Express.Multer.File[];
+    },
   ): Promise<ProfileResponseDto> {
     let profile = await this.profileRepository.findOne({
       where: { user: { id: userId } },
@@ -180,20 +217,46 @@ export class ProfilesService {
 
     if (!profile) {
       const user = await this.usersService.findById(userId);
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-
       profile = this.profileRepository.create({ user, ...updateProfileDto });
     } else {
       Object.assign(profile, updateProfileDto);
     }
+
+    // xử lý upload avatar
+    if (files?.avatar?.[0]) {
+      const avatar = await this.cloudinaryService.uploadFile(
+        files.avatar[0],
+        'avatars',
+      );
+      profile.avatar = avatar.url;
+    }
+
+    // xử lý upload coverImage
+    if (files?.coverImage?.[0]) {
+      const cover = await this.cloudinaryService.uploadFile(
+        files.coverImage[0],
+        'covers',
+      );
+      profile.coverImage = cover.url;
+    }
+
     const saved = await this.profileRepository.save(profile);
+
+    const fullname = `${saved.user.firstName} ${saved.user.lastName}`
+    // const fullname = `${profile.user.firstName} ${profile.user.lastName}`
+
+    await this.searchService.updateUser(userId, {
+      username: saved.user.username,
+      fullName: fullname,
+      email: saved.user.email,
+      avatar: saved.avatar,
+    });
 
     return plainToInstance(ProfileResponseDto, saved, {
       excludeExtraneousValues: true,
     });
   }
+
 
   remove(id: number) {
     return `This action removes a #${id} profile`;

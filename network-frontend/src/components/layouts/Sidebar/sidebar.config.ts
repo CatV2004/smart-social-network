@@ -7,7 +7,8 @@ export const getSidebarNavItems = (username?: string) => [
     name: "Tìm kiếm",
     icon: Icons.search,
     href: "/search",
-    triggerCollapse: true
+    triggerCollapse: true,
+    overlay: "search"
   },
   { name: "Khám phá", icon: Icons.explore, href: "/explore" },
   { name: "Reels", icon: Icons.reels, href: "/reels" },
@@ -16,7 +17,8 @@ export const getSidebarNavItems = (username?: string) => [
     name: "Thông báo",
     icon: Icons.notifications,
     href: "/notifications",
-    triggerCollapse: true
+    triggerCollapse: true,
+    overlay: "notifications"
   },
   { name: "Tạo", icon: Icons.create, action: "openPostCreate" },
   {

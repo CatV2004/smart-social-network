@@ -8,6 +8,7 @@ export interface Profile {
   location: string | null;
   gender: string | null;
   phoneNumber: string | null;
+  dateOfBirth: string | null;
   website: string | null;
   facebook: string | null;
   linkedin: string | null;
@@ -23,22 +24,21 @@ export interface Profile {
 }
 
 export interface ProfileUpdatePayload {
-  avatar?: string;
-  coverImage?: string;
-  bio?: string;
-  location?: string;
-  gender?: string;
-  phoneNumber?: string;
-  website?: string;
-  facebook?: string;
-  linkedin?: string;
-  github?: string;
-  isPrivate?: boolean;
+  bio?: string | null;
+  location?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
+  phoneNumber?: string | null;
+  website?: string | null;
+  facebook?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+  isPrivate?: boolean | null;
 }
 
 export interface AuthorProfile {
   id: string;
   avatar: string;
   bio: string | null;
-  user?: User; 
+  user?: User;
 }

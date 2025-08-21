@@ -44,7 +44,6 @@ export function useProfileBase(username: string, isMyProfile = false) {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-  console.log("userProfilebase: ", user);
 
   return {
     user,

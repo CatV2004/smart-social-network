@@ -1,4 +1,4 @@
-import { AudioMedia, ImageMedia, VideoMedia } from "./media";
+import { AudioMedia, ImageMedia, UpdateMediaPayload, VideoMedia } from "./media";
 // import { PaginationMeta } from "./pagination-meta";
 import { AuthorProfile } from "./profile";
 
@@ -17,7 +17,9 @@ export interface Post {
   isSaved: boolean;
   createdAt: string;
   updatedAt: string;
+  deletedAt?: string | null;
 }
+
 
 // export interface PostListResponse {
 //   data: Post[];
@@ -47,4 +49,16 @@ export interface PostCreateState {
   uploadProgress: number;
   showBackConfirm: boolean;
   currentIndex: number;
+}
+
+export interface MediaUpdatePayload {
+  mediaId: string;
+}
+
+export interface UpdatePostPayload {
+  content?: string;
+  mediaToDelete?: string[];
+  mediaToUpdate?: MediaUpdatePayload[];
+  files?: File[]; 
+  isPinned?: boolean;
 }

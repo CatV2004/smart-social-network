@@ -1,7 +1,7 @@
 // hooks/useCreatePost.ts
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { createPostWithMedia } from "@/services/post.service";
+import postService from "@/services/post.service";
 
 interface UseCreatePostOptions {
     onSuccess?: () => void;
@@ -20,7 +20,7 @@ export const useCreatePost = (options?: UseCreatePostOptions) => {
             const images = formData.getAll("images") as File[];
             const videos = formData.getAll("videos") as File[];
 
-            await createPostWithMedia({ content, images, videos });
+            await postService.createPostWithMedia({ content, images, videos });
 
             toast({
                 title: "Thành công",

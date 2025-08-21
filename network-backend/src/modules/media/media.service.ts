@@ -8,6 +8,7 @@ import { CloudinaryService } from '@/cloudinary/cloudinary.service';
 import { PostsService } from '../posts/posts.service';
 import { MediaResponseDto } from './dto/response-media.dto';
 import { plainToInstance } from 'class-transformer';
+import { MediaType } from './types/media.types';
 
 @Injectable()
 export class MediaService {
@@ -17,9 +18,33 @@ export class MediaService {
 
     @Inject(forwardRef(() => PostsService))
     private readonly postsService: PostsService,
-    
+
     private cloudinary: CloudinaryService,
   ) { }
+
+  async createNewMedia(
+    file: Express.Multer.File,
+    postId: string,
+    type: MediaType,
+  ): Promise<any> {
+    const uploadResult = await this.cloudinary.uploadFile(
+      file,
+      `posts/${postId}`,
+    );
+
+    const media = this.mediaRepo.create({
+      type,
+      publicId: uploadResult.public_id,
+      url: uploadResult.secure_url,
+      post: { id: postId },
+      width: uploadResult.width,
+      height: uploadResult.height,
+      thumbnail: uploadResult.thumbnail_url,
+      duration: uploadResult.duration,
+    });
+
+    return this.mediaRepo.save(media);
+  }
 
   async uploadMultipleMedia(
     files: Express.Multer.File[],
@@ -95,10 +120,8 @@ export class MediaService {
     const media = await this.mediaRepo.findOne({ where: { id: mediaId } });
     if (!media) throw new NotFoundException('Media not found');
 
-    // Xoá trên Cloudinary
     await this.cloudinary.deleteFile(media.publicId);
 
-    // Upload file mới
     const result = await this.cloudinary.uploadFile(newFile, `posts/${media.type}`);
 
     media.url = result.secure_url;
@@ -112,8 +135,6 @@ export class MediaService {
 
     return plainToInstance(MediaResponseDto, media, { excludeExtraneousValues: true });
   }
-
-
 
   // Upload avatar, cover, logo
   async uploadAvatar(file: Express.Multer.File) {

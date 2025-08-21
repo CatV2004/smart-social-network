@@ -8,12 +8,14 @@ import { AuthModule } from '../auth/auth.module';
 import { BcryptService } from '../auth/bcrypt.service';
 import { MailModule } from '@/mail/mail.module';
 import { ProfilesModule } from '../profiles/profiles.module';
+import { SearchModule } from '../search/search.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     forwardRef(() => AuthModule),
     forwardRef(() => ProfilesModule),
-    MailModule
+    MailModule,
+    SearchModule
   ],
   controllers: [UsersController],
   providers: [UsersService, BcryptService],

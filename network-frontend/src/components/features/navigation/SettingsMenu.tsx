@@ -1,3 +1,4 @@
+// components/features/navigation/SettingsMenu.tsx
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -8,10 +9,15 @@ import MenuDivider from "./MenuDivider";
 import { useAppDispatch } from "@/redux/hooks";
 import { logout } from "@/redux/features/auth/authThunks";
 import { useRouter } from "next/navigation";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { Menu } from "lucide-react";
 
-export default function SettingsMenu() {
+interface SettingsMenuProps {
+  isCollapsed?: boolean;
+}
+
+export default function SettingsMenu({
+  isCollapsed = false,
+}: SettingsMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -42,25 +48,54 @@ export default function SettingsMenu() {
       {/* Nút trigger */}
       <div
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-100 transition cursor-pointer"
+        className="flex items-center p-3 rounded-lg hover:bg-gray-100 transition cursor-pointer overflow-hidden"
       >
-        <FontAwesomeIcon icon={faBars} className="w-6 h-6 text-black" />
-        <span className="text-[15px] font-normal text-black">Xem thêm</span>
+        {/* Icon luôn nằm bên trái, không đổi justify */}
+        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+          <Menu className="w-6 h-6 text-black" />
+        </div>
+
+        {/* Text animate */}
+        <div className="ml-3 overflow-hidden">
+          <AnimatePresence mode="wait">
+            {!isCollapsed && (
+              <motion.span
+                key="text-visible"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="text-[15px] font-normal text-black whitespace-nowrap"
+              >
+                Xem thêm
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Menu dropdown */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             className="absolute bottom-12 left-0 w-56 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-200"
           >
             <MenuItem label="Cài đặt" icon={Icons.settings} hasCheckmark />
-            <MenuItem label="Hoạt động của bạn" icon={Icons.activity} hasCheckmark />
+            <MenuItem
+              label="Hoạt động của bạn"
+              icon={Icons.activity}
+              hasCheckmark
+            />
             <MenuItem label="Đã lưu" icon={Icons.bookmark} hasCheckmark />
+            <MenuItem
+              label="Đã xóa gần đây"
+              icon={Icons.trash}
+              onClick={() => router.push("/trash")}
+            />
 
             <MenuDivider />
 

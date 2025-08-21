@@ -24,6 +24,9 @@ import { MediaModule } from './modules/media/media.module';
 import { ReactionsModule } from './modules/reactions/reactions.module';
 import { SavePostsModule } from './modules/save-posts/save-posts.module';
 import { CommentsModule } from './modules/comments/comments.module';
+import { SearchModule } from './modules/search/search.module';
+import { SyncModule } from './modules/sync/sync.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 
 @Module({
@@ -47,7 +50,7 @@ import { CommentsModule } from './modules/comments/comments.module';
         entities: [__dirname + '/../**/*.entity.{ts,js}'],
         // migrations: [__dirname + '/migrations/*{.ts,.js}'],
         synchronize: true,
-        logging: ['query', 'error'],
+        // logging: ['query', 'error'],
       }),
   
     }),
@@ -63,6 +66,7 @@ import { CommentsModule } from './modules/comments/comments.module';
       }),
     }),
     MailModule,
+    SearchModule,
     SocketModule,
     RedisModule,
     AuthModule,
@@ -72,7 +76,9 @@ import { CommentsModule } from './modules/comments/comments.module';
     MediaModule,
     ReactionsModule,
     SavePostsModule,
-    CommentsModule
+    CommentsModule,
+    SyncModule,
+    NotificationsModule
   ],
   controllers: [AppController],
   providers: [

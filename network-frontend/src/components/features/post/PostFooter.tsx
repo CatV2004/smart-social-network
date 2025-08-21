@@ -1,8 +1,7 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
-import { formatNumber } from "@/lib/format";
-import clsx from "clsx";
+import { cn } from "@/lib/utils/cn";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -16,21 +15,17 @@ interface PostFooterProps {
       lastName: string;
     };
   };
-  likesCount?: number;
-  commentsCount?: number;
   createdAt: string;
-  className?: string; // 👈 thêm className
-  onComment?: () => void;
+  className?: string;
+  isDeleting?: boolean; // Thêm prop mới
 }
 
 export function PostFooter({
   content,
   author,
-  likesCount = 0,
-  commentsCount = 0,
   createdAt,
   className,
-  onComment,
+  isDeleting = false, // Default value
 }: PostFooterProps) {
   const fullName = author.user
     ? `${author.user.firstName} ${author.user.lastName}`
@@ -38,27 +33,42 @@ export function PostFooter({
   const formattedDate = dayjs(createdAt).fromNow();
 
   return (
-    <div className={clsx("p-3", className)}>
-      <p className="font-semibold text-sm">
-        {formatNumber(likesCount)} lượt thích
-      </p>
-      <div className="text-sm mt-1">
-        <span className="font-semibold">{fullName}</span> {content}
-      </div>
-      {commentsCount > 0 && (
-        <p
-          className="text-sm text-gray-500 mt-1 cursor-pointer"
-          onClick={onComment}
-        >
-          Xem tất cả {formatNumber(commentsCount)} bình luận
-        </p>
+    <div
+      className={cn(
+        "px-4 pb-3 space-y-2",
+        className,
+        isDeleting && "opacity-50" // Làm mờ toàn bộ footer khi đang xóa
       )}
-      <p className="text-xs text-gray-400 mt-1">{formattedDate}</p>
-      <input
-        type="text"
-        placeholder="Thêm bình luận..."
-        className="w-full text-sm outline-none bg-transparent mt-2 border-t pt-2"
-      />
+    >
+      {/* Content with author name */}
+      <div className="text-sm leading-snug">
+        <span
+          className={cn(
+            "font-semibold mr-1.5",
+            isDeleting && "opacity-70" // Làm mờ tên tác giả
+          )}
+        >
+          {fullName}
+        </span>
+        <span
+          className={cn(
+            "text-gray-900",
+            isDeleting && "opacity-70" // Làm mờ nội dung
+          )}
+        >
+          {content}
+        </span>
+      </div>
+
+      {/* Timestamp */}
+      <p
+        className={cn(
+          "text-xs text-gray-400",
+          isDeleting && "opacity-50" // Làm mờ thời gian
+        )}
+      >
+        {formattedDate}
+      </p>
     </div>
   );
 }

@@ -1,8 +1,15 @@
 export type MediaType = 'IMAGE' | 'VIDEO' | 'AUDIO';
 
+
+export interface MediaInput {
+  id?: string;           // media cũ
+  type?: "IMAGE" | "VIDEO" | "AUDIO";
+  file?: File;           // media mới
+}
+
 interface MediaFile {
   file: File;
-  previewUrl?: string; 
+  previewUrl?: string;
 }
 
 export interface ImageMedia {
@@ -43,10 +50,10 @@ export interface AudioMedia {
   updatedAt: string;
 }
 
-export interface UploadMediaPayload {
-  files: File[];
-  postId: string;
-  type: Extract<MediaType, 'IMAGE' | 'VIDEO'>;
+export interface UpdateMediaPayload {
+  id?: string;
+  type?: 'IMAGE' | 'VIDEO';
+  file?: File;
 }
 
 export interface MediaResponse {

@@ -1,10 +1,14 @@
-import { Controller, Post, Get, UseGuards, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Controller, Post, Get, UseGuards, Body, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { SavePostsService } from './save-posts.service';
 import { ToggleSavePostDto } from './dto/toggle-save-post.dto';
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
+import { PaginatedResponseDto } from '@/common/dtos/paginated-response.factory';
+import { PostResponseDto } from '../posts/dto/response-post.dto';
+import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
+import { IPaginated } from '@/common/dtos/paginated.interface';
 
 @ApiTags('save-posts')
 @Controller('save-posts')
@@ -22,8 +26,13 @@ export class SavePostsController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get all saved posts of the current user' })
-  async getSavedPosts(@ActiveUser() user: ActiveUserData) {
-    return this.savePostsService.getSavedPosts(user.id);
+  @ApiOkResponse({ type: PaginatedResponseDto(PostResponseDto) })
+  async getSavedPosts(
+    @ActiveUser() user: ActiveUserData,
+    @Query() pagination: PaginationQueryDto,
+  ): Promise<IPaginated<PostResponseDto>> {
+    return this.savePostsService.getSavedPosts(user.id, pagination);
   }
 }

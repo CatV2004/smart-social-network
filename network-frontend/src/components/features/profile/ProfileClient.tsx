@@ -1,10 +1,10 @@
-// ProfileClient.tsx
 "use client";
 import { useState, useMemo } from "react";
 import { useAppSelector } from "@/redux/hooks";
 import { selectUserLoading } from "@/redux/features/user/userSelectors";
 import { useProfileBase } from "@/hooks/useProfileBase";
 import { useProfilePosts } from "@/hooks/useProfilePosts";
+import { useSavedPosts } from "@/hooks/useSavedPosts";
 import ErrorMessage from "@/components/common/ErrorMessage";
 import ProfileHeader from "@/components/features/profile/ProfileHeader";
 import { ProfileStats } from "@/components/features/profile/ProfileStats";
@@ -14,6 +14,8 @@ import { MediaItem } from "@/types/post";
 import { ImageMedia } from "@/types/media";
 import { motion } from "framer-motion";
 import { fadeIn } from "@/lib/motion";
+import { PostCommentModal } from "@/components/shared/modals/PostCommentModal"; 
+import { Post } from "@/types/post";
 
 interface ProfileClientProps {
   username: string;
@@ -27,6 +29,8 @@ export default function ProfileClient({
   const [activeTab, setActiveTab] = useState<"posts" | "saved" | "tagged">(
     "posts"
   );
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null); 
+  const [isModalOpen, setIsModalOpen] = useState(false); 
   const loadingUser = useAppSelector(selectUserLoading);
 
   const {
@@ -37,8 +41,6 @@ export default function ProfileClient({
     isCurrentUser,
     reload: reloadProfile,
   } = useProfileBase(username, isMyProfile);
-  console.log("user: ", user);
-  console.log("profile: ", profile);
 
   const canViewPosts = useMemo(() => {
     return isCurrentUser || profile?.isPrivate === false;
@@ -48,8 +50,25 @@ export default function ProfileClient({
     items: posts,
     hasMore,
     loadMore,
-    isLoading, 
+    isLoading,
   } = useProfilePosts(profile?.id, !canViewPosts);
+
+  const {
+    items: savedPosts,
+    hasMore: hasMoreSaved,
+    loadMore: loadMoreSaved,
+    isLoading: isLoadingSaved,
+  } = useSavedPosts(activeTab === "saved" && isCurrentUser);
+
+  const handlePostClick = (post: Post) => {
+    setSelectedPost(post);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedPost(null);
+  };
 
   const fallbackImageMedia: ImageMedia = useMemo(
     () => ({
@@ -81,23 +100,27 @@ export default function ProfileClient({
     [posts, fallbackImageMedia]
   );
 
+  const safeSavedPosts = useMemo(
+    () =>
+      savedPosts.map((post) => ({
+        ...post,
+        media:
+          post.media?.length > 0
+            ? post.media.map((m: MediaItem) => ({
+                ...m,
+                url: m.url ?? "/fallback-image.png",
+              }))
+            : [fallbackImageMedia],
+      })),
+    [savedPosts, fallbackImageMedia]
+  );
+
   if (profileError) {
     return <ErrorMessage message={profileError} onRetry={reloadProfile} />;
   }
 
   if (loadingProfile || loadingUser) {
-    return (
-      <div className="container mx-auto py-4 px-4 lg:px-0 animate-pulse">
-        <div className="h-24 w-24 bg-gray-200 rounded-full mb-4" />
-        <div className="h-6 w-1/3 bg-gray-200 rounded mb-2" />
-        <div className="h-4 w-1/4 bg-gray-200 rounded mb-6" />
-        <div className="grid grid-cols-3 gap-1 md:gap-6 mt-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="aspect-square bg-gray-200 rounded" />
-          ))}
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (!user || !profile) {
@@ -135,6 +158,7 @@ export default function ProfileClient({
               hasMore={hasMore}
               onLoadMore={loadMore}
               isLoading={isLoading}
+              onPostClick={handlePostClick} 
             />
           </motion.div>
         ) : (
@@ -142,8 +166,27 @@ export default function ProfileClient({
         );
 
       case "saved":
-        return (
-          <div className="text-center py-12 text-gray-500">Chưa hỗ trợ</div>
+        return !isCurrentUser ? (
+          <div className="text-center py-12 text-gray-500">
+            Chỉ chủ sở hữu profile mới xem được bài đã lưu.
+          </div>
+        ) : isLoadingSaved && safeSavedPosts.length === 0 ? (
+          <SkeletonGrid />
+        ) : safeSavedPosts.length > 0 ? (
+          <motion.div variants={fadeIn}>
+            <PostGrid
+              posts={safeSavedPosts}
+              isCurrentUser={isCurrentUser}
+              hasMore={hasMoreSaved}
+              onLoadMore={loadMoreSaved}
+              isLoading={isLoadingSaved}
+              onPostClick={handlePostClick} 
+            />
+          </motion.div>
+        ) : (
+          <div className="text-center py-12 text-gray-500">
+            Chưa có bài viết nào được lưu.
+          </div>
         );
 
       case "tagged":
@@ -157,24 +200,30 @@ export default function ProfileClient({
   };
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={fadeIn}
-      className="container mx-auto py-4 px-4 lg:px-0"
-    >
-      <ProfileHeader
-        user={user}
-        profile={profile}
-        isCurrentUser={isCurrentUser}
-      />
-
-      <motion.div variants={fadeIn}>
-        <ProfileStats activeTab={activeTab} onTabChange={setActiveTab} />
+    <>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="container mx-auto py-4 px-4 lg:px-0"
+      >
+        <ProfileHeader
+          user={user}
+          profile={profile}
+          isCurrentUser={isCurrentUser}
+        />
+        <motion.div variants={fadeIn}>
+          <ProfileStats activeTab={activeTab} onTabChange={setActiveTab} />
+        </motion.div>
+        {renderContent()}
       </motion.div>
 
-      {renderContent()}
-    </motion.div>
+      <PostCommentModal
+        post={selectedPost}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
+    </>
   );
 }
 
@@ -184,6 +233,21 @@ function SkeletonGrid() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div key={i} className="aspect-square bg-gray-200 rounded" />
       ))}
+    </div>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="container mx-auto py-4 px-4 lg:px-0 animate-pulse">
+      <div className="h-24 w-24 bg-gray-200 rounded-full mb-4" />
+      <div className="h-6 w-1/3 bg-gray-200 rounded mb-2" />
+      <div className="h-4 w-1/4 bg-gray-200 rounded mb-6" />
+      <div className="grid grid-cols-3 gap-1 md:gap-6 mt-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="aspect-square bg-gray-200 rounded" />
+        ))}
+      </div>
     </div>
   );
 }

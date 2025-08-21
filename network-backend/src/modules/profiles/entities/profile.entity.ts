@@ -36,7 +36,7 @@ export class Profile {
   @Column({
     nullable: true,
     default:
-      'https://res.cloudinary.com/dohsfqs6d/image/upload/v1755532065/0b1fc966-29af-4528-9857-33d1025ff241.png',
+      'https://res.cloudinary.com/dohsfqs6d/image/upload/v1755777403/avatar-default_owuece.svg',
   })
   avatar?: string;
 

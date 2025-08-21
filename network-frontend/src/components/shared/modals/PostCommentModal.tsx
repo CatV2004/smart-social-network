@@ -30,24 +30,23 @@ export function PostCommentModal({
 }: PostCommentModalProps) {
   const { toast } = useToast();
   const [replyingTo, setReplyingTo] = useState<Comment | null>(null);
-  if (!post) return null;
-
-  // Lấy danh sách bình luận
+  
+  // Lấy danh sách bình luận - chỉ gọi khi modal mở và có post
   const {
     data: commentsData,
     isLoading,
     error,
     fetchNextPage,
     hasNextPage,
-  } = useGetComments(post.id, isOpen);
+  } = useGetComments(post?.id || "", isOpen && !!post);
 
   // Hook tạo bình luận
   const { mutateAsync: createComment, isPending: isCreating } =
-    useCreateComment(post.id);
+    useCreateComment(post?.id || "");
 
   // Hook xóa bình luận
   const { mutateAsync: deleteComment, isPending: isDeleting } =
-    useDeleteComment(post.id);
+    useDeleteComment(post?.id || "");
 
   // Format comments từ infinite query
   const comments = useMemo(
@@ -64,6 +63,8 @@ export function PostCommentModal({
 
   // Xử lý submit bình luận
   const handleSubmitComment = async (content: string) => {
+    if (!post) return;
+
     try {
       if (replyingTo) {
         const parentCommentId = replyingTo.parentId ?? replyingTo.id;
@@ -127,6 +128,9 @@ export function PostCommentModal({
     setReplyingTo(null);
   };
 
+  // 👇 KIỂM TRA POST SAU TẤT CẢ CÁC HOOK
+  if (!post) return null;
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="2xl" className="h-[90vh]">
       <div className="flex flex-col md:flex-row h-full bg-white rounded-xl overflow-hidden shadow-2xl">
@@ -134,9 +138,11 @@ export function PostCommentModal({
         <div className="md:w-3/5 bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col border-r border-gray-100">
           <div className="p-6">
             <PostHeader
+              post={post}
               author={post.author}
               className="text-gray-800"
               optionsClassName="text-gray-500 hover:text-gray-700"
+              hideOptions={true}
             />
             {/* Content */}
             {post.content && (
@@ -146,7 +152,7 @@ export function PostCommentModal({
             )}
           </div>
 
-          <div className="flex-1 flex items-center justify-center p-4 bg-white overflow-hidden">
+          <div className="flex-1 flex items-center justify-center p-4 pb-8 bg-[#f3f8fd] overflow-hidden">
             <PostMedia
               media={post.media}
               className="max-h-full max-w-full object-contain rounded-xl shadow-md border border-gray-100"

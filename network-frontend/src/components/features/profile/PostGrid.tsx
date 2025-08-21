@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { MediaItem } from "@/types/post";
+import { MediaItem, Post } from "@/types/post";
 import Image from "next/image";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   HeartIcon,
@@ -13,16 +12,12 @@ import {
 import { EmptyPostState } from "./EmptyPostState";
 
 interface PostGridProps {
-  posts: {
-    id: string;
-    media: MediaItem[];
-    likesCount: number;
-    commentsCount: number;
-  }[];
+  posts: Post[];
   isCurrentUser?: boolean;
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoading?: boolean;
+  onPostClick?: (post: Post) => void; 
 }
 
 export const PostGrid = ({
@@ -31,6 +26,7 @@ export const PostGrid = ({
   onLoadMore,
   hasMore = false,
   isLoading = false,
+  onPostClick, // 👈 Nhận prop mới
 }: PostGridProps) => {
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
@@ -74,6 +70,15 @@ export const PostGrid = ({
     />
   );
 
+  // 👇 Hàm xử lý click bài viết
+  const handlePostClick = (post: Post, e: React.MouseEvent) => {
+    e.preventDefault(); // Ngăn chặn chuyển hướng
+    e.stopPropagation(); // Ngăn chặn sự kiện nổi bọt
+    if (onPostClick) {
+      onPostClick(post);
+    }
+  };
+
   return (
     <div className="w-full">
       <div className="grid grid-cols-3 gap-1 sm:gap-6">
@@ -90,9 +95,11 @@ export const PostGrid = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.35, ease: "easeOut" }}
-                className="relative group aspect-square overflow-hidden bg-gray-100 rounded"
+                className="relative group aspect-square overflow-hidden bg-gray-100 rounded cursor-pointer" // 👈 Thêm cursor-pointer
+                onClick={(e) => handlePostClick(post, e)} // 👈 Thêm sự kiện click
               >
-                <Link href={`/p/${post.id}`} className="block h-full w-full">
+                {/* 👇 Thay thế Link bằng div để ngăn chuyển hướng */}
+                <div className="block h-full w-full">
                   {!firstMedia ? (
                     <div className="w-full h-full flex items-center justify-center bg-gray-200">
                       <span className="text-gray-500">No media</span>
@@ -142,7 +149,7 @@ export const PostGrid = ({
                       </div>
                     </div>
                   </div>
-                </Link>
+                </div>
               </motion.div>
             );
           })}

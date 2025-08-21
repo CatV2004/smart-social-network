@@ -2,9 +2,19 @@ import React from "react";
 
 interface LoadingSpinnerProps {
   fullScreen?: boolean;
+  size?: "sm" | "md" | "lg";
 }
 
-export default function LoadingSpinner({ fullScreen = false }: LoadingSpinnerProps) {
+export default function LoadingSpinner({
+  fullScreen = false,
+  size = "md",
+}: LoadingSpinnerProps) {
+  const sizeMap = {
+    sm: "w-4 h-4 border-2",
+    md: "w-8 h-8 border-4",
+    lg: "w-12 h-12 border-4",
+  };
+
   return (
     <div
       className={`flex justify-center items-center ${
@@ -13,7 +23,9 @@ export default function LoadingSpinner({ fullScreen = false }: LoadingSpinnerPro
       role="status"
       aria-label="Loading"
     >
-      <div className="w-12 h-12 rounded-full animate-spin-slow border-4 border-t-transparent border-blue-600 shadow-lg" />
+      <div
+        className={`rounded-full animate-spin-slow border-t-transparent border-blue-600 shadow-lg ${sizeMap[size]}`}
+      />
     </div>
   );
 }

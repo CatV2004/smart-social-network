@@ -41,10 +41,7 @@ export default function MenuItem({
         <span className="text-sm font-medium">{label}</span>
       </div>
       {hasCheckmark && (
-        <FontAwesomeIcon
-          icon={Icons.check}
-          className="w-4 h-4 text-blue-500"
-        />
+        <FontAwesomeIcon icon={Icons.check} className="w-4 h-4 text-blue-500" />
       )}
     </motion.div>
   );
@@ -58,10 +55,7 @@ export default function MenuItem({
   }
 
   return (
-    <button
-      onClick={onClick}
-      className="w-full text-left hover:bg-gray-50"
-    >
+    <button onClick={onClick} className="w-full text-left hover:bg-gray-50">
       {content}
     </button>
   );

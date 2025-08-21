@@ -10,12 +10,11 @@ export function useFeedPosts() {
 
     const { loadMore, ...rest } = usePaginatedData<Post>(
         fetchFn,
-        true, // enabled by default
-        [],   // no dependencies
-        3     // initial limit
+        true,
+        [],
+        3
     );
 
-    // 👉 Bọc lại để chắc chắn loadMore trả về Promise
     const wrappedLoadMore = useCallback(async () => {
         return await loadMore();
     }, [loadMore]);

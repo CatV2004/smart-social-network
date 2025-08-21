@@ -29,7 +29,10 @@ import {
   faSpinner,
   faChevronUp,
   faChevronDown,
-  faTriangleExclamation
+  faTriangleExclamation,
+  faRotate,
+  faT,
+  faTrash
 
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -61,7 +64,9 @@ export const Icons = {
   emoji: faFaceSmile,
   image: faImage,
   spinner: faSpinner,
-  chevronUp: faChevronUp,   
+  chevronUp: faChevronUp,
   chevronDown: faChevronDown,
-  warning: faTriangleExclamation
+  warning: faTriangleExclamation,
+  refresh: faRotate,
+  trash: faTrash,
 };
