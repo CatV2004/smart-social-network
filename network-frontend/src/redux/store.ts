@@ -1,12 +1,39 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
+// redux/store.ts
+import { configureStore, ThunkAction, Action, createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 import authReducer from './features/auth/authSlice';
 import profileReducer from './features/profile/profileSlice';
 import userReducer from './features/user/userSlice';
 import uiReducer from "./features/ui/uiSlice";
+import notificationReducer from './features/notifications/notificationSlice';
 
 import { combineReducers } from 'redux';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
+import { clearAuth, setAuthTokens } from './features/auth/authSlice'; // Thêm loginSuccess
+import { resetNotifications } from './features/notifications/notificationSlice';
+import { fetchNotifications, fetchUnreadCount } from './features/notifications/notificationThunks'; // Import thunks
+
+// Tạo listener middleware
+export const listenerMiddleware = createListenerMiddleware();
+
+// Lắng nghe action logout và reset notifications
+listenerMiddleware.startListening({
+    matcher: isAnyOf(clearAuth),
+    effect: async (action, listenerApi) => {
+        // Reset notifications khi logout
+        listenerApi.dispatch(resetNotifications());
+    },
+});
+
+// Lắng nghe action loginSuccess và fetch notifications
+listenerMiddleware.startListening({
+    matcher: isAnyOf(setAuthTokens),
+    effect: async (action, listenerApi) => {
+        // Fetch notifications khi đăng nhập thành công
+        listenerApi.dispatch(fetchNotifications({ limit: 20 }));
+        listenerApi.dispatch(fetchUnreadCount());
+    },
+});
 
 const persistConfig = {
     key: 'root',
@@ -19,6 +46,7 @@ const rootReducer = combineReducers({
     profile: profileReducer,
     user: userReducer,
     ui: uiReducer,
+    notifications: notificationReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -28,7 +56,7 @@ export const store = configureStore({
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
             serializableCheck: false,
-        }),
+        }).prepend(listenerMiddleware.middleware),
 });
 
 export const persistor = persistStore(store);

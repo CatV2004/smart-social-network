@@ -1,45 +1,59 @@
 import {
-  SubscribeMessage,
   WebSocketGateway,
+  WebSocketServer,
   OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  MessageBody,
-  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
-import { Socket, Server } from 'socket.io';
-import { SocketService } from '@/socket/socket.service'; 
+import { Server, Socket } from 'socket.io';
+import { SocketService } from './socket.service';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: process.env.FRONTEND_URL || '*',
   },
 })
 export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  private logger: Logger = new Logger('SocketGateway');
+  @WebSocketServer()
+  server: Server;
 
-  constructor(private readonly socketService: SocketService) {}
+  private readonly logger = new Logger(SocketGateway.name);
+
+  constructor(private readonly socketService: SocketService) { }
 
   afterInit(server: Server) {
-    this.logger.log('WebSocket Initialized');
     this.socketService.setServer(server);
+    this.logger.log('🚀 SocketGateway initialized');
   }
 
-  handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
+  async handleConnection(client: Socket) {
+    try {
+      const { userId } = client.handshake.auth;
+
+      if (!userId) {
+        this.logger.warn(`Connection rejected: No userId provided`);
+        client.disconnect();
+        return;
+      }
+
+      this.socketService.registerConnection(client.id, userId);
+
+      client.join(`user_${userId}`);
+
+      this.logger.log(`✅ User ${userId} connected (socket: ${client.id})`);
+
+    } catch (error) {
+      this.logger.error(`Connection error: ${error.message}`);
+      client.disconnect();
+    }
   }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
-  }
-
-  @SubscribeMessage('sendMessage')
-  handleMessage(
-    @MessageBody() payload: { toUserId: string; content: string },
-    @ConnectedSocket() client: Socket,
-  ) {
-    this.logger.log(`Message from ${client.id}: ${JSON.stringify(payload)}`);
-    this.socketService.sendMessageToUser(payload.toUserId, payload.content);
+    const userId = this.socketService.getUserIdBySocketId(client.id);
+    if (userId) {
+      this.logger.log(`❌ User ${userId} disconnected (socket: ${client.id})`);
+      this.socketService.unregisterConnection(client.id, userId);
+    }
   }
 }

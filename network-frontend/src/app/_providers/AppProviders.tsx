@@ -8,19 +8,25 @@ import AppInitializer from "../AppInitializer";
 import TopLoader from "@/components/common/TopLoader";
 import AppLoadingGate from "../AppLoadingGate";
 import { Toaster } from "@/components/ui/sonner";
+import { NotificationsSocketProvider } from "@/context/NotificationsSocketContext";
+// import { MessagesSocketProvider } from "@/context/MessagesSocketContext";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <ReduxProvider>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <QueryClientProvider client={queryClient}>
-          <AppInitializer>
-            <AppLoadingGate>
-              <TopLoader />
-              {children}
-              <Toaster richColors position="top-center" />
-            </AppLoadingGate>
-          </AppInitializer>
+          <NotificationsSocketProvider>
+            {/* <MessagesSocketProvider> */}
+              <AppInitializer>
+                <AppLoadingGate>
+                  <TopLoader />
+                  {children}
+                  <Toaster richColors position="top-center" />
+                </AppLoadingGate>
+              </AppInitializer>
+            {/* </MessagesSocketProvider> */}
+          </NotificationsSocketProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </ReduxProvider>

@@ -5,12 +5,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ReactionPost } from './entities/reaction-post.entity';
 import { ProfilesModule } from '../profiles/profiles.module';
 import { PostsModule } from '../posts/posts.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ReactionPost]),
     ProfilesModule,
-    PostsModule
+    PostsModule,
+    NotificationsModule
   ],
   controllers: [ReactionsController],
   providers: [ReactionsService],

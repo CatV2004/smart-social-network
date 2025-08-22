@@ -5,6 +5,7 @@ import { ReactionPost } from './entities/reaction-post.entity';
 import { PostsService } from '../posts/posts.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { ToggleReactionPostDto } from '@/modules/reactions/dto/toggle-reaction-post.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class ReactionsService {
@@ -15,18 +16,14 @@ export class ReactionsService {
 
     private readonly profilesService: ProfilesService,
     private readonly postsService: PostsService,
+    private readonly notificationsService: NotificationsService,
   ) { }
 
   async togglePostReaction(userId: string, dto: ToggleReactionPostDto) {
     const profile = await this.profilesService.findByUserId(userId);
-    if (!profile) {
-      throw new NotFoundException('Profile not found');
-    }
+    const post = await this.postsService.findByIdWithRelations(dto.postId, ['author']);
 
-    const post = await this.postsService.findByIdWithRelations(dto.postId);
-    if (!post) {
-      throw new NotFoundException('Post not found');
-    }
+    const isOwnPost = post.author.id === profile.id;
 
     if (dto.liked) {
       const exists = await this.reactionPostRepository.exists({
@@ -40,6 +37,18 @@ export class ReactionsService {
         });
         const savedReaction = await this.reactionPostRepository.save(reaction);
         await this.postsService.incrementLikesCount(dto.postId)
+
+        if (!isOwnPost) {
+          try {
+            await this.notificationsService.notifyLikePost(
+              profile.id,
+              post.author.id,
+              dto.postId        
+            );
+          } catch (error) {
+            console.error('Failed to send notification:', error);
+          }
+        }
       } else {
       }
       return { message: 'Reaction added' };

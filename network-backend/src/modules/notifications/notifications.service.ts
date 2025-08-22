@@ -1,58 +1,138 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Notification } from './entities/notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { NotificationType } from './types/notification.type';
-import { NotificationsGateway } from './notifications.gateway';
+import { NotificationsGateway } from '../../socket/notifications/notifications.gateway';
 import { paginate } from '@/common/utils/pagination.util';
 import { NotificationDto } from './dto/notification.dto';
+import { SocketService } from '@/socket/socket.service';
+import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
+import { IPaginated } from '@/common/dtos/paginated.interface';
+import { ProfilesService } from '../profiles/profiles.service';
 
 @Injectable()
 export class NotificationsService {
+  private readonly logger = new Logger(NotificationsService.name);
+
   constructor(
     @InjectRepository(Notification)
     private readonly notificationRepo: Repository<Notification>,
     private readonly notificationGateway: NotificationsGateway,
+    private readonly socketService: SocketService,
+    private readonly profilesService: ProfilesService,
   ) { }
 
   /**
    * Tạo thông báo mới (generic)
    */
   async create(dto: CreateNotificationDto) {
-    const noti = this.notificationRepo.create({
-      sender: { id: dto.senderId } as any,
-      receiver: { id: dto.receiverId } as any,
-      type: dto.type,
-      post: dto.postId ? ({ id: dto.postId } as any) : undefined,
-      comment: dto.commentId ? ({ id: dto.commentId } as any) : undefined,
-      metadata: dto.metadata,
-    });
-    const saved = await this.notificationRepo.save(noti);
+    const receiverProfile = await this.profilesService.findByIdWithRelations(dto.receiverId, ['user']);
+    const receiverUserId = receiverProfile.user.id;
+    const isReceiverOnline = this.socketService.isUserOnline(receiverUserId);
 
-    this.notificationGateway.sendNotificationToUser(dto.receiverId, saved);
 
-    return saved;
+    try {
+      const noti = this.notificationRepo.create({
+        sender: { id: dto.senderId } as any,
+        receiver: { id: dto.receiverId } as any,
+        type: dto.type,
+        post: dto.postId ? ({ id: dto.postId } as any) : undefined,
+        comment: dto.commentId ? ({ id: dto.commentId } as any) : undefined,
+        metadata: dto.metadata,
+      });
+
+      const saved = await this.notificationRepo.save(noti);
+
+      if (isReceiverOnline && saved) {
+        this.notificationGateway.sendNotificationToUser(receiverUserId, saved);
+        this.logger.log(`Notification sent realtime to user ${receiverUserId}`);
+      } else {
+        this.logger.log(`User ${receiverUserId} is offline, notification saved only`);
+      }
+
+      this.logger.log(`Notification created for user ${receiverUserId}`);
+      return saved;
+    } catch (error) {
+      this.logger.error(`Error creating notification: ${error.message}`);
+      throw error;
+    }
   }
 
-  /**
-   * Lấy danh sách thông báo của 1 user (phân trang)
-   */
-  async getForUser(
-    userId: string,
-    options: { page?: number; limit?: number } = {},
-  ) {
-    const page = options.page ?? 1;
-    const limit = options.limit ?? 20;
+  async createBatch(dtos: CreateNotificationDto[]) {
+    try {
+      const notifications = dtos.map(dto =>
+        this.notificationRepo.create({
+          sender: { id: dto.senderId } as any,
+          receiver: { id: dto.receiverId } as any,
+          type: dto.type,
+          post: dto.postId ? ({ id: dto.postId } as any) : undefined,
+          comment: dto.commentId ? ({ id: dto.commentId } as any) : undefined,
+          metadata: dto.metadata,
+        })
+      );
 
-    const qb = this.notificationRepo
+      const savedNotifications = await this.notificationRepo.save(notifications);
+
+      const notificationsByUser = new Map<string, Notification[]>();
+      savedNotifications.forEach(notification => {
+        const userId = notification.receiver.id;
+        if (!notificationsByUser.has(userId)) {
+          notificationsByUser.set(userId, []);
+        }
+        notificationsByUser.get(userId)?.push(notification);
+      });
+
+      notificationsByUser.forEach((notifications, userId) => {
+        if (this.socketService.isUserOnline(userId)) {
+          notifications.forEach(notification => {
+            if (notification)
+              this.notificationGateway.sendNotificationToUser(userId, notification);
+          });
+        } else {
+          this.logger.log(`User ${userId} offline, skip realtime emit`);
+        }
+      });
+
+
+      this.logger.log(`Created ${savedNotifications.length} notifications`);
+      return savedNotifications;
+    } catch (error) {
+      this.logger.error(`Error creating batch notifications: ${error.message}`);
+      throw error;
+    }
+  }
+
+  private buildListQuery(profileId: string): SelectQueryBuilder<Notification> {
+    return this.notificationRepo
       .createQueryBuilder('n')
       .leftJoinAndSelect('n.sender', 'sender')
       .leftJoinAndSelect('sender.user', 'senderUser')
-      .where('n.receiverId = :userId', { userId })
-      .orderBy('n.createdAt', 'DESC');
+      .where('n.receiver.id = :profileId', { profileId });
+  }
 
+  /**
+   * Lấy danh sách thông báo (phân trang + sort)
+   */
+  async getForUser(
+    pagination: PaginationQueryDto,
+    userId: string,
+  ): Promise<IPaginated<NotificationDto>> {
+    const profile = await this.profilesService.findByUserId(userId)
+    const {
+      page = 1,
+      limit = 20,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+    } = pagination;
+    console.log("userId: ", userId)
+
+    const qb = this.buildListQuery(profile.id).orderBy(
+      `n.${sortBy}`,
+      sortOrder as 'ASC' | 'DESC',
+    );
     return paginate<Notification>(qb, page, limit, NotificationDto);
   }
 
@@ -79,8 +159,9 @@ export class NotificationsService {
    * Đếm số thông báo chưa đọc của 1 user
    */
   async countUnread(userId: string) {
+    const profile = await this.profilesService.findByUserId(userId)
     return this.notificationRepo.count({
-      where: { receiver: { id: userId }, isRead: false },
+      where: { receiver: { id: profile.id }, isRead: false },
     });
   }
 

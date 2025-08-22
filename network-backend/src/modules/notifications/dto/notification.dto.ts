@@ -10,6 +10,9 @@ export class SenderUserDto {
 
     @ApiProperty()
     @Expose() lastName: string;
+
+    @ApiProperty()
+    @Expose() username: string;
 }
 
 export class SenderDto {
@@ -42,4 +45,8 @@ export class NotificationDto {
     @Expose()
     @Type(() => SenderDto)
     sender: SenderDto;
+
+    @ApiProperty({ required: false, type: Object, description: 'Additional metadata' })
+    @Expose()
+    metadata?: Record<string, any>;
 }

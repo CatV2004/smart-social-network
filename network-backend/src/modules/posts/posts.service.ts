@@ -9,8 +9,6 @@ import { IPaginated } from '@/common/dtos/paginated.interface';
 import { PostResponseDto } from './dto/response-post.dto';
 import { paginate } from '@/common/utils/pagination.util';
 import { MediaService } from '../media/media.service';
-import { UpdatePostDto } from './dto/update-post.dto';
-import { plainToInstance } from 'class-transformer';
 import { MediaType } from '../media/types/media.types';
 import { SearchService } from '../search/search.service';
 import { PostSearchDto } from '../search/dto/post-search.dto';
@@ -216,10 +214,6 @@ export class PostsService {
       post.media.push(newMedia);
     }
   }
-
-
-
-
 
   /**
    * Hàm build query chung
