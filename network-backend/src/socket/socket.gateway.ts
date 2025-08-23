@@ -1,3 +1,4 @@
+// socket.gateway.ts
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -24,12 +25,16 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   afterInit(server: Server) {
     this.socketService.setServer(server);
-    this.logger.log('🚀 SocketGateway initialized');
+    this.logger.log('SocketGateway initialized');
   }
 
   async handleConnection(client: Socket) {
     try {
       const { userId } = client.handshake.auth;
+
+      this.logger.debug(
+        `[NotificationsGateway] Client connected: socketId=${client.id}, userId=${userId}, namespace=${client.nsp.name}`
+      );
 
       if (!userId) {
         this.logger.warn(`Connection rejected: No userId provided`);
@@ -37,11 +42,11 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         return;
       }
 
-      this.socketService.registerConnection(client.id, userId);
-
+      // Đăng ký kết nối với namespace mặc định ("/")
+      this.socketService.registerConnection('/', client.id, userId);
       client.join(`user_${userId}`);
 
-      this.logger.log(`✅ User ${userId} connected (socket: ${client.id})`);
+      this.logger.log(`User ${userId} connected (socket: ${client.id})`);
 
     } catch (error) {
       this.logger.error(`Connection error: ${error.message}`);
@@ -50,10 +55,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   handleDisconnect(client: Socket) {
-    const userId = this.socketService.getUserIdBySocketId(client.id);
-    if (userId) {
-      this.logger.log(`❌ User ${userId} disconnected (socket: ${client.id})`);
-      this.socketService.unregisterConnection(client.id, userId);
-    }
+    this.socketService.unregisterConnection(client.id);
+    this.logger.log(`Socket disconnected: ${client.id}`);
   }
 }

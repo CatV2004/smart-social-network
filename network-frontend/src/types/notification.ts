@@ -13,7 +13,6 @@ export interface Notification {
     };
     isRead: boolean;
     createdAt: string;
-    updatedAt?: string; 
     metadata?: Record<string, any>;
 }
 

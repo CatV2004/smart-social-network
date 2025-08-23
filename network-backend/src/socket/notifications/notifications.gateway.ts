@@ -1,3 +1,4 @@
+// notifications.gateway.ts
 import {
     WebSocketGateway,
     WebSocketServer,
@@ -7,6 +8,8 @@ import {
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
+import { SocketService } from '../socket.service';
+import { NotificationDto } from '@/modules/notifications/dto/notification.dto';
 
 @WebSocketGateway({
     cors: {
@@ -19,10 +22,12 @@ export class NotificationsGateway implements OnGatewayInit, OnGatewayConnection,
     server: Server;
 
     private readonly logger = new Logger(NotificationsGateway.name);
-    private userConnections: Map<string, string[]> = new Map(); // userId -> socketIds
+
+    constructor(private readonly socketService: SocketService) { }
 
     afterInit(server: Server) {
-        this.logger.log('🚀 NotificationsGateway initialized');
+        this.socketService.setServer(server);
+        this.logger.log('NotificationsGateway initialized');
     }
 
     async handleConnection(client: Socket) {
@@ -35,17 +40,10 @@ export class NotificationsGateway implements OnGatewayInit, OnGatewayConnection,
                 return;
             }
 
-            // Register connection
-            if (!this.userConnections.has(userId)) {
-                this.userConnections.set(userId, []);
-            }
-
-            this.userConnections.get(userId)!.push(client.id);
-
-            // Join user room
+            this.socketService.registerConnection('/notifications', client.id, userId);
             client.join(`user_${userId}`);
 
-            this.logger.log(`✅ User ${userId} connected to notifications (socket: ${client.id})`);
+            this.logger.log(`User ${userId} connected to notifications (socket: ${client.id})`);
 
         } catch (error) {
             this.logger.error(`Notifications connection error: ${error.message}`);
@@ -54,27 +52,26 @@ export class NotificationsGateway implements OnGatewayInit, OnGatewayConnection,
     }
 
     handleDisconnect(client: Socket) {
-        // Find and remove connection
-        for (const [userId, socketIds] of this.userConnections.entries()) {
-            const index = socketIds.indexOf(client.id);
-            if (index > -1) {
-                socketIds.splice(index, 1);
-                if (socketIds.length === 0) {
-                    this.userConnections.delete(userId);
-                }
-                this.logger.log(`❌ User ${userId} disconnected from notifications (socket: ${client.id})`);
-                break;
-            }
-        }
+        this.socketService.unregisterConnection(client.id);
+        this.logger.log(`Socket disconnected from notifications: ${client.id}`);
     }
 
     isUserOnline(userId: string): boolean {
-        return (this.userConnections.get(userId)?.length ?? 0) > 0;
+        return this.socketService.isUserOnlineInNamespace(userId, '/notifications');
     }
 
-    sendToUser(userId: string, notification: any) {
-        this.server.to(`user_${userId}`).emit('new_notification', notification);
-        this.logger.debug(`📩 Sent notification to user ${userId}`);
+    sendToUser(userId: string, notification: NotificationDto) {
+        this.socketService.emitToUserInNamespace(userId, '/notifications', 'new_notification', notification);
+        this.logger.debug(`Sent notification to user ${userId}`);
+    }
+
+    sendMultipleToUser(userId: string, notifications: any[]) {
+        if (this.isUserOnline(userId)) {
+            this.socketService.emitToUserInNamespace(userId, '/notifications', 'new_notifications_batch', notifications);
+            this.logger.debug(`Sent ${notifications.length} notifications to user ${userId}`);
+            return true;
+        }
+        return false;
     }
 
     sendToUsers(userIds: string[], notification: any) {
@@ -83,14 +80,15 @@ export class NotificationsGateway implements OnGatewayInit, OnGatewayConnection,
         });
     }
 
-    sendNotificationToUser(userId: string, notification: any) {
+    sendNotificationToUser(userId: string, notification: NotificationDto) {
         if (this.isUserOnline(userId)) {
-            this.server.to(`user_${userId}`).emit('new_notification', notification);
-            this.logger.debug(`📩 Sent notification to online user ${userId}`);
+            this.sendToUser(userId, notification);
+            this.logger.debug(`Sent notification to online user ${userId}`);
             return true;
         } else {
             this.logger.debug(`User ${userId} is offline, notification queued`);
             return false;
         }
     }
+
 }

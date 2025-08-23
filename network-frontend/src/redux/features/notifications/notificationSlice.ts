@@ -14,7 +14,7 @@ interface NotificationState {
     hasNew: boolean;
     loading: boolean;
     error: string | null;
-    pagination: PaginationMeta | null; 
+    pagination: PaginationMeta | null;
 }
 
 const initialState: NotificationState = {
@@ -113,6 +113,7 @@ export const notificationSlice = createSlice({
             // Update single notification
             .addCase(updateNotification.fulfilled, (state, action) => {
                 const updated = action.payload;
+                console.log("action.payload notificationSlice: ", updated)
                 const index = state.notifications.findIndex((n) => n.id === updated.id);
                 if (index !== -1) {
                     state.notifications[index] = updated;

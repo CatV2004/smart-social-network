@@ -31,7 +31,7 @@ export const notificationApi = {
         notificationId: string,
         payload: UpdateNotificationPayload
     ): Promise<Notification> => {
-        return axiosClient.patch(`/notifications/${notificationId}`, payload);
+        return axiosClient.patch(`/notifications/${notificationId}`, payload).then((res) => res.data);
     },
 
     // Xóa thông báo

@@ -12,6 +12,7 @@ import { SocketService } from '@/socket/socket.service';
 import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface';
 import { ProfilesService } from '../profiles/profiles.service';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class NotificationsService {
@@ -31,8 +32,9 @@ export class NotificationsService {
   async create(dto: CreateNotificationDto) {
     const receiverProfile = await this.profilesService.findByIdWithRelations(dto.receiverId, ['user']);
     const receiverUserId = receiverProfile.user.id;
-    const isReceiverOnline = this.socketService.isUserOnline(receiverUserId);
 
+    // Kiểm tra user có online trong namespace notifications không
+    const isReceiverOnline = this.notificationGateway.isUserOnline(receiverUserId);
 
     try {
       const noti = this.notificationRepo.create({
@@ -46,14 +48,22 @@ export class NotificationsService {
 
       const saved = await this.notificationRepo.save(noti);
 
+      const loaded = await this.notificationRepo.findOne({
+        where: { id: saved.id },
+        relations: ['sender', 'sender.user'],
+      });
+
+      const notiDto = plainToInstance(NotificationDto, loaded, {
+        excludeExtraneousValues: true, 
+      });
+
       if (isReceiverOnline && saved) {
-        this.notificationGateway.sendNotificationToUser(receiverUserId, saved);
+        this.notificationGateway.sendNotificationToUser(receiverUserId, notiDto);
         this.logger.log(`Notification sent realtime to user ${receiverUserId}`);
       } else {
         this.logger.log(`User ${receiverUserId} is offline, notification saved only`);
       }
 
-      this.logger.log(`Notification created for user ${receiverUserId}`);
       return saved;
     } catch (error) {
       this.logger.error(`Error creating notification: ${error.message}`);
@@ -86,16 +96,12 @@ export class NotificationsService {
       });
 
       notificationsByUser.forEach((notifications, userId) => {
-        if (this.socketService.isUserOnline(userId)) {
-          notifications.forEach(notification => {
-            if (notification)
-              this.notificationGateway.sendNotificationToUser(userId, notification);
-          });
+        if (this.notificationGateway.isUserOnline(userId)) {
+          this.notificationGateway.sendMultipleToUser(userId, notifications);
         } else {
           this.logger.log(`User ${userId} offline, skip realtime emit`);
         }
       });
-
 
       this.logger.log(`Created ${savedNotifications.length} notifications`);
       return savedNotifications;

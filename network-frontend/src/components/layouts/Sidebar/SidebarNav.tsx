@@ -15,7 +15,6 @@ export function SidebarNav({
 }: any) {
   const isActiveTab = useActiveTab();
   const unreadCount = useAppSelector(selectCountUnReadOnly);
-  console.log("unreadcount: ", unreadCount)
 
   return (
     <ul>
