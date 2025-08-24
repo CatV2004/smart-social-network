@@ -1,8 +1,11 @@
+// components/features/notification/notificationUtils.ts
 import {
     faBell,
     faHeart,
     faComment,
     faUserPlus,
+    faReply,
+    faCheckCircle, // Thêm icon reply
 } from "@fortawesome/free-solid-svg-icons";
 import { Notification, NotificationEnum } from "@/types/notification";
 
@@ -12,10 +15,19 @@ export const getNotificationIcon = (type: NotificationEnum) => {
         case NotificationEnum.LIKE_POST:
             return faHeart;
         case NotificationEnum.COMMENT_POST:
-        case NotificationEnum.REPLY_COMMENT:
             return faComment;
+        case NotificationEnum.REPLY_COMMENT:
+            return faReply;
         case NotificationEnum.FOLLOW:
             return faUserPlus;
+        case NotificationEnum.FOLLOW_REQUEST:
+            return faUserPlus;
+        case NotificationEnum.FOLLOW_REQUEST_ACCEPTED:
+            return faCheckCircle;
+        case NotificationEnum.MENTION:
+            return faComment;
+        case NotificationEnum.TAG:
+            return faComment;
         default:
             return faBell;
     }
@@ -27,10 +39,19 @@ export const getNotificationIconColor = (type: NotificationEnum) => {
         case NotificationEnum.LIKE_POST:
             return "text-red-500";
         case NotificationEnum.COMMENT_POST:
-        case NotificationEnum.REPLY_COMMENT:
             return "text-blue-500";
+        case NotificationEnum.REPLY_COMMENT:
+            return "text-purple-500";
         case NotificationEnum.FOLLOW:
             return "text-green-500";
+        case NotificationEnum.FOLLOW_REQUEST:
+            return "text-orange-500";
+        case NotificationEnum.FOLLOW_REQUEST_ACCEPTED:
+            return "text-green-600";
+        case NotificationEnum.MENTION:
+            return "text-blue-500";
+        case NotificationEnum.TAG:
+            return "text-blue-500";
         default:
             return "text-gray-500";
     }
@@ -48,15 +69,21 @@ export const getNotificationMessage = (notification: Notification) => {
         case NotificationEnum.LIKE_POST:
             return `${senderName} đã thích bài viết của bạn`;
         case NotificationEnum.COMMENT_POST:
-            return `${senderName} đã bình luận: "${notification.comment?.content || ""
-                }"`;
+            return `${senderName} đã bình luận: "${notification.comment?.content || ""}"`;
         case NotificationEnum.REPLY_COMMENT:
-            return `${senderName} đã trả lời: "${notification.comment?.content || ""
-                }"`;
+            // Xử lý riêng cho reply comment
+            if (notification.metadata?.parentCommentAuthor) {
+                return `${senderName} đã trả lời bình luận của ${notification.metadata.parentCommentAuthor}: "${notification.comment?.content || ""}"`;
+            }
+            return `${senderName} đã trả lời bình luận: "${notification.comment?.content || ""}"`;
         case NotificationEnum.FOLLOW:
             return `${senderName} đã bắt đầu theo dõi bạn`;
+        case NotificationEnum.FOLLOW_REQUEST:
+            return `${senderName} đã gửi lời mời theo dõi`;
+        case NotificationEnum.FOLLOW_REQUEST_ACCEPTED:
+            return `${senderName} đã chấp nhận lời mời theo dõi của bạn`;
         case NotificationEnum.MENTION:
-            return `${senderName} đã nhắc đến bạn`;
+            return `${senderName} đã nhắc đến bạn trong một bình luận`;
         case NotificationEnum.TAG:
             return `${senderName} đã gắn thẻ bạn trong bài viết`;
         default:
@@ -65,7 +92,7 @@ export const getNotificationMessage = (notification: Notification) => {
 };
 
 // Format thời gian
-export const formatTime = (createdAt: string) => {
+export const formatTime = (createdAt: string | Date) => {
     const now = new Date();
     const created = new Date(createdAt);
     const diffInHours = Math.floor(
@@ -76,11 +103,16 @@ export const formatTime = (createdAt: string) => {
         const diffInMinutes = Math.floor(
             (now.getTime() - created.getTime()) / (1000 * 60)
         );
+        if (diffInMinutes < 1) return "Vừa xong";
         return `${diffInMinutes} phút trước`;
     } else if (diffInHours < 24) {
         return `${diffInHours} giờ trước`;
     } else {
         const diffInDays = Math.floor(diffInHours / 24);
-        return `${diffInDays} ngày trước`;
+        if (diffInDays < 7) {
+            return `${diffInDays} ngày trước`;
+        } else {
+            return created.toLocaleDateString("vi-VN");
+        }
     }
 };

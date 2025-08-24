@@ -29,6 +29,7 @@ export const fetchNotifications = createAsyncThunk<
     }
 );
 
+
 // Lấy số lượng chưa đọc
 export const fetchUnreadCount = createAsyncThunk<number>(
     "notifications/fetchUnreadCount",
@@ -53,5 +54,17 @@ export const markAllNotificationsAsRead = createAsyncThunk<void>(
     "notifications/markAllAsRead",
     async () => {
         await notificationApi.markAllAsRead();
+    }
+);
+
+export const deleteNotification = createAsyncThunk(
+    'notifications/deleteNotification',
+    async (notificationId: string, { rejectWithValue }) => {
+        try {
+            await notificationApi.removeNotification(notificationId);
+            return notificationId;
+        } catch (error: any) {
+            return rejectWithValue(error.message || 'Failed to delete notification');
+        }
     }
 );

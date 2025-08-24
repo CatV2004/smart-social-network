@@ -1,4 +1,3 @@
-
 export interface FollowResponse {
     id: string;
     follower: {

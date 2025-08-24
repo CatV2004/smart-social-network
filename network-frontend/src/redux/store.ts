@@ -39,7 +39,7 @@ listenerMiddleware.startListening({
 const persistConfig = {
     key: 'root',
     storage,
-    whitelist: ['user', 'profile'],
+    whitelist: ['user', 'profile.myProfile'],
 };
 
 const rootReducer = combineReducers({

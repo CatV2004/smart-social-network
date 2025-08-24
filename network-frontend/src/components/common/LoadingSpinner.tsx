@@ -2,7 +2,7 @@ import React from "react";
 
 interface LoadingSpinnerProps {
   fullScreen?: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xs";
   className?: string;
 }
 
@@ -12,6 +12,7 @@ export default function LoadingSpinner({
   className,
 }: LoadingSpinnerProps) {
   const sizeMap = {
+    xs: "w-2 h-2 border-2",
     sm: "w-4 h-4 border-2",
     md: "w-8 h-8 border-4",
     lg: "w-12 h-12 border-4",

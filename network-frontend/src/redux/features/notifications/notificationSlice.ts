@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Notification } from "@/types/notification";
 import {
+    deleteNotification,
     fetchNotifications,
     fetchUnreadCount,
     markAllNotificationsAsRead,
@@ -68,6 +69,24 @@ export const notificationSlice = createSlice({
             state.error = null;
             state.pagination = null;
         },
+        removeNotification: (state, action: PayloadAction<string>) => {
+            const notificationId = action.payload;
+            const notificationIndex = state.notifications.findIndex((n) => n.id === notificationId);
+
+            if (notificationIndex !== -1) {
+                const notification = state.notifications[notificationIndex];
+                state.notifications.splice(notificationIndex, 1);
+
+                if (!notification.isRead) {
+                    state.unreadCount = Math.max(0, state.unreadCount - 1);
+                }
+
+                if (state.pagination) {
+                    state.pagination.total = Math.max(0, state.pagination.total - 1);
+                    state.pagination.totalPages = Math.ceil(state.pagination.total / state.pagination.limit);
+                }
+            }
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -118,7 +137,6 @@ export const notificationSlice = createSlice({
                 if (index !== -1) {
                     state.notifications[index] = updated;
                 }
-                // Nếu thông báo này được đánh dấu đọc thì cập nhật unreadCount
                 if (updated.isRead) {
                     state.unreadCount = Math.max(
                         0,
@@ -126,13 +144,39 @@ export const notificationSlice = createSlice({
                     );
                 }
             })
-            // Mark all as read
             .addCase(markAllNotificationsAsRead.fulfilled, (state) => {
                 state.notifications.forEach((notification) => {
                     notification.isRead = true;
                 });
                 state.unreadCount = 0;
                 state.hasNew = false;
+            })
+            .addCase(deleteNotification.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteNotification.fulfilled, (state, action) => {
+                state.loading = false;
+                const notificationId = action.payload;
+                const notificationIndex = state.notifications.findIndex((n) => n.id === notificationId);
+
+                if (notificationIndex !== -1) {
+                    const notification = state.notifications[notificationIndex];
+                    state.notifications.splice(notificationIndex, 1);
+
+                    if (!notification.isRead) {
+                        state.unreadCount = Math.max(0, state.unreadCount - 1);
+                    }
+
+                    if (state.pagination) {
+                        state.pagination.total = Math.max(0, state.pagination.total - 1);
+                        state.pagination.totalPages = Math.ceil(state.pagination.total / state.pagination.limit);
+                    }
+                }
+            })
+            .addCase(deleteNotification.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string || "Failed to delete notification";
             });
     },
 });
@@ -145,6 +189,7 @@ export const {
     incrementUnreadCount,
     resetUnreadCount,
     resetNotifications,
+    removeNotification
 } = notificationSlice.actions;
 
 export default notificationSlice.reducer;

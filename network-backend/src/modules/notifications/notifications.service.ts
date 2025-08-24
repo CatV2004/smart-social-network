@@ -209,24 +209,37 @@ export class NotificationsService {
       senderId,
       receiverId,
       type: NotificationType.FOLLOW,
-      metadata: { message: 'started following you' },
+      metadata: {
+        message: 'started following you',
+      },
+    });
+  }
+
+  async notifyFollowRequestAccepted(senderId: string, receiverId: string) {
+    return this.create({
+      senderId,    
+      receiverId,
+      type: NotificationType.FOLLOW_REQUEST_ACCEPTED,
+      metadata: {
+        message: 'accepted your follow request',
+      },
     });
   }
 
   async notifyRequestFollow(
     senderId: string,
     receiverId: string,
-    followInfo: FollowProfileResponseDto, 
+    followInfo: FollowProfileResponseDto,
   ) {
     const metadata = {
       ...followInfo,
-      message: `${followInfo.profile.user.firstName} ${followInfo.profile.user.lastName} requested to follow you`, 
+      message: `${followInfo.profile.user.firstName} ${followInfo.profile.user.lastName} requested to follow you`,
     };
 
     return this.create({
       senderId,
       receiverId,
-      type: NotificationType.FOLLOW_REQUEST, 
+      type: NotificationType.FOLLOW_REQUEST,
       metadata,
     });
   }

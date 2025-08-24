@@ -26,6 +26,28 @@ const followRequestsSlice = createSlice({
             state.meta = null;
             state.error = null;
         },
+        addFollowRequestFromNotification: (state, action: PayloadAction<FollowRequest>) => {
+            const newRequest = action.payload;
+
+            const exists = state.data.some(req => req.id === newRequest.id);
+
+            if (!exists) {
+                state.data.unshift(newRequest);
+
+                if (state.meta) {
+                    state.meta.total += 1;
+                    state.meta.totalPages = Math.ceil(state.meta.total / state.meta.limit);
+                }
+            }
+        },
+        removeFollowRequest: (state, action: PayloadAction<string>) => {
+            state.data = state.data.filter((req) => req.id !== action.payload);
+
+            if (state.meta) {
+                state.meta.total = Math.max(0, state.meta.total - 1);
+                state.meta.totalPages = Math.ceil(state.meta.total / state.meta.limit);
+            }
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -47,7 +69,10 @@ const followRequestsSlice = createSlice({
                 if (meta.page === 1) {
                     state.data = data;
                 } else {
-                    state.data.push(...data);
+                    const newData = data.filter(newItem =>
+                        !state.data.some(existingItem => existingItem.id === newItem.id)
+                    );
+                    state.data.push(...newData);
                 }
 
                 state.meta = meta;
@@ -55,7 +80,6 @@ const followRequestsSlice = createSlice({
             .addCase(fetchFollowRequests.rejected, (state, action: any) => {
                 state.loading = false;
                 state.error = action.payload || "Failed to fetch follow requests";
-
                 state.meta = state.meta || {
                     page: 1,
                     limit: 20,
@@ -65,12 +89,24 @@ const followRequestsSlice = createSlice({
             })
             .addCase(acceptFollowRequest.fulfilled, (state, action) => {
                 state.data = state.data.filter((req) => req.id !== action.meta.arg);
+                if (state.meta) {
+                    state.meta.total = Math.max(0, state.meta.total - 1);
+                    state.meta.totalPages = Math.ceil(state.meta.total / state.meta.limit);
+                }
             })
             .addCase(rejectFollowRequest.fulfilled, (state, action) => {
                 state.data = state.data.filter((req) => req.id !== action.payload);
+                if (state.meta) {
+                    state.meta.total = Math.max(0, state.meta.total - 1);
+                    state.meta.totalPages = Math.ceil(state.meta.total / state.meta.limit);
+                }
             });
     },
 });
 
-export const { clearFollowRequests } = followRequestsSlice.actions;
+export const {
+    clearFollowRequests,
+    addFollowRequestFromNotification,
+    removeFollowRequest
+} = followRequestsSlice.actions;
 export default followRequestsSlice.reducer;

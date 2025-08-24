@@ -38,6 +38,8 @@ export function ProfileActions({
     userId,
   });
 
+  console.log("followStatus: ", followStatus);
+
   if (isCurrentUser) {
     return (
       <Button

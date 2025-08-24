@@ -31,6 +31,7 @@ function SidebarComponent() {
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   NProgress.configure({ showSpinner: false, trickleSpeed: 300, minimum: 0.3 });
+  console.log("current-user: ", currentUser);
 
   const navItems = getSidebarNavItems(currentUser?.username);
 
@@ -182,6 +183,7 @@ function SidebarComponent() {
           isOpen={activeOverlay === "notifications"}
           onClose={handleCloseOverlay}
           data-overlay="notifications"
+          router={router}
         />
       </div>
 

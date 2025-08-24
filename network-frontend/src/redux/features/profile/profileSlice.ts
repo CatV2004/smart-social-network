@@ -27,6 +27,16 @@ const profileSlice = createSlice({
       state.myProfile = action.payload;
       state.initialized = true;
     },
+    incrementFollowersCount: (state) => {
+      if (state.myProfile) {
+        state.myProfile.followersCount += 1;
+      }
+    },
+    decrementFollowersCount: (state) => {
+      if (state.myProfile) {
+        state.myProfile.followersCount = Math.max(0, state.myProfile.followersCount - 1);
+      }
+    },
     clearProfile: (state) => {
       state.myProfile = null;
       state.initialized = false;
@@ -175,6 +185,8 @@ export const {
   setProfile,
   clearProfile,
   updateProfileInfo,
+  incrementFollowersCount,
+  decrementFollowersCount,
   setInitialized,
   setOtherProfile,
   updateFollowStatus,

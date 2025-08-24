@@ -3,9 +3,12 @@
 
 import { useEffect } from 'react';
 import { useAppDispatch } from '@/redux/hooks';
-import { addNotification, incrementUnreadCount } from '@/redux/features/notifications/notificationSlice';
-import { Notification } from '@/types/notification';
+import { addNotification } from '@/redux/features/notifications/notificationSlice';
+import { addFollowRequestFromNotification } from '@/redux/features/follow-request/followRequestSlice';
+import { Notification, NotificationEnum } from '@/types/notification';
 import { useNotificationsSocket } from '@/context/NotificationsSocketContext';
+import { FollowRequest } from '@/types/follow-request';
+import { incrementFollowersCount } from '@/redux/features/profile/profileSlice';
 
 export const useSocketNotifications = () => {
     const { socket, isConnected } = useNotificationsSocket();
@@ -27,6 +30,26 @@ export const useSocketNotifications = () => {
         const handleNewNotification = (notification: Notification) => {
             console.log('[SOCKET] New notification received:', notification);
             dispatch(addNotification(notification));
+
+            if (notification.type === NotificationEnum.FOLLOW_REQUEST && notification.metadata) {
+                try {
+                    // Metadata đã là FollowRequest object, chỉ cần ép kiểu
+                    const followRequest = notification.metadata as unknown as FollowRequest;
+
+                    if (followRequest.id && followRequest.profile && followRequest.followedAt) {
+                        dispatch(addFollowRequestFromNotification(followRequest));
+                        console.log('[SOCKET] Added follow request from notification:', followRequest);
+                    } else {
+                        console.warn('[SOCKET] Invalid follow request format in metadata:', notification.metadata);
+                    }
+                } catch (error) {
+                    console.error('[SOCKET] Error processing follow request notification:', error);
+                }
+            }
+            else if (notification.type === NotificationEnum.FOLLOW) {
+                dispatch(incrementFollowersCount());
+                console.log('[SOCKET] Incremented followers count due to follow notification');
+            }
         };
 
         socket.on('new_notification', handleNewNotification);

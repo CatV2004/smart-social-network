@@ -11,7 +11,7 @@ import {
   updateNotification,
 } from "@/redux/features/notifications/notificationThunks";
 import { markAllAsReadLocal } from "@/redux/features/notifications/notificationSlice";
-import { Notification } from "@/types/notification";
+import { Notification, NotificationEnum } from "@/types/notification";
 import {
   NotificationHeader,
   NotificationItem,
@@ -19,16 +19,19 @@ import {
   NotificationLoading,
   NotificationFooter,
 } from "./";
+import { useRouter } from "next/router";
 
 interface NotificationsOverlayProps {
   isOpen: boolean;
   onClose: () => void;
+  router?: any;
   "data-overlay"?: string;
 }
 
 export function NotificationsOverlay({
   isOpen,
   onClose,
+  router,
   ...props
 }: NotificationsOverlayProps) {
   const dispatch = useAppDispatch();
@@ -105,8 +108,43 @@ export function NotificationsOverlay({
         })
       );
     }
+    switch (notification.type) {
+      case NotificationEnum.FOLLOW || NotificationEnum.FOLLOW_REQUEST_ACCEPTED:
+        if (notification.sender?.user?.username) {
+          router.push(`/in/${notification.sender.user.username}`);
+        }
+        break;
+
+      case NotificationEnum.FOLLOW_REQUEST:
+        router.push("/follow-requests");
+        break;
+
+      case NotificationEnum.LIKE_POST:
+      case NotificationEnum.COMMENT_POST:
+      case NotificationEnum.REPLY_COMMENT:
+        if (notification.post?.id) {
+          router.push(`/post/${notification.post.id}`);
+        }
+        break;
+
+      case NotificationEnum.MENTION:
+      case NotificationEnum.TAG:
+        if (notification.post?.id) {
+          const url = notification.comment?.id
+            ? `/post/${notification.post.id}?comment=${notification.comment.id}`
+            : `/post/${notification.post.id}`;
+          router.push(url);
+        }
+        break;
+
+      default:
+        console.log("Unknown notification type:", notification.type);
+    }
+
     onClose();
   };
+
+  const handleActionComplete = useCallback((notificationId: string) => {}, []);
 
   const handleViewAll = () => {
     // Logic để xem tất cả thông báo
@@ -157,6 +195,7 @@ export function NotificationsOverlay({
                       notification={notification}
                       index={index}
                       onClick={handleNotificationClick}
+                      onActionComplete={handleActionComplete}
                     />
                   ))}
 

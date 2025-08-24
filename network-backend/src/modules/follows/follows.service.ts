@@ -10,6 +10,7 @@ import { IPaginated } from '@/common/dtos/paginated.interface';
 import { paginateWithMapper } from '@/common/utils/paginate-with-mapper';
 import { NotificationType } from '../notifications/types/notification.type';
 import { NotificationsService } from '../notifications/notifications.service';
+import { FollowMapper } from './mappers/follow.mapper';
 
 @Injectable()
 export class FollowsService {
@@ -54,38 +55,34 @@ export class FollowsService {
 
     const savedFollow = await this.followRepo.save(follow);
 
-    // Gửi thông báo realtime
+    const entity = await this.followRepo.findOne({
+      where: { id: savedFollow.id },
+      relations: [
+        'follower',
+        'follower.user',
+        'following',
+        'following.user',
+      ],
+    });
+
+    const dto = FollowMapper.toFollowerDto(entity!);
+
     try {
       if (isPrivate) {
-        // Gửi thông báo follow request cho private profile
-        await this.notificationService.create({
-          senderId: follower.id,
-          receiverId: following.id,
-          type: NotificationType.FOLLOW_REQUEST,
-          metadata: {
-            message: 'sent you a follow request',
-            followId: savedFollow.id
-          },
-        });
-        this.logger.log(`Follow request notification sent for user ${followingUserId}`);
+        await this.notificationService.notifyRequestFollow(
+          follower.id,
+          following.id,
+          dto,
+        );
       } else {
-        // Gửi thông báo follow cho public profile
-        await this.notificationService.create({
-          senderId: follower.id,
-          receiverId: following.id,
-          type: NotificationType.FOLLOW,
-          metadata: {
-            message: 'started following you',
-            followId: savedFollow.id
-          },
-        });
-        this.logger.log(`Follow notification sent for user ${followingUserId}`);
+        await this.notificationService.notifyFollow(
+          follower.id,
+          following.id,
+        );
       }
     } catch (error) {
       this.logger.error(`Failed to send notification: ${error.message}`);
-      // Không throw error vì follow đã thành công, chỉ log lỗi notification
     }
-
     return savedFollow;
   }
 
@@ -95,13 +92,24 @@ export class FollowsService {
 
     const follow = await this.followRepo.findOne({
       where: { id: followId },
-      relations: ['following'],
+      relations: ['following', 'follower'],
     });
 
     if (!follow || follow.following.id !== currentProfile.id) throw new ForbiddenException('Not allowed');
 
     follow.status = FollowStatus.ACCEPTED;
-    return this.followRepo.save(follow);
+    const savedFollow = await this.followRepo.save(follow);
+
+    try {
+      await this.notificationService.notifyFollowRequestAccepted(
+        follow.following.id,
+        follow.follower.id
+      );
+    } catch (error) {
+      this.logger.error(`Failed to send notification: ${error.message}`);
+    }
+
+    return savedFollow;
   }
 
   async rejectFollowRequest(followId: string, currentUserId: string): Promise<void> {

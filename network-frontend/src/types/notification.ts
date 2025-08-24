@@ -30,6 +30,8 @@ export enum NotificationEnum {
     FOLLOW = "FOLLOW",
     MENTION = "MENTION",
     TAG = "TAG",
+    FOLLOW_REQUEST = "FOLLOW_REQUEST",
+    FOLLOW_REQUEST_ACCEPTED = "FOLLOW_REQUEST_ACCEPTED",
 }
 
 export interface PostPreview {
