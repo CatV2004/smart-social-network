@@ -37,14 +37,14 @@ export class UserResponseDto {
   @Expose()
   role: UserRole;
 
-  constructor(user: User) {
-    this.id = user.id;
-    this.email = user.email;
-    this.firstName = user.firstName;
-    this.lastName = user.lastName;
-    this.username = user.username;
-    this.createdAt = user.createdAt;
-    this.updatedAt = user.updatedAt;
-    this.role = user.role;
-  }
+  // constructor(user: User) {
+  //   this.id = user.id;
+  //   this.email = user.email;
+  //   this.firstName = user.firstName;
+  //   this.lastName = user.lastName;
+  //   this.username = user.username;
+  //   this.createdAt = user.createdAt;
+  //   this.updatedAt = user.updatedAt;
+  //   this.role = user.role;
+  // }
 }

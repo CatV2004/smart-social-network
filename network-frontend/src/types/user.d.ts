@@ -7,8 +7,7 @@ export interface User {
   lastName: string;
   username: string;
   role: UserRole;
-  isActive: boolean;
-  isVerified: boolean;
+  // isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }

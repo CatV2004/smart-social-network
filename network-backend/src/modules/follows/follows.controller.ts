@@ -8,6 +8,8 @@ import {
   HttpCode,
   HttpStatus,
   Get,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,6 +21,7 @@ import {
   ApiBadRequestResponse,
   ApiConflictResponse,
   ApiNotFoundResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 
 import { FollowsService } from './follows.service';
@@ -26,6 +29,7 @@ import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FollowProfileResponseDto } from './dto/follow-profile-response.dto';
+import { IPaginated } from '@/common/dtos/paginated.interface';
 
 @ApiTags('follows')
 @ApiBearerAuth()
@@ -39,13 +43,13 @@ export class FollowsController {
   @ApiBadRequestResponse({ description: 'Cannot follow yourself' })
   @ApiConflictResponse({ description: 'Follow request already exists' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @Post(':profileId')
+  @Post(':userId')
   @HttpCode(HttpStatus.OK)
   async follow(
     @ActiveUser() user: ActiveUserData,
-    @Param('profileId') profileId: string,
+    @Param('userId') userId: string,
   ) {
-    return this.followsService.requestFollow(user.id, profileId);
+    return this.followsService.requestFollow(user.id, userId);
   }
 
   @ApiOperation({ summary: 'Accept a follow request' })
@@ -91,7 +95,7 @@ export class FollowsController {
   @Get('followers')
   async getFollowers(
     @ActiveUser() user: ActiveUserData,
-  ):Promise<FollowProfileResponseDto[]> {
+  ): Promise<FollowProfileResponseDto[]> {
     return this.followsService.getFollowers(user.id);
   }
 
@@ -100,7 +104,7 @@ export class FollowsController {
   @Get('following')
   async getFollowing(
     @ActiveUser() user: ActiveUserData,
-  ):Promise<FollowProfileResponseDto[]> {
+  ): Promise<FollowProfileResponseDto[]> {
     return this.followsService.getFollowing(user.id);
   }
 
@@ -109,16 +113,20 @@ export class FollowsController {
   @Get('sent-requests')
   async getSentFollowRequests(
     @ActiveUser() user: ActiveUserData,
-  ):Promise<FollowProfileResponseDto[]> {
+  ): Promise<FollowProfileResponseDto[]> {
     return this.followsService.getSentFollowRequests(user.id);
   }
 
   @ApiOperation({ summary: 'Get all follow requests sent to me (PENDING)' })
-  @ApiOkResponse({ description: 'List of users requesting to follow me' })
+  @ApiOkResponse({ description: 'Paginated list of users requesting to follow me' })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
   @Get('received-requests')
   async getReceivedFollowRequests(
     @ActiveUser() user: ActiveUserData,
-  ):Promise<FollowProfileResponseDto[]> {
-    return this.followsService.getReceivedFollowRequests(user.id);
+    @Query('page', new ParseIntPipe({ errorHttpStatusCode: 400 })) page = 1,
+    @Query('limit', new ParseIntPipe({ errorHttpStatusCode: 400 })) limit = 10,
+  ): Promise<IPaginated<FollowProfileResponseDto>> {
+    return this.followsService.getReceivedFollowRequests(user.id, page, limit);
   }
 }

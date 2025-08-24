@@ -58,9 +58,10 @@ export class ProfilesController {
   @Get('user/:username')
   @HttpCode(HttpStatus.OK)
   async getProfileByUsername(
-    @Param('username') username: string
+    @Param('username') username: string,
+    @ActiveUser() user: ActiveUserData
   ): Promise<ProfileResponseDto> {
-    return this.profilesService.getProfileByUsername(username);
+    return this.profilesService.getProfileByUsername(username, user.id);
   }
 
   @Put('me')
@@ -106,12 +107,6 @@ export class ProfilesController {
       updateProfileDto,
       files,
     );
-  }
-
-
-  @Get()
-  findAll() {
-    return this.profilesService.findAll();
   }
 
   @Delete(':id')

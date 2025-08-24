@@ -3,11 +3,13 @@ import React from "react";
 interface LoadingSpinnerProps {
   fullScreen?: boolean;
   size?: "sm" | "md" | "lg";
+  className?: string;
 }
 
 export default function LoadingSpinner({
   fullScreen = false,
   size = "md",
+  className,
 }: LoadingSpinnerProps) {
   const sizeMap = {
     sm: "w-4 h-4 border-2",
@@ -17,7 +19,7 @@ export default function LoadingSpinner({
 
   return (
     <div
-      className={`flex justify-center items-center ${
+      className={`${className} flex justify-center items-center  ${
         fullScreen ? "fixed inset-0 bg-white bg-opacity-80 z-50" : ""
       }`}
       role="status"

@@ -6,6 +6,10 @@ import { plainToInstance } from 'class-transformer';
 import { FollowProfileResponseDto } from './dto/follow-profile-response.dto';
 import { UsersService } from '../users/users.service';
 import { ProfilesService } from '../profiles/profiles.service';
+import { IPaginated } from '@/common/dtos/paginated.interface';
+import { paginateWithMapper } from '@/common/utils/paginate-with-mapper';
+import { NotificationType } from '../notifications/types/notification.type';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class FollowsService {
@@ -19,11 +23,13 @@ export class FollowsService {
     @Inject(forwardRef(() => ProfilesService))
     private readonly profilesService: ProfilesService,
 
+    private readonly notificationService: NotificationsService
+
   ) { }
 
-  async requestFollow(followerUserId: string, followingProfileId: string): Promise<Follow> {
+  async requestFollow(followerUserId: string, followingUserId: string): Promise<Follow> {
     const follower = await this.profilesService.findByUserId(followerUserId);
-    const following = await this.profilesService.findById(followingProfileId);
+    const following = await this.profilesService.findByUserId(followingUserId);
 
     if (follower.id === following.id) {
       throw new BadRequestException('Cannot follow yourself');
@@ -46,7 +52,41 @@ export class FollowsService {
       status: isPrivate ? FollowStatus.PENDING : FollowStatus.ACCEPTED,
     });
 
-    return this.followRepo.save(follow);
+    const savedFollow = await this.followRepo.save(follow);
+
+    // Gửi thông báo realtime
+    try {
+      if (isPrivate) {
+        // Gửi thông báo follow request cho private profile
+        await this.notificationService.create({
+          senderId: follower.id,
+          receiverId: following.id,
+          type: NotificationType.FOLLOW_REQUEST,
+          metadata: {
+            message: 'sent you a follow request',
+            followId: savedFollow.id
+          },
+        });
+        this.logger.log(`Follow request notification sent for user ${followingUserId}`);
+      } else {
+        // Gửi thông báo follow cho public profile
+        await this.notificationService.create({
+          senderId: follower.id,
+          receiverId: following.id,
+          type: NotificationType.FOLLOW,
+          metadata: {
+            message: 'started following you',
+            followId: savedFollow.id
+          },
+        });
+        this.logger.log(`Follow notification sent for user ${followingUserId}`);
+      }
+    } catch (error) {
+      this.logger.error(`Failed to send notification: ${error.message}`);
+      // Không throw error vì follow đã thành công, chỉ log lỗi notification
+    }
+
+    return savedFollow;
   }
 
 
@@ -161,27 +201,34 @@ export class FollowsService {
     ));
   }
 
-  async getReceivedFollowRequests(userId: string): Promise<FollowProfileResponseDto[]> {
+  async getReceivedFollowRequests(
+    userId: string,
+    page: number,
+    limit: number,
+  ): Promise<IPaginated<FollowProfileResponseDto>> {
     const profile = await this.profilesService.findByUserId(userId);
 
-    const requests = await this.followRepo.find({
-      where: {
-        following: { id: profile.id },
-        status: FollowStatus.PENDING,
-      },
-      relations: ['follower', 'follower.user'],
-      order: { createdAt: 'DESC' },
-    });
+    const qb = this.followRepo.createQueryBuilder('follow')
+      .leftJoinAndSelect('follow.follower', 'follower')
+      .leftJoinAndSelect('follow.following', 'following')
+      .leftJoinAndSelect('follower.user', 'user')
+      .where('following.id = :profileId', { profileId: profile.id })
+      .andWhere('follow.status = :status', { status: FollowStatus.PENDING })
+      .orderBy('follow.createdAt', 'DESC');
 
-    return requests.map(follow => plainToInstance(
-      FollowProfileResponseDto,
-      {
-        profile: follow.follower,
-        followedAt: follow.createdAt,
-      },
-      { excludeExtraneousValues: true }
-    ));
+    return paginateWithMapper(qb, page, limit, (follow) =>
+      plainToInstance(
+        FollowProfileResponseDto,
+        {
+          id: follow.id,
+          profile: follow.follower,
+          followedAt: follow.createdAt,
+        },
+        { excludeExtraneousValues: true }
+      )
+    );
   }
+
 
   async isFollowing(currentUserId: string, targetUserId: string): Promise<boolean> {
     const currentProfile = await this.profilesService.findByUserId(currentUserId);
@@ -197,6 +244,25 @@ export class FollowsService {
 
     return !!follow;
   }
+
+  async getFollowStatus(currentUserId: string, targetUserId: string): Promise<FollowStatus> {
+    const currentProfile = await this.profilesService.findByUserId(currentUserId);
+    const targetProfile = await this.profilesService.findByUserId(targetUserId);
+    this.logger.log("currentProfile.id: ", currentProfile.id)
+    this.logger.log("targetProfile.id: ", targetProfile.id)
+
+    const follow = await this.followRepo.findOne({
+      where: {
+        follower: { id: currentProfile.id },
+        following: { id: targetProfile.id },
+      },
+    });
+
+    this.logger.log("follow: ", follow)
+
+    return follow ? follow.status : FollowStatus.REJECTED;
+  }
+
 
   async getFollowedAuthorIds(
     currentUserId: string,

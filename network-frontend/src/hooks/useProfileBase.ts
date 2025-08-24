@@ -1,22 +1,18 @@
-// hooks/useProfileBase.ts
 "use client";
 import { useState, useEffect, useCallback } from 'react';
-import { User } from '@/types/user';
 import { Profile } from '@/types/profile';
-import userApi from '@/lib/api/user.api';
-import profileApi from '@/lib/api/profile.api';
-import { useAppSelector } from '@/redux/hooks';
-import { selectCurrentUser } from '@/redux/features/user/userSelectors';
-import { selectMyProfile } from '@/redux/features/profile/profileSelectors';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { selectMyProfile, selectOtherProfile } from '@/redux/features/profile/profileSelectors';
+import { fetchOtherProfile } from '@/redux/features/profile/profileThunks';
 
 export function useProfileBase(username: string, isMyProfile = false) {
-  const currentUser = useAppSelector(selectCurrentUser);
   const myProfile = useAppSelector(selectMyProfile);
-  
-  const [user, setUser] = useState<User | null>(null);
+  const otherProfile = useAppSelector(selectOtherProfile);
+
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const dispatch = useAppDispatch()
 
   const fetchData = useCallback(async () => {
     try {
@@ -24,33 +20,36 @@ export function useProfileBase(username: string, isMyProfile = false) {
       setError(null);
 
       if (isMyProfile) {
-        setUser(currentUser);
         setProfile(myProfile);
+      } else if (otherProfile?.user?.username === username) {
+        // Nếu đã có otherProfile trong Redux
+        setProfile(otherProfile);
       } else {
-        const [userRes, profileRes] = await Promise.all([
-          userApi.getUserByUsername(username),
-          profileApi.getProfileByUserName(username)
-        ]);
-        setUser(userRes.data);
-        setProfile(profileRes.data);
+        const resultAction = await dispatch(fetchOtherProfile(username));
+
+        if (fetchOtherProfile.fulfilled.match(resultAction)) {
+          setProfile(resultAction.payload);
+        } else if (fetchOtherProfile.rejected.match(resultAction)) {
+          throw new Error(resultAction.payload as string);
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'Failed to load profile');
     } finally {
       setLoading(false);
     }
-  }, [username, isMyProfile, currentUser, myProfile]);
+  }, [username, isMyProfile, myProfile, otherProfile]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   return {
-    user,
     profile,
+    user: profile?.user || null,
     loading,
     error,
     reload: fetchData,
-    isCurrentUser: isMyProfile || currentUser?.username === username,
+    isCurrentUser: isMyProfile || myProfile?.user?.username === username,
   };
 }

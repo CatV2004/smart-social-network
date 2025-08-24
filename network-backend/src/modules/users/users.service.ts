@@ -13,6 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { log } from 'console';
 import { SearchService } from '../search/search.service';
 import { UserSearchDto } from '../search/dto/user-search.dto';
+import { UserSearchMapper } from './mappers/user-search.mapper';
+import { plainToInstance } from 'class-transformer';
 
 
 @Injectable()
@@ -41,7 +43,9 @@ export class UsersService {
       throw new BadRequestException('User not found');
     }
 
-    return new UserResponseDto(user);
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 
   async findUserByUsername(username: string): Promise<UserResponseDto> {
@@ -53,7 +57,9 @@ export class UsersService {
       throw new BadRequestException('User not found');
     }
 
-    return new UserResponseDto(user);
+    return plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 
   async createUser(dto: CreateUserDto): Promise<UserResponseDto> {
@@ -103,7 +109,9 @@ export class UsersService {
         this.logger.error(`Failed to send email, but user was created: ${error}`);
       });
 
-      return new UserResponseDto(savedUser);
+      return plainToInstance(UserResponseDto, savedUser, {
+        excludeExtraneousValues: true,
+      });
     } catch (error) {
       await queryRunner.rollbackTransaction();
       this.logger.error(`User creation failed: ${error.message}`, error.stack);
@@ -293,5 +301,27 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async findAllActivePaged(options: { limit: number; offset: number }) {
+    const [items, total] = await this.userRepository.findAndCount({
+      where: { isActive: true },
+      relations: ['profile'],
+      take: options.limit,
+      skip: options.offset,
+      order: { createdAt: 'DESC' },
+    });
+
+    const userSearchItems = UserSearchMapper.toDtos(items);
+
+    const nextOffset = options.offset + options.limit < total
+      ? options.offset + options.limit
+      : null;
+
+    return {
+      items: userSearchItems,
+      total,
+      nextOffset
+    };
   }
 }

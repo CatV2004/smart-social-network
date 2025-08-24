@@ -1,4 +1,4 @@
-import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,9 +12,11 @@ import { PostsService } from '../posts/posts.service';
 import { UpdateProfileImageDto } from './dto/update-profile-image.dto';
 import { CloudinaryService } from '@/cloudinary/cloudinary.service';
 import { SearchService } from '../search/search.service';
+import { FollowStatus } from '../follows/entities/follow.entity';
 
 @Injectable()
 export class ProfilesService {
+  private readonly logger = new Logger(ProfilesService.name)
   constructor(
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
@@ -34,10 +36,13 @@ export class ProfilesService {
   ) { }
 
   async getProfileByUserId(userId: string, currentUserId?: string): Promise<ProfileResponseDto> {
-    const profile = await this.findByUserId(userId);
+    const profile = await this.profileRepository.findOne({
+      where: { user: { id: userId } },
+      relations: ['user'],
+    });
 
     if (!profile) {
-      throw new NotFoundException('Profile not found');
+      throw new NotFoundException(`Profile for user ${userId} not found`);
     }
 
     const { followersCount, followingCount } = await this.followsService.countFollowersAndFollowing(profile.id);
@@ -60,21 +65,32 @@ export class ProfilesService {
   }
 
   async getProfileByUsername(username: string, currentUserId?: string): Promise<ProfileResponseDto> {
-    const profile = await this.findByUsername(username);
+    const profile = await this.profileRepository.findOne({
+      where: { user: { username: username } },
+      relations: ['user'],
+    });
+    if (!profile) {
+      throw new NotFoundException(`Profile with user ${username} not found`)
+    }
     const { followersCount, followingCount } = await this.followsService.countFollowersAndFollowing(profile.id);
     const postsCount = await this.postsService.countPostsByProfileId(profile.id);
 
     let isFollowed = false;
-    if (currentUserId && currentUserId !== username) {
-      isFollowed = await this.followsService.isFollowing(currentUserId, username);
+    let followStatus: FollowStatus = FollowStatus.REJECTED;
+    if (currentUserId && currentUserId !== profile.user.id) {
+      const status = await this.followsService.getFollowStatus(currentUserId, profile.user.id);
+      followStatus = status;
+      isFollowed = status === FollowStatus.ACCEPTED;
     }
 
+    this.logger.log("followStatus: ", followStatus)
     return plainToInstance(ProfileResponseDto, {
       ...profile,
       followersCount,
       followingCount,
       postsCount,
-      isFollowed
+      isFollowed,
+      followStatus,
     }, {
       excludeExtraneousValues: true,
     });
@@ -134,10 +150,6 @@ export class ProfilesService {
     return plainToInstance(ProfileResponseDto, saved, {
       excludeExtraneousValues: true,
     });
-  }
-
-  findAll() {
-    return `This action returns all profiles`;
   }
 
   async findById(id: string): Promise<Profile> {

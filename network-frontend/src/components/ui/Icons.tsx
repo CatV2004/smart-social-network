@@ -12,6 +12,8 @@ import {
   UserIcon,
   Phone,
   Lock,
+  LucideCake,
+  AlertCircle,
 } from "lucide-react";
 
 import {
@@ -25,7 +27,13 @@ import {
   FiUser,
   FiMoreHorizontal,
 } from "react-icons/fi";
-import { FaFacebook, FaLinkedin, FaGithub, FaMailchimp, FaEnvelope } from "react-icons/fa";
+import {
+  FaFacebook,
+  FaLinkedin,
+  FaGithub,
+  FaMailchimp,
+  FaEnvelope,
+} from "react-icons/fa";
 
 export const HomeIcon = () => <FiHome size={24} />;
 export const SearchIcon = () => <FiSearch size={24} />;
@@ -81,6 +89,10 @@ export const GridIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <Grid {...props} />
 );
 
+export const AlertCircleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <AlertCircle {...props} />
+);
+
 export const PhoneIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <Phone {...props} />
 );
@@ -127,4 +139,8 @@ export const MailIcon = ({
   size?: number;
   color?: string;
   className?: string;
-}) => <FaEnvelope  size={size} color={color} className={className} />;
+}) => <FaEnvelope size={size} color={color} className={className} />;
+
+export const Cake = (props: React.SVGProps<SVGSVGElement>) => (
+  <LucideCake {...props} />
+);

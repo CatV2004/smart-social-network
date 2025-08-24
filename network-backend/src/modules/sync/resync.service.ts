@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
 import { PostsService } from '../posts/posts.service';
+import { UsersService } from '../users/users.service';
 import { SearchService } from '../search/search.service';
 import dayjs from 'dayjs';
 import { ConfigService } from '@nestjs/config';
@@ -13,6 +14,7 @@ export class ResyncService {
 
     constructor(
         private readonly postsService: PostsService,
+        private readonly usersService: UsersService,
         private readonly searchService: SearchService,
         private readonly schedulerRegistry: SchedulerRegistry,
         private readonly configService: ConfigService,
@@ -26,11 +28,46 @@ export class ResyncService {
 
         const job = new CronJob(cronExpression, async () => {
             this.logger.log(`Starting ES resync (batch: ${this.BATCH_SIZE})`);
+            await this.syncAllUsersToES();
             await this.syncAllPostsToES();
         });
 
-        this.schedulerRegistry.addCronJob('resyncPosts', job);
+        this.schedulerRegistry.addCronJob('resyncData', job);
         job.start();
+    }
+
+    async syncAllUsersToES() {
+        let offset = 0;
+        let total = 0;
+
+        while (true) {
+            const { items, nextOffset } = await this.usersService.findAllActivePaged({
+                limit: this.BATCH_SIZE,
+                offset,
+            });
+
+            if (!items.length) break;
+
+            try {
+                const usersToIndex = items.map((u) => ({
+                    id: u.id,
+                    username: u.username,
+                    fullName: u.fullName,
+                    email: u.email,
+                    avatar: u.avatar,
+                }));
+                await this.searchService.bulkIndexUsers(usersToIndex);
+                total += items.length;
+                this.logger.log(`Indexed ${total} users so far...`);
+            } catch (err) {
+                this.logger.error(`ES bulk index users failed at offset ${offset}`, err instanceof Error ? err.stack : String(err));
+            }
+
+            if (nextOffset == null || items.length < this.BATCH_SIZE) break;
+            offset = nextOffset;
+        }
+
+        this.logger.log(`ES users sync completed. Total indexed users: ${total}`);
     }
 
     async syncAllPostsToES() {
@@ -56,13 +93,19 @@ export class ResyncService {
                 total += items.length;
                 this.logger.log(`Indexed ${total} posts so far...`);
             } catch (err) {
-                this.logger.error(`ES bulk index failed at offset ${offset}`, err instanceof Error ? err.stack : String(err));
+                this.logger.error(`ES bulk index posts failed at offset ${offset}`, err instanceof Error ? err.stack : String(err));
             }
 
             if (nextOffset == null || items.length < this.BATCH_SIZE) break;
             offset = nextOffset;
         }
 
-        this.logger.log(`ES sync completed. Total indexed posts: ${total}`);
+        this.logger.log(`ES posts sync completed. Total indexed posts: ${total}`);
+    }
+
+    // Phương thức để resync thủ công nếu cần
+    async manualResync() {
+        await this.syncAllUsersToES();
+        await this.syncAllPostsToES();
     }
 }

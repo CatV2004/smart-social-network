@@ -3,6 +3,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 
 export class FollowProfileResponseDto {
+  @ApiProperty()
+  @Expose()
+  id: string;
+
   @ApiProperty({ type: () => ProfilePublicDto })
   @Expose()
   @Type(() => ProfilePublicDto)

@@ -32,7 +32,8 @@ import {
   faTriangleExclamation,
   faRotate,
   faT,
-  faTrash
+  faTrash,
+  faUserPlus
 
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -69,4 +70,6 @@ export const Icons = {
   warning: faTriangleExclamation,
   refresh: faRotate,
   trash: faTrash,
+  userPlus: faUserPlus,
+  x: faXmark
 };

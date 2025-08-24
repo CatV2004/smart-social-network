@@ -172,6 +172,21 @@ export class SearchService {
         });
     }
 
+    async bulkDeleteUsers(ids: string[]) {
+        if (!ids.length) return;
+        const body = ids.flatMap((id) => [{ delete: { _index: this.USER_INDEX, _id: id } }]);
+        await this.esService.bulk({ refresh: true, body });
+    }
+
+    async bulkIndexUsers(users: UserSearchDto[]) {
+        if (!users.length) return;
+        const body = users.flatMap((u) => [
+            { index: { _index: this.USER_INDEX, _id: u.id } },
+            u,
+        ]);
+        await this.esService.bulk({ refresh: true, body });
+    }
+
     async indexPost(post: PostSearchDto) {
         return this.esService.index<PostSearchDto>({
             index: this.POST_INDEX,

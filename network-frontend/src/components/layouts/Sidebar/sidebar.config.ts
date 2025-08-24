@@ -10,7 +10,6 @@ export const getSidebarNavItems = (username?: string) => [
     triggerCollapse: true,
     overlay: "search"
   },
-  { name: "Khám phá", icon: Icons.explore, href: "/explore" },
   { name: "Reels", icon: Icons.reels, href: "/reels" },
   { name: "Tin nhắn", icon: Icons.messages, href: "/messages" },
   {
@@ -19,6 +18,13 @@ export const getSidebarNavItems = (username?: string) => [
     href: "/notifications",
     triggerCollapse: true,
     overlay: "notifications"
+  },
+  {
+    name: "Yêu cầu theo dõi",
+    icon: Icons.userPlus,
+    href: "/follow-requests",
+    // triggerCollapse: true,
+    // overlay: "followRequests"
   },
   { name: "Tạo", icon: Icons.create, action: "openPostCreate" },
   {

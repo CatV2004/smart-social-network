@@ -1,16 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Transform } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { Gender } from '../entities/profile.entity';
+import { UserResponseDto } from '@/modules/users/dto/user-response.dto';
+import { FollowStatus } from '@/modules/follows/entities/follow.entity';
 
 export class ProfileResponseDto {
   @ApiProperty()
   @Expose()
   id: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: () => UserResponseDto })
   @Expose()
-  @Transform(({ obj }) => obj.user?.id)
-  userId: string;
+  @Type(() => UserResponseDto)
+  user: UserResponseDto;
 
   @ApiProperty({ nullable: true })
   @Expose()
@@ -32,8 +34,8 @@ export class ProfileResponseDto {
   @Expose()
   @Transform(({ value }) => {
     if (!value) return null;
-    if (typeof value === 'string') return value; 
-    if (value instanceof Date) return value.toISOString().split('T')[0]; 
+    if (typeof value === 'string') return value;
+    if (value instanceof Date) return value.toISOString().split('T')[0];
     return null;
   })
   dateOfBirth?: string;
@@ -69,6 +71,10 @@ export class ProfileResponseDto {
   @ApiProperty()
   @Expose()
   isFollowed: boolean;
+
+  @ApiProperty()
+  @Expose()
+  followStatus: FollowStatus;
 
   @ApiProperty()
   @Expose()

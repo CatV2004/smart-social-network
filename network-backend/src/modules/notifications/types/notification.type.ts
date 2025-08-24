@@ -5,4 +5,5 @@ export enum NotificationType {
     FOLLOW = 4,
     MENTION = 5,
     TAG = 6,
+    FOLLOW_REQUEST = 7,
 }

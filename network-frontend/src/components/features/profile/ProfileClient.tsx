@@ -6,15 +6,15 @@ import { useProfileBase } from "@/hooks/useProfileBase";
 import { useProfilePosts } from "@/hooks/useProfilePosts";
 import { useSavedPosts } from "@/hooks/useSavedPosts";
 import ErrorMessage from "@/components/common/ErrorMessage";
-import ProfileHeader from "@/components/features/profile/ProfileHeader";
-import { ProfileStats } from "@/components/features/profile/ProfileStats";
+import { ProfileHeader } from "@/components/features/profile/ProfileHeader";
+import { ProfileTabs } from "@/components/features/profile/ProfileTabs";
 import { PostGrid } from "./PostGrid";
 import { EmptyPostState } from "./EmptyPostState";
 import { MediaItem } from "@/types/post";
 import { ImageMedia } from "@/types/media";
 import { motion } from "framer-motion";
 import { fadeIn } from "@/lib/motion";
-import { PostCommentModal } from "@/components/shared/modals/PostCommentModal"; 
+import { PostCommentModal } from "@/components/shared/modals/PostCommentModal";
 import { Post } from "@/types/post";
 
 interface ProfileClientProps {
@@ -29,8 +29,8 @@ export default function ProfileClient({
   const [activeTab, setActiveTab] = useState<"posts" | "saved" | "tagged">(
     "posts"
   );
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null); 
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const loadingUser = useAppSelector(selectUserLoading);
 
   const {
@@ -158,7 +158,7 @@ export default function ProfileClient({
               hasMore={hasMore}
               onLoadMore={loadMore}
               isLoading={isLoading}
-              onPostClick={handlePostClick} 
+              onPostClick={handlePostClick}
             />
           </motion.div>
         ) : (
@@ -180,7 +180,7 @@ export default function ProfileClient({
               hasMore={hasMoreSaved}
               onLoadMore={loadMoreSaved}
               isLoading={isLoadingSaved}
-              onPostClick={handlePostClick} 
+              onPostClick={handlePostClick}
             />
           </motion.div>
         ) : (
@@ -213,7 +213,7 @@ export default function ProfileClient({
           isCurrentUser={isCurrentUser}
         />
         <motion.div variants={fadeIn}>
-          <ProfileStats activeTab={activeTab} onTabChange={setActiveTab} />
+          <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
         </motion.div>
         {renderContent()}
       </motion.div>

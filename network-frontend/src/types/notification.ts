@@ -14,6 +14,8 @@ export interface Notification {
     isRead: boolean;
     createdAt: string;
     metadata?: Record<string, any>;
+    post?: PostPreview;
+    comment?: CommentPreview;
 }
 
 export interface UpdateNotificationPayload {
@@ -22,10 +24,21 @@ export interface UpdateNotificationPayload {
 }
 
 export enum NotificationEnum {
-    LIKE_POST = 1,
-    COMMENT_POST = 2,
-    REPLY_COMMENT = 3,
-    FOLLOW = 4,
-    MENTION = 5,
-    TAG = 6,
+    LIKE_POST = "LIKE_POST",
+    COMMENT_POST = "COMMENT_POST",
+    REPLY_COMMENT = "REPLY_COMMENT",
+    FOLLOW = "FOLLOW",
+    MENTION = "MENTION",
+    TAG = "TAG",
+}
+
+export interface PostPreview {
+    id: string;
+    previewUrl: string;
+}
+
+export interface CommentPreview {
+    id: string;
+    content: string;
+    post: PostPreview;
 }

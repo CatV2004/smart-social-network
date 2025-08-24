@@ -2,11 +2,11 @@
 
 import { useEffect, useCallback } from "react";
 import { getCookie } from "cookies-next";
-import { fetchCurrentUser } from "@/redux/features/user/userThunks";
+// import { fetchCurrentUser } from "@/redux/features/user/userThunks";
 import { useAppDispatch } from "@/redux/hooks";
 import { fetchMyProfile } from "@/redux/features/profile/profileThunks";
 import { setAuthenticated } from "@/redux/features/auth/authSlice";
-import { setInitialized } from "@/redux/features/user/userSlice";
+import { setInitialized } from "@/redux/features/profile/profileSlice";
 import {
   fetchNotifications,
   fetchUnreadCount,
@@ -20,7 +20,7 @@ export default function AppInitializer({
 }: {
   children: React.ReactNode;
 }) {
-  const dispatch = useAppDispatch();  
+  const dispatch = useAppDispatch();
 
   useSocketNotifications();
 
@@ -31,7 +31,7 @@ export default function AppInitializer({
       try {
         dispatch(setAuthenticated(true));
         await Promise.all([
-          dispatch(fetchCurrentUser()),
+          // dispatch(fetchCurrentUser()),
           dispatch(fetchMyProfile()),
           dispatch(fetchNotifications({ page: 1, limit: 20 })),
           dispatch(fetchUnreadCount()),

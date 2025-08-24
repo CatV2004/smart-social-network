@@ -5,6 +5,7 @@ import profileReducer from './features/profile/profileSlice';
 import userReducer from './features/user/userSlice';
 import uiReducer from "./features/ui/uiSlice";
 import notificationReducer from './features/notifications/notificationSlice';
+import followRequestsReducer from "./features/follow-request/followRequestSlice";
 
 import { combineReducers } from 'redux';
 import storage from 'redux-persist/lib/storage';
@@ -47,6 +48,7 @@ const rootReducer = combineReducers({
     user: userReducer,
     ui: uiReducer,
     notifications: notificationReducer,
+    followRequests: followRequestsReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

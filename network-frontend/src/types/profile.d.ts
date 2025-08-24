@@ -2,6 +2,7 @@ import { User } from "./user";
 
 export interface Profile {
   id: string;
+  user: User;
   avatar: string | null;
   coverImage: string | null;
   bio: string | null;
@@ -18,6 +19,7 @@ export interface Profile {
   followingCount: number;
   postsCount: number;
   isFollowed: boolean;
+  followStatus: 'PENDING' | 'ACCEPTED' | 'REJECTED';
   createdAt: string;
   updatedAt: string;
   canViewPosts?: boolean;

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Notification } from './entities/notification.entity';
@@ -13,6 +13,9 @@ import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface';
 import { ProfilesService } from '../profiles/profiles.service';
 import { plainToInstance } from 'class-transformer';
+import { NotificationMapper } from './mappers/notification.mapper';
+import { paginateWithMapper } from '@/common/utils/paginate-with-mapper';
+import { FollowProfileResponseDto } from '../follows/dto/follow-profile-response.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -22,7 +25,7 @@ export class NotificationsService {
     @InjectRepository(Notification)
     private readonly notificationRepo: Repository<Notification>,
     private readonly notificationGateway: NotificationsGateway,
-    private readonly socketService: SocketService,
+    @Inject(forwardRef(() => ProfilesService))
     private readonly profilesService: ProfilesService,
   ) { }
 
@@ -48,14 +51,12 @@ export class NotificationsService {
 
       const saved = await this.notificationRepo.save(noti);
 
-      const loaded = await this.notificationRepo.findOne({
-        where: { id: saved.id },
-        relations: ['sender', 'sender.user'],
-      });
+      const loaded = await this.buildDetailQuery()
+        .where('n.id = :id', { id: saved.id })
+        .getOne();
 
-      const notiDto = plainToInstance(NotificationDto, loaded, {
-        excludeExtraneousValues: true, 
-      });
+      const notiDto = NotificationMapper.toDto(loaded!);
+
 
       if (isReceiverOnline && saved) {
         this.notificationGateway.sendNotificationToUser(receiverUserId, notiDto);
@@ -71,44 +72,16 @@ export class NotificationsService {
     }
   }
 
-  async createBatch(dtos: CreateNotificationDto[]) {
-    try {
-      const notifications = dtos.map(dto =>
-        this.notificationRepo.create({
-          sender: { id: dto.senderId } as any,
-          receiver: { id: dto.receiverId } as any,
-          type: dto.type,
-          post: dto.postId ? ({ id: dto.postId } as any) : undefined,
-          comment: dto.commentId ? ({ id: dto.commentId } as any) : undefined,
-          metadata: dto.metadata,
-        })
-      );
-
-      const savedNotifications = await this.notificationRepo.save(notifications);
-
-      const notificationsByUser = new Map<string, Notification[]>();
-      savedNotifications.forEach(notification => {
-        const userId = notification.receiver.id;
-        if (!notificationsByUser.has(userId)) {
-          notificationsByUser.set(userId, []);
-        }
-        notificationsByUser.get(userId)?.push(notification);
-      });
-
-      notificationsByUser.forEach((notifications, userId) => {
-        if (this.notificationGateway.isUserOnline(userId)) {
-          this.notificationGateway.sendMultipleToUser(userId, notifications);
-        } else {
-          this.logger.log(`User ${userId} offline, skip realtime emit`);
-        }
-      });
-
-      this.logger.log(`Created ${savedNotifications.length} notifications`);
-      return savedNotifications;
-    } catch (error) {
-      this.logger.error(`Error creating batch notifications: ${error.message}`);
-      throw error;
-    }
+  private buildDetailQuery() {
+    return this.notificationRepo
+      .createQueryBuilder('n')
+      .leftJoinAndSelect('n.sender', 'sender')
+      .leftJoinAndSelect('sender.user', 'senderUser')
+      .leftJoinAndSelect('n.post', 'post')
+      .leftJoinAndSelect('post.media', 'postMedia')
+      .leftJoinAndSelect('n.comment', 'comment')
+      .leftJoinAndSelect('comment.post', 'commentPost')
+      .leftJoinAndSelect('commentPost.media', 'commentPostMedia');
   }
 
   private buildListQuery(profileId: string): SelectQueryBuilder<Notification> {
@@ -116,6 +89,11 @@ export class NotificationsService {
       .createQueryBuilder('n')
       .leftJoinAndSelect('n.sender', 'sender')
       .leftJoinAndSelect('sender.user', 'senderUser')
+      .leftJoinAndSelect('n.post', 'post')
+      .leftJoinAndSelect('post.media', 'postMedia')
+      .leftJoinAndSelect('n.comment', 'comment')
+      .leftJoinAndSelect('comment.post', 'commentPost')
+      .leftJoinAndSelect('commentPost.media', 'commentPostMedia')
       .where('n.receiver.id = :profileId', { profileId });
   }
 
@@ -139,7 +117,8 @@ export class NotificationsService {
       `n.${sortBy}`,
       sortOrder as 'ASC' | 'DESC',
     );
-    return paginate<Notification>(qb, page, limit, NotificationDto);
+    // return paginate<Notification>(qb, page, limit, NotificationDto);
+    return paginateWithMapper(qb, page, limit, NotificationMapper.toDto);
   }
 
   /**
@@ -233,6 +212,25 @@ export class NotificationsService {
       metadata: { message: 'started following you' },
     });
   }
+
+  async notifyRequestFollow(
+    senderId: string,
+    receiverId: string,
+    followInfo: FollowProfileResponseDto, 
+  ) {
+    const metadata = {
+      ...followInfo,
+      message: `${followInfo.profile.user.firstName} ${followInfo.profile.user.lastName} requested to follow you`, 
+    };
+
+    return this.create({
+      senderId,
+      receiverId,
+      type: NotificationType.FOLLOW_REQUEST, 
+      metadata,
+    });
+  }
+
 
   async notifyMention(
     senderId: string,

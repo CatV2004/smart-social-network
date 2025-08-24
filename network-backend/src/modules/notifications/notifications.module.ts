@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationsService } from './notifications.service';
 import { NotificationsController } from './notifications.controller';
@@ -11,7 +11,7 @@ import { ProfilesModule } from '../profiles/profiles.module';
   imports: [
     TypeOrmModule.forFeature([Notification]),
     SocketModule,
-    ProfilesModule,
+    forwardRef(() => ProfilesModule),
   ],
   controllers: [NotificationsController],
   providers: [NotificationsService, NotificationsGateway],

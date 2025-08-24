@@ -1,12 +1,13 @@
 import * as React from "react";
 import { cn } from "@/lib/utils/cn";
 
-export function Card({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+export const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
   return (
     <div
+      ref={ref}
       className={cn(
         "rounded-2xl border bg-white text-gray-900 shadow-sm",
         className
@@ -14,7 +15,8 @@ export function Card({
       {...props}
     />
   );
-}
+});
+Card.displayName = "Card";
 
 export function CardHeader({
   className,
@@ -56,10 +58,7 @@ export function CardFooter({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        "flex items-center justify-end bg-white p-3",
-        className
-      )}
+      className={cn("flex items-center justify-end bg-white p-3", className)}
       {...props}
     />
   );

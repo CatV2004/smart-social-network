@@ -1,5 +1,7 @@
 import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { PostPreviewDto } from '@/modules/posts/dto/post-preview.dto';
+import { CommentPreviewDto } from '@/modules/comments/dto/comment-preview.dto';
 
 export class SenderUserDto {
     @ApiProperty()
@@ -49,4 +51,14 @@ export class NotificationDto {
     @ApiProperty({ required: false, type: Object, description: 'Additional metadata' })
     @Expose()
     metadata?: Record<string, any>;
+
+    @ApiProperty({ required: false, type: () => PostPreviewDto })
+    @Expose()
+    @Type(() => PostPreviewDto)
+    post?: PostPreviewDto;
+
+    @ApiProperty({ required: false, type: () => CommentPreviewDto })
+    @Expose()
+    @Type(() => CommentPreviewDto)
+    comment?: CommentPreviewDto;
 }
