@@ -45,7 +45,7 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/");
+      router.push("/home");
     }
   }, [isAuthenticated, router]);
 

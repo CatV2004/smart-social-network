@@ -2,7 +2,7 @@
 import { Icons } from "@/lib/icons";
 
 export const getSidebarNavItems = (username?: string) => [
-  { name: "Trang chủ", icon: Icons.home, href: "/" },
+  { name: "Trang chủ", icon: Icons.home, href: "/home" },
   {
     name: "Tìm kiếm",
     icon: Icons.search,
@@ -11,7 +11,13 @@ export const getSidebarNavItems = (username?: string) => [
     overlay: "search"
   },
   { name: "Reels", icon: Icons.reels, href: "/reels" },
-  { name: "Tin nhắn", icon: Icons.messages, href: "/messages" },
+  {
+    name: "Tin nhắn",
+    icon: Icons.messages,
+    href: "/direct/inbox", 
+    triggerCollapse: true, 
+    overlay: "messages" 
+  },
   {
     name: "Thông báo",
     icon: Icons.notifications,

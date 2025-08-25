@@ -46,7 +46,7 @@ export default function VerifyEmailPage() {
       <div className="text-center space-y-4">
         <h1 className="text-2xl font-bold">Đang xác thực email...</h1>
         <p>Vui lòng chờ trong giây lát</p>
-        <Button onClick={() => router.push("/")}>Về trang chủ</Button>
+        <Button onClick={() => router.push("/home")}>Về trang chủ</Button>
       </div>
     </div>
   );

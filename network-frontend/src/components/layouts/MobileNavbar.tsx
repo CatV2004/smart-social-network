@@ -17,7 +17,7 @@ export default function MobileNavbar() {
   const currentUserId = currentUser?.id;
 
   const navItems = [
-    { name: "Trang chủ", icon: Icons.home, href: "/", exact: true },
+    { name: "Trang chủ", icon: Icons.home, href: "/home", exact: true },
     { name: "Tìm kiếm", icon: Icons.search, href: "/search" },
     { name: "Tạo", icon: Icons.create, href: "/create" },
     { name: "Reels", icon: Icons.reels, href: "/reels" },

@@ -1,13 +1,16 @@
+"use client";
+
 import StoryList from "@/components/features/story/StoriesList";
-import { mockStories, mockSuggestions } from "@/lib/mock-data";
 import SuggestionsSidebar from "@/components/features/suggestion/SuggestionsSidebar";
-import { Suspense } from "react";
 import LoadingSkeleton from "@/components/common/LoadingSkeleton";
 import { PostContainer } from "@/components/features/post/PostContainer";
+import { mockStories, mockSuggestions } from "@/lib/mock-data";
+import { Suspense } from "react";
 
-export default async function HomePage() {
+export default function HomeClient() {
   return (
-    <div className="flex justify-center gap-28 py-6">
+    <div className="flex justify-center gap-28 py-6 min-h-screen">
+      {/* Main content */}
       <div className="w-full max-w-[650px]">
         <Suspense fallback={<LoadingSkeleton type="stories" />}>
           <StoryList stories={mockStories} />
@@ -16,12 +19,11 @@ export default async function HomePage() {
         <PostContainer />
       </div>
 
-      <div className="hidden lg:block w-[350px]">
-        <div className="w-[350px]">
-          <Suspense fallback={<LoadingSkeleton type="suggestions" />}>
-            <SuggestionsSidebar suggestions={mockSuggestions} />
-          </Suspense>
-        </div>
+      {/* Sidebar */}
+      <div className="hidden lg:block w-[350px] flex-shrink-0">
+        <Suspense fallback={<LoadingSkeleton type="suggestions" />}>
+          <SuggestionsSidebar suggestions={mockSuggestions} />
+        </Suspense>
       </div>
     </div>
   );
