@@ -9,13 +9,13 @@ import {
   Body,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { PaginatedNotificationDto } from './dto/paginated-notification.dto';
+import { PaginatedNotificationDto } from './dtos/paginated-notification.dto';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
-import { NotificationDto } from './dto/notification.dto';
+import { UpdateNotificationDto } from './dtos/update-notification.dto';
+import { NotificationDto } from './dtos/notification.dto';
 import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
 
 @ApiTags('notifications')

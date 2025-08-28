@@ -130,8 +130,15 @@ export function TrashPostList({
                   <PostCard
                     post={post}
                     onDelete={onPermanentDelete}
+                    onLike={() => {}}
+                    onSave={() => {}}
+                    onComment={() => {}}
+                    onShare={() => {}}
+                    onEdit={() => {}}
                     isDeleting={post.id === deletingPostId}
                     hideOptions
+                    updatingPostId={null}
+                    isUpdating={false}
                   />
                 </CardContent>
 

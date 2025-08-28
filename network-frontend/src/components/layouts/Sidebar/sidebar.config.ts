@@ -15,8 +15,8 @@ export const getSidebarNavItems = (username?: string) => [
     name: "Tin nhắn",
     icon: Icons.messages,
     href: "/direct/inbox", 
-    triggerCollapse: true, 
-    overlay: "messages" 
+    // triggerCollapse: true, 
+    // overlay: "messages" 
   },
   {
     name: "Thông báo",

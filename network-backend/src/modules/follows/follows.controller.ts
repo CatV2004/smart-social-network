@@ -28,8 +28,10 @@ import { FollowsService } from './follows.service';
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { FollowProfileResponseDto } from './dto/follow-profile-response.dto';
+import { FollowProfileResponseDto } from './dtos/follow-profile-response.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface';
+import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
+import { PaginatedResponseDto } from '@/common/dtos/paginated-response.factory';
 
 @ApiTags('follows')
 @ApiBearerAuth()
@@ -100,13 +102,18 @@ export class FollowsController {
   }
 
   @ApiOperation({ summary: 'Get all users the current user is following' })
-  @ApiOkResponse({ description: 'List of followings returned' })
+  @ApiOkResponse({
+    description: 'Paginated list of followings',
+    type: PaginatedResponseDto(FollowProfileResponseDto),
+  })
   @Get('following')
   async getFollowing(
     @ActiveUser() user: ActiveUserData,
-  ): Promise<FollowProfileResponseDto[]> {
-    return this.followsService.getFollowing(user.id);
+    @Query() pagination: PaginationQueryDto
+  ): Promise<IPaginated<FollowProfileResponseDto>> {
+    return this.followsService.getFollowing(user.id, pagination);
   }
+
 
   @ApiOperation({ summary: 'Get all follow requests I have sent (PENDING)' })
   @ApiOkResponse({ description: 'List of users I requested to follow' })

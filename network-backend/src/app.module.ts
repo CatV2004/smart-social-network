@@ -27,6 +27,7 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { SearchModule } from './modules/search/search.module';
 import { SyncModule } from './modules/sync/sync.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { MessagesModule } from './modules/messages/messages.module';
 
 
 @Module({
@@ -78,7 +79,8 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     SavePostsModule,
     CommentsModule,
     SyncModule,
-    NotificationsModule
+    NotificationsModule,
+    MessagesModule
   ],
   controllers: [AppController],
   providers: [

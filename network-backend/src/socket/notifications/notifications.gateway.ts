@@ -9,7 +9,7 @@ import {
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { SocketService } from '../socket.service';
-import { NotificationDto } from '@/modules/notifications/dto/notification.dto';
+import { NotificationDto } from '@/modules/notifications/dtos/notification.dto';
 
 @WebSocketGateway({
     cors: {

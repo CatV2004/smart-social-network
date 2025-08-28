@@ -127,3 +127,32 @@ body {
 .animate-scaleDialogOut {
   animation: scaleDialogOut 0.15s ease-in forwards;
 }
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.95);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.3s ease-out, zoomIn 0.3s ease-out;
+}
+
+.animate-out {
+  animation: fadeIn 0.3s ease-out reverse, zoomIn 0.3s ease-out reverse;
+}

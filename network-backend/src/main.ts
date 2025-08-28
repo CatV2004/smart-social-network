@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { setupSwagger } from '@/swagger/swagger.config';
 import { json, urlencoded } from 'express';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +24,8 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
+
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   await app.listen(configService.get<number>('PORT') || 3000);
 }

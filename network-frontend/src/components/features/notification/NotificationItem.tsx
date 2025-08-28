@@ -35,7 +35,6 @@ export function NotificationItem({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const isFollowRequest = notification.type === NotificationEnum.FOLLOW_REQUEST;
-  console.log("isFollowRequest: ", isFollowRequest)
   const followId = notification.metadata?.id;
 
   const handleDeleteNotification = async () => {

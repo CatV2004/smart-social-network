@@ -3,12 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { Media } from './entities/media.entity';
-import { CreateMediaDto } from './dto/create-media.dto';
+import { CreateMediaDto } from './dtos/create-media.dto';
 import { CloudinaryService } from '@/cloudinary/cloudinary.service';
 import { PostsService } from '../posts/posts.service';
-import { MediaResponseDto } from './dto/response-media.dto';
+import { MediaResponseDto } from './dtos/response-media.dto';
 import { plainToInstance } from 'class-transformer';
-import { MediaType } from './types/media.types';
+import { MediaType } from './types/media.type';
 
 @Injectable()
 export class MediaService {

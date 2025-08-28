@@ -57,7 +57,6 @@ export const profileService = {
         if (data.avatar) formData.append("avatar", data.avatar);
         if (data.coverImage) formData.append("coverImage", data.coverImage);
 
-        console.log("Updating profile with data: ", Object.fromEntries(formData.entries()));
 
         return profileApi.updateProfile(formData)
     },

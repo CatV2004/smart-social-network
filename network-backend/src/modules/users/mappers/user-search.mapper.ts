@@ -1,5 +1,5 @@
 import { User } from '../entities/user.entity';
-import { UserSearchDto } from '@/modules/search/dto/user-search.dto';
+import { UserSearchDto } from '@/modules/search/dtos/user-search.dto';
 
 export class UserSearchMapper {
     static toDto(user: User): UserSearchDto {

@@ -7,6 +7,14 @@ import { X } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 
+interface DialogOverlayProps
+  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay> {
+  /** Độ tối nền (0–100), mặc định 30 */
+  dimOpacity?: number;
+  /** Có làm mờ nền không */
+  blur?: boolean | string; // true => sm, string => custom tailwind blur
+}
+
 // Re-export cơ bản để tiện dùng
 const Dialog = DialogPrimitive.Root;
 const DialogTrigger = DialogPrimitive.Trigger;
@@ -17,12 +25,18 @@ const DialogDescription = DialogPrimitive.Description;
 // Overlay tùy biến
 const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
+  DialogOverlayProps
+>(({ className, dimOpacity = 30, blur = false, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/30 backdrop-blur-sm",
+      "fixed inset-0 z-50",
+      `bg-black/${dimOpacity}`, // truyền opacity động
+      blur === true
+        ? "backdrop-blur-sm"
+        : typeof blur === "string"
+        ? `backdrop-blur-${blur}`
+        : "",
       "data-[state=open]:animate-fadeIn data-[state=closed]:animate-fadeOut",
       className
     )}
@@ -38,8 +52,8 @@ interface CustomDialogContentProps
   showCloseButton?: boolean;
   /** Đường dẫn icon hiển thị mờ ở background */
   iconPath?: string;
-  /** Class tùy biến cho Overlay */
-  overlayClassName?: string;
+  /** Props cho Overlay */
+  overlayProps?: DialogOverlayProps;
 }
 
 // Content tùy biến
@@ -53,14 +67,16 @@ const DialogContent = React.forwardRef<
       children,
       showCloseButton = true,
       iconPath,
-      overlayClassName,
+      overlayProps,
       ...props
     },
     ref
   ) => (
     <DialogPortal>
-      <DialogOverlay className={overlayClassName} />
+      {/* Overlay */}
+      <DialogOverlay {...overlayProps} />
 
+      {/* Close button */}
       {showCloseButton && (
         <DialogPrimitive.Close
           className={cn(
@@ -73,6 +89,7 @@ const DialogContent = React.forwardRef<
         </DialogPrimitive.Close>
       )}
 
+      {/* Content */}
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
@@ -96,13 +113,42 @@ const DialogContent = React.forwardRef<
             />
           </div>
         )}
-
         <div className="relative z-10">{children}</div>
       </DialogPrimitive.Content>
     </DialogPortal>
   )
 );
 DialogContent.displayName = "DialogContent";
+
+// Header wrapper
+const DialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-1.5 text-center sm:text-left p-4 border-b",
+      className
+    )}
+    {...props}
+  />
+);
+DialogHeader.displayName = "DialogHeader";
+
+// Footer wrapper
+const DialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 p-4 border-t",
+      className
+    )}
+    {...props}
+  />
+);
+DialogFooter.displayName = "DialogFooter";
 
 export {
   Dialog,
@@ -111,4 +157,6 @@ export {
   DialogTitle,
   DialogDescription,
   DialogOverlay,
+  DialogHeader,
+  DialogFooter,
 };

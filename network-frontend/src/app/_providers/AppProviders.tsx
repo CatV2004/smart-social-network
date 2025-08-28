@@ -9,7 +9,7 @@ import TopLoader from "@/components/common/TopLoader";
 import AppLoadingGate from "../AppLoadingGate";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationsSocketProvider } from "@/context/NotificationsSocketContext";
-// import { MessagesSocketProvider } from "@/context/MessagesSocketContext";
+import { MessagesSocketProvider } from "@/context/MessagesSocketContext";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -17,7 +17,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <QueryClientProvider client={queryClient}>
           <NotificationsSocketProvider>
-            {/* <MessagesSocketProvider> */}
+            <MessagesSocketProvider>
               <AppInitializer>
                 <AppLoadingGate>
                   <TopLoader />
@@ -25,7 +25,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
                   <Toaster richColors position="top-center" />
                 </AppLoadingGate>
               </AppInitializer>
-            {/* </MessagesSocketProvider> */}
+            </MessagesSocketProvider>
           </NotificationsSocketProvider>
         </QueryClientProvider>
       </ThemeProvider>

@@ -1,28 +1,35 @@
-export interface User {
-    id: string;
-    username: string;
-    fullName: string;
-    avatar?: string;
-    isOnline?: boolean;
-    lastSeen?: string;
+import { AuthorProfile } from "./profile";
+
+export interface MessageRequest {
+  conversationId: string;
+  content?: string;
+  files?: File[];
 }
 
-export interface Message {
-    id: string;
-    content: string;
-    sender: User;
-    timestamp: string;
-    isRead: boolean;
-    type: 'text' | 'image' | 'file';
-    mediaUrl?: string;
+export interface Attachment {
+  url: string;
+  type: string;
+  publicId: string;
 }
 
-export interface Conversation {
-    id: string;
-    participants: User[];
-    lastMessage?: Message;
-    unreadCount: number;
-    isGroup: boolean;
-    groupName?: string;
-    groupAvatar?: string;
+export interface MessageResponse {
+  id: string;
+  content: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  sender: AuthorProfile;
+  attachments: Attachment[];
+}
+
+export interface MessageRead {
+  userId: string;
+  avatar: string;
+  readAt: string;
+}
+
+export enum MessageStatus {
+  SENT = 'SENT',
+  DELIVERED = 'DELIVERED',
+  READ = 'READ',
 }

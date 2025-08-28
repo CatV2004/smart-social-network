@@ -1,46 +1,90 @@
-import { Conversation } from "@/types/message";
+"use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Phone, Video, Info } from "lucide-react";
+import { Phone, Video, Info, MoreVertical, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { conversationResponse } from "@/types/conversation";
+import { Badge } from "@/components/ui/badge";
 
 interface MessagesHeaderProps {
-  conversation: Conversation;
+  conversation: conversationResponse | null;
+  isConnected: boolean;
 }
 
-export function MessagesHeader({ conversation }: MessagesHeaderProps) {
-  const displayUser = conversation.isGroup
-    ? { name: conversation.groupName, avatar: conversation.groupAvatar }
-    : {
-        name: conversation.participants[0].fullName,
-        avatar: conversation.participants[0].avatar,
-        isOnline: conversation.participants[0].isOnline,
-      };
+export function MessagesHeader({
+  conversation,
+  isConnected,
+}: MessagesHeaderProps) {
+  const displayName = conversation?.displayName;
+  const displayAvatar = conversation?.displayAvatar;
+  const isOnline = !conversation?.isGroup && isConnected;
 
   return (
-    <div className="border-b p-4 flex items-center justify-between">
+    <div className="border-b border-gray-200 p-4 flex items-center justify-between bg-white shadow-sm">
       <div className="flex items-center gap-3">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={displayUser.avatar} alt={displayUser.name} />
-          <AvatarFallback>{displayUser.name?.charAt(0) || "U"}</AvatarFallback>
+        <Avatar className="h-10 w-10 border-2 border-white shadow-md">
+          {displayAvatar ? (
+            <AvatarImage src={displayAvatar} alt={displayName} />
+          ) : (
+            <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+              {displayName?.charAt(0) ?? "?"}
+            </AvatarFallback>
+          )}
         </Avatar>
         <div>
-          <h3 className="font-semibold">{displayUser.name}</h3>
-          {!conversation.isGroup && (
+          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+            {displayName}
+            {conversation?.isGroup && (
+              <Badge variant="outline" className="text-xs py-0 px-1.5">
+                <Users className="h-3 w-3 mr-1" /> Nhóm
+              </Badge>
+            )}
+          </h3>
+          {!conversation?.isGroup && (
+            <p className="text-xs text-muted-foreground flex items-center">
+              <span
+                className={`h-2 w-2 rounded-full mr-1 ${
+                  isOnline ? "bg-green-500" : "bg-gray-400"
+                }`}
+              ></span>
+              {isOnline ? "Đang hoạt động" : "Ngoại tuyến"}
+            </p>
+          )}
+          {conversation?.isGroup && (
             <p className="text-xs text-muted-foreground">
-              {displayUser.isOnline ? "Đang hoạt động" : "Không hoạt động"}
+              {conversation.memberCount || 0} thành viên
             </p>
           )}
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon">
+      <div className="flex items-center gap-1">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+        >
           <Phone className="h-5 w-5" />
         </Button>
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+        >
           <Video className="h-5 w-5" />
         </Button>
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+        >
           <Info className="h-5 w-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full text-gray-600 hover:text-gray-800"
+        >
+          <MoreVertical className="h-5 w-5" />
         </Button>
       </div>
     </div>

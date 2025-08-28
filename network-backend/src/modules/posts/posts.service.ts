@@ -1,17 +1,17 @@
 import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
+import { CreatePostDto } from './dtos/create-post.dto';
 import { Post } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, IsNull, LessThan, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { ProfilesService } from '../profiles/profiles.service';
 import { PaginationQueryDto, SortOrder } from '@/common/dtos/pagination-query.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface';
-import { PostResponseDto } from './dto/response-post.dto';
+import { PostResponseDto } from './dtos/response-post.dto';
 import { paginate } from '@/common/utils/pagination.util';
 import { MediaService } from '../media/media.service';
-import { MediaType } from '../media/types/media.types';
+import { MediaType } from '../media/types/media.type';
 import { SearchService } from '../search/search.service';
-import { PostSearchDto } from '../search/dto/post-search.dto';
+import { PostSearchDto } from '../search/dtos/post-search.dto';
 import dayjs from 'dayjs';
 
 interface UpdatePostOptions {

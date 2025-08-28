@@ -2,11 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SavePost } from '@/modules/save-posts/entities/save-post.entity';
-import { ToggleSavePostDto } from './dto/toggle-save-post.dto';
+import { ToggleSavePostDto } from './dtos/toggle-save-post.dto';
 import { ProfilesService } from '@/modules/profiles/profiles.service';
 import { PostsService } from '@/modules/posts/posts.service';
 import { paginate } from '@/common/utils/pagination.util';
-import { PostResponseDto } from '../posts/dto/response-post.dto';
+import { PostResponseDto } from '../posts/dtos/response-post.dto';
 import { PaginationQueryDto, SortOrder } from '@/common/dtos/pagination-query.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface';
 
@@ -51,7 +51,6 @@ export class SavePostsService {
     pagination: PaginationQueryDto,
   ): Promise<IPaginated<PostResponseDto>> {
     const profile = await this.profilesService.findByUserId(userId);
-    console.log("profileId: ", profile.id)
 
     const {
       page = 1,

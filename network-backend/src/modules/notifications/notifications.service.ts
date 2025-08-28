@@ -2,12 +2,12 @@ import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { Notification } from './entities/notification.entity';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { CreateNotificationDto } from './dtos/create-notification.dto';
+import { UpdateNotificationDto } from './dtos/update-notification.dto';
 import { NotificationType } from './types/notification.type';
 import { NotificationsGateway } from '../../socket/notifications/notifications.gateway';
 import { paginate } from '@/common/utils/pagination.util';
-import { NotificationDto } from './dto/notification.dto';
+import { NotificationDto } from './dtos/notification.dto';
 import { SocketService } from '@/socket/socket.service';
 import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface';
@@ -15,7 +15,7 @@ import { ProfilesService } from '../profiles/profiles.service';
 import { plainToInstance } from 'class-transformer';
 import { NotificationMapper } from './mappers/notification.mapper';
 import { paginateWithMapper } from '@/common/utils/paginate-with-mapper';
-import { FollowProfileResponseDto } from '../follows/dto/follow-profile-response.dto';
+import { FollowProfileResponseDto } from '../follows/dtos/follow-profile-response.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -111,7 +111,6 @@ export class NotificationsService {
       sortBy = 'createdAt',
       sortOrder = 'DESC',
     } = pagination;
-    console.log("userId: ", userId)
 
     const qb = this.buildListQuery(profile.id).orderBy(
       `n.${sortBy}`,

@@ -1,8 +1,8 @@
 import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
 import { SearchService } from './search.service';
-import { UserSearchDto } from './dto/user-search.dto';
-import { PostSearchDto } from './dto/post-search.dto';
+import { UserSearchDto } from './dtos/user-search.dto';
+import { PostSearchDto } from './dtos/post-search.dto';
 import { SEARCH_QUEUE } from './search.constants';
 import { Logger } from '@nestjs/common';
 

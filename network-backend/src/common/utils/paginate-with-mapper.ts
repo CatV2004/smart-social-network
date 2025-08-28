@@ -9,8 +9,8 @@ export async function paginateWithMapper<T extends ObjectLiteral, R>(
     qb: SelectQueryBuilder<T>,
     page: number,
     limit: number,
-    mapper: (entity: T) => R,
-): Promise<IPaginated<R>> {
+    mapper: (entity: T) => R | Promise<R>,
+): Promise < IPaginated < R >> {
     const total = await qb.getCount();
 
     const entities = await qb
@@ -18,7 +18,7 @@ export async function paginateWithMapper<T extends ObjectLiteral, R>(
         .take(limit)
         .getMany();
 
-    const data = entities.map(mapper);
+    const data = await Promise.all(entities.map(mapper));
 
     const meta: PaginationMetaDto = {
         total,

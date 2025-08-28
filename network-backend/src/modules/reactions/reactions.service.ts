@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { ReactionPost } from './entities/reaction-post.entity';
 import { PostsService } from '../posts/posts.service';
 import { ProfilesService } from '../profiles/profiles.service';
-import { ToggleReactionPostDto } from '@/modules/reactions/dto/toggle-reaction-post.dto';
+import { ToggleReactionPostDto } from '@/modules/reactions/dtos/toggle-reaction-post.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()

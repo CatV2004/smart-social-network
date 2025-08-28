@@ -1,7 +1,7 @@
 import { Follow } from '../entities/follow.entity';
-import { FollowProfileResponseDto } from '../dto/follow-profile-response.dto';
-import { ProfilePublicDto } from '@/modules/profiles/dto/profile-public.dto';
-import { UserPublicDto } from '@/modules/users/dto/user-public.dto';
+import { FollowProfileResponseDto } from '../dtos/follow-profile-response.dto';
+import { ProfilePublicDto } from '@/modules/profiles/dtos/profile-public.dto';
+import { UserPublicDto } from '@/modules/users/dtos/user-public.dto';
 import { plainToInstance } from 'class-transformer';
 
 export class FollowMapper {

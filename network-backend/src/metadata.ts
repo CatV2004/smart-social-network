@@ -8,7 +8,7 @@ export default async () => {
 
   ] = await Promise.all([
     import('@/modules/users/entities/user.entity'),
-    import('@/modules/auth/dto/sign-in.dto'),
+    import('@/modules/auth/dtos/sign-in.dto'),
     import('@/app.controller'),
     import('@/modules/auth/auth.controller'),
     import('@/modules/users/users.controller'),

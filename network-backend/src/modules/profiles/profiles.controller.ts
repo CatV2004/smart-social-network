@@ -1,12 +1,12 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Put, ParseUUIDPipe, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
-import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdateProfileDto } from './dtos/update-profile.dto';
 import { ApiBadRequestResponse, ApiBody, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
-import { ProfileResponseDto } from './dto/response-profile.dto';
+import { ProfileResponseDto } from './dtos/response-profile.dto';
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
-import { UpdateProfileImageDto } from './dto/update-profile-image.dto';
+import { UpdateProfileImageDto } from './dtos/update-profile-image.dto';
 
 @Controller('profiles')
 export class ProfilesController {

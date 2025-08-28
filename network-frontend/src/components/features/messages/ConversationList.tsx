@@ -1,76 +1,98 @@
-"use client";
-
-import { useState } from "react";
-import { Conversation } from "@/types/message";
 import { ConversationItem } from "./ConversationItem";
-import { Input } from "@/components/ui/input";
-import { Search, MessageSquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { Loader2, MessageSquarePlus } from "lucide-react";
+import { conversationResponse } from "@/types/conversation";
 
 interface ConversationListProps {
-  conversations: Conversation[];
+  conversations: conversationResponse[];
   selectedConversationId?: string;
-  onSelectConversation?: (conversationId: string) => void; // Thêm prop này
+  hasMore: boolean;
+  isLoading: boolean;
+  isFiltering: boolean;
+  filterType: "all" | "unread" | "pinned";
+  onSelectConversation: (conversation: conversationResponse) => void;
+  onLoadMore: () => void;
 }
 
 export function ConversationList({
   conversations,
   selectedConversationId,
-  onSelectConversation, // Nhận prop
+  hasMore,
+  isLoading,
+  isFiltering,
+  filterType,
+  onSelectConversation,
+  onLoadMore,
 }: ConversationListProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const router = useRouter();
 
-  const filteredConversations = conversations.filter((conversation) => {
-    const displayName = conversation.isGroup
-      ? conversation.groupName
-      : conversation.participants[0].fullName;
-
-    return displayName?.toLowerCase().includes(searchTerm.toLowerCase());
-  });
-
-  const handleSelectConversation = (conversationId: string) => {
-    if (onSelectConversation) {
-      onSelectConversation(conversationId); // Gọi callback nếu có
-    }
-    router.push(`/direct/t/${conversationId}`);
-  };
-
-  const handleNewMessage = () => {
-    // Logic để tạo tin nhắn mới
-    console.log("Create new message");
-  };
+  if (conversations.length === 0 && !isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-500 p-4">
+        <div className="rounded-full bg-gray-200 p-4 mb-3">
+          <MessageSquarePlus className="h-8 w-8 text-gray-400" />
+        </div>
+        <p className="text-center text-sm font-medium">
+          {filterType === "unread"
+            ? "Không có hội thoại chưa đọc"
+            : filterType === "pinned"
+            ? "Không có hội thoại được ghim"
+            : isFiltering
+            ? "Không tìm thấy kết quả phù hợp"
+            : "Bắt đầu cuộc trò chuyện mới"}
+        </p>
+        <p className="text-center text-xs mt-1 text-gray-400">
+          {filterType === "all" &&
+            !isFiltering &&
+            "Nhấn vào nút + để bắt đầu trò chuyện"}
+        </p>
+        {filterType === "all" && !isFiltering && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4 rounded-lg"
+          >
+            <MessageSquarePlus className="h-4 w-4 mr-2" />
+            Trò chuyện mới
+          </Button>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Tin nhắn</h2>
-          <Button variant="ghost" size="icon" onClick={handleNewMessage}>
-            <MessageSquarePlus className="h-5 w-5" />
-          </Button>
-        </div>
-        <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm kiếm"
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto">
-        {filteredConversations.map((conversation) => (
+    <>
+      <div className="space-y-1">
+        {conversations.map((conversation) => (
           <ConversationItem
             key={conversation.id}
             conversation={conversation}
             isActive={selectedConversationId === conversation.id}
-            onClick={() => handleSelectConversation(conversation.id)}
+            onClick={() => onSelectConversation(conversation)}
           />
         ))}
       </div>
-    </div>
+
+      {/* Load More Button */}
+      {hasMore && (
+        <div className="flex justify-center mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onLoadMore}
+            disabled={isLoading}
+            className="rounded-lg"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Đang tải...
+              </>
+            ) : (
+              "Tải thêm"
+            )}
+          </Button>
+        </div>
+      )}
+    </>
   );
 }

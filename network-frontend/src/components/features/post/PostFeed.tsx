@@ -133,7 +133,6 @@
 //       if (onEditPost) {
 //         onEditPost(post);
 //       } else {
-//         console.log("Edit post:", post.id);
 //         toast({
 //           title: "Thông báo",
 //           description: "Tính năng chỉnh sửa bài viết",

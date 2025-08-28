@@ -28,9 +28,9 @@ import {
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { Public } from '@/common/decorators/public.decorator';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UserResponseDto } from './dto/user-response.dto';
-import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { UserResponseDto } from './dtos/user-response.dto';
+import { ResendVerificationDto } from './dtos/resend-verification.dto';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 
 @ApiTags('users')

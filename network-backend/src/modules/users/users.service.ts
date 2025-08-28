@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, IsNull, Repository } from 'typeorm';
+import { EntityManager, In, IsNull, Repository } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from './dtos/create-user.dto';
 import { BcryptService } from '@/modules/auth/bcrypt.service';
-import { UserResponseDto } from './dto/user-response.dto';
+import { UserResponseDto } from './dtos/user-response.dto';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '@/mail/mail.service';
 import dayjs from 'dayjs';
@@ -12,7 +12,7 @@ import { ProfilesService } from '../profiles/profiles.service';
 import { v4 as uuidv4 } from 'uuid';
 import { log } from 'console';
 import { SearchService } from '../search/search.service';
-import { UserSearchDto } from '../search/dto/user-search.dto';
+import { UserSearchDto } from '../search/dtos/user-search.dto';
 import { UserSearchMapper } from './mappers/user-search.mapper';
 import { plainToInstance } from 'class-transformer';
 
@@ -273,6 +273,15 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async findByIds(ids: string[]): Promise<User[]> {
+    if (!ids || ids.length === 0) {
+      return [];
+    }
+    return await this.userRepository.find({
+      where: { id: In(ids) },
+    });
   }
 
   async findByIdWithRelations(id: string, relations: string[] = []): Promise<User> {

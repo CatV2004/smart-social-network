@@ -25,10 +25,10 @@ import {
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
-import { CreateCommentDto } from './dto/create-comment.dto';
+import { CreateCommentDto } from './dtos/create-comment.dto';
 import { CommentsService } from './comments.service';
-import { CommentResponseDto } from './dto/comment-response.dto';
-import { PaginatedCommentResponseDto } from './dto/paginated-comment-response.dto';
+import { CommentResponseDto } from './dtos/comment-response.dto';
+import { PaginatedCommentResponseDto } from './dtos/paginated-comment-response.dto';
 
 @ApiTags('comments')
 @ApiBearerAuth()

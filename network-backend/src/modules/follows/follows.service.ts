@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Follow, FollowStatus } from './entities/follow.entity';
 import { In, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
-import { FollowProfileResponseDto } from './dto/follow-profile-response.dto';
+import { FollowProfileResponseDto } from './dtos/follow-profile-response.dto';
 import { UsersService } from '../users/users.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { IPaginated } from '@/common/dtos/paginated.interface';
@@ -11,6 +11,7 @@ import { paginateWithMapper } from '@/common/utils/paginate-with-mapper';
 import { NotificationType } from '../notifications/types/notification.type';
 import { NotificationsService } from '../notifications/notifications.service';
 import { FollowMapper } from './mappers/follow.mapper';
+import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
 
 @Injectable()
 export class FollowsService {
@@ -165,27 +166,28 @@ export class FollowsService {
     ));
   }
 
-  async getFollowing(userId: string): Promise<FollowProfileResponseDto[]> {
+  async getFollowing(
+    userId: string, paginate: PaginationQueryDto
+  ): Promise<IPaginated<FollowProfileResponseDto>> {
     const profile = await this.profilesService.findByUserId(userId);
 
-    const following = await this.followRepo.find({
-      where: {
-        follower: { id: profile.id },
-        status: FollowStatus.ACCEPTED,
-      },
-      relations: ['following', 'following.user'],
-      order: { createdAt: 'DESC' },
-    });
+    const qb = this.followRepo
+      .createQueryBuilder('follow')
+      .leftJoinAndSelect('follow.following', 'following')
+      .leftJoinAndSelect('follow.follower', 'follower')
+      .leftJoinAndSelect('following.user', 'user')
+      .where('follower.id = :profileId', { profileId: profile.id })
+      .andWhere('follow.status = :status', { status: FollowStatus.ACCEPTED })
+      .orderBy('follow.createdAt', 'DESC');
 
-    return following.map(follow => plainToInstance(
-      FollowProfileResponseDto,
-      {
-        profile: follow.following,
-        followedAt: follow.createdAt,
-      },
-      { excludeExtraneousValues: true }
-    ));
+    return paginateWithMapper<Follow, FollowProfileResponseDto>(
+      qb,
+      paginate.page ?? 1,
+      paginate.limit ?? 10,
+      (follow: Follow) => FollowMapper.toFollowingDto(follow),
+    );
   }
+
 
   async getSentFollowRequests(userId: string): Promise<FollowProfileResponseDto[]> {
     const profile = await this.profilesService.findByUserId(userId);

@@ -26,7 +26,7 @@ export const PostGrid = ({
   onLoadMore,
   hasMore = false,
   isLoading = false,
-  onPostClick, // 👈 Nhận prop mới
+  onPostClick, 
 }: PostGridProps) => {
   const loaderRef = useRef<HTMLDivElement | null>(null);
 

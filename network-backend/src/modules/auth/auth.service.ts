@@ -8,7 +8,7 @@ import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 import { RedisService } from '@/redis/redis.service';
 import { User } from '@/modules/users/entities/user.entity';
 import { BcryptService } from './bcrypt.service';
-import { TokensResponseDto } from './dto/tokens-response.dto';
+import { TokensResponseDto } from './dtos/tokens-response.dto';
 import { UsersService } from '../users/users.service';
 
 @Injectable()

@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { UserSearchDto } from './dto/user-search.dto';
-import { PostSearchDto } from './dto/post-search.dto';
+import { UserSearchDto } from './dtos/user-search.dto';
+import { PostSearchDto } from './dtos/post-search.dto';
 import { SEARCH_QUEUE } from './search.constants';
 
 type SearchDoc = UserSearchDto | PostSearchDto;

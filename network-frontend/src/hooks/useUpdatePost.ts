@@ -47,7 +47,6 @@ export const useUpdatePost = (options?: UseUpdatePostOptions) => {
                 ],
             };
 
-            console.log("Updating post with payload: ", payload);
 
             const updatedPost: Post = await postService.updatePostWithMedia(postId, payload);
 

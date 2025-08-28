@@ -46,8 +46,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.socketService.registerConnection('/', client.id, userId);
       client.join(`user_${userId}`);
 
-      this.logger.log(`User ${userId} connected (socket: ${client.id})`);
-
+      this.logger.log(`User ${userId} connected to main namespace (socket: ${client.id})`);
     } catch (error) {
       this.logger.error(`Connection error: ${error.message}`);
       client.disconnect();

@@ -1,9 +1,9 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { SearchService } from './search.service';
 import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { UserSearchDto } from './dto/user-search.dto';
-import { PostSearchDto } from './dto/post-search.dto';
-import { SearchResultDto } from './dto/search-result.dto';
+import { UserSearchDto } from './dtos/user-search.dto';
+import { PostSearchDto } from './dtos/post-search.dto';
+import { SearchResultDto } from './dtos/search-result.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface'; 
 import { PaginationMetaDto } from '@/common/dtos/pagination-meta.dto'; 
 

@@ -11,12 +11,17 @@ export function SidebarNavItem({
   isCollapsed,
   isTransitioning,
   index,
-  badgeCount, // Thêm prop mới cho badge
+  badgeCount,
 }: any) {
   // Thêm class background khi active
   const containerClass = `w-full text-left text-2xl flex items-center p-3 rounded-lg transition-all duration-300 cursor-pointer overflow-hidden ${
     isActive ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100 text-black"
   }`;
+
+  // Xác định xem có nên hiển thị badge không
+  const shouldShowBadge =
+    badgeCount > 0 &&
+    (item.overlay === "notifications" || item.href?.startsWith("/direct"));
 
   if (item.action) {
     return (
@@ -95,8 +100,8 @@ export function SidebarNavItem({
               </motion.div>
             ) : null}
 
-            {/* Hiển thị badge nếu có số lượng và là mục thông báo */}
-            {badgeCount > 0 && item.overlay === "notifications" && (
+            {/* Hiển thị badge nếu có số lượng và là mục thông báo hoặc tin nhắn */}
+            {shouldShowBadge && (
               <motion.span
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}

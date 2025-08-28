@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import jwtConfig from '@/common/config/jwt.config';
-import { RefreshTokenDto } from '../../dto/refresh-token.dto';
+import { RefreshTokenDto } from '../../dtos/refresh-token.dto';
 
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'refresh-token') {

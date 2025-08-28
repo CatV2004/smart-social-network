@@ -2,37 +2,55 @@
 "use client";
 
 import { Sidebar } from "./Sidebar/Sidebar";
-
-// import MobileNavbar from "./MobileNavbar";
+import { usePathname } from "next/navigation";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
+import { setSidebarCollapse } from "@/redux/features/ui/uiSlice";
+import { useEffect } from "react";
+import { cn } from "@/lib/utils/cn"; // Nếu bạn có utility cn
 
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // const [isMobile, setIsMobile] = useState(false);
+  const pathname = usePathname();
+  const dispatch = useAppDispatch();
+  const isSidebarCollapsed = useAppSelector(
+    (state) => state.ui.isSidebarCollapsed
+  );
+  const activeOverlay = useAppSelector((state) => state.ui.activeOverlay);
+  const isDirectPage = pathname?.startsWith("/direct");
 
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     setIsMobile(window.innerWidth < 768);
-  //   };
-
-  //   handleResize();
-  //   window.addEventListener("resize", handleResize);
-  //   return () => window.removeEventListener("resize", handleResize);
-  // }, []);
+  useEffect(() => {
+    if (activeOverlay === "none") {
+      if (isDirectPage && !isSidebarCollapsed) {
+        dispatch(setSidebarCollapse(true));
+      } else if (!isDirectPage && isSidebarCollapsed) {
+        dispatch(setSidebarCollapse(false));
+      }
+    }
+  }, [pathname, isDirectPage, isSidebarCollapsed, dispatch, activeOverlay]);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {" "}
       {/* Sidebar wrapper */}
-      <div className="w-1/6 min-w-[88px] lg:w-1/6 lg:min-w-[280px]">
-        <Sidebar />
+      <div className={cn(
+        // Điều kiện: chỉ thêm w-1/6 khi KHÔNG phải trang direct
+        !isDirectPage && "w-1/6"
+      )}>
+        <div className={cn(
+          "transition-all duration-300",
+          isSidebarCollapsed 
+            ? "w-[88px]" 
+            : "min-w-[88px] lg:min-w-[280px]",
+          // Đảm bảo sidebar chiếm full width trong container trên trang direct
+        )}>
+          <Sidebar />
+        </div>
       </div>
+
       {/* Main content */}
-      <main className="flex-1 transition-all duration-300">
-        <div className="max-w-[1024px] mx-auto w-full p-4">{children}</div>
-      </main>
+      <div className="flex-1">{children}</div>
     </div>
   );
 }

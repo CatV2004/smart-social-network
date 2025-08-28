@@ -1,7 +1,11 @@
 import { motion, Easing } from "framer-motion";
 
 interface LoadingSkeletonProps {
-  type: "stories" | "posts" | "suggestions" | "follow-requests";
+  type:
+    | "stories"
+    | "posts"
+    | "suggestions"
+    | "follow-requests"
   count?: number;
   className?: string;
 }
@@ -207,6 +211,5 @@ export default function LoadingSkeleton({
       </div>
     );
   }
-
   return null;
 }

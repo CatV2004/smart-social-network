@@ -1,0 +1,18 @@
+import { ProfilePublicDto } from '@/modules/profiles/dtos/profile-public.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { Expose, Type } from 'class-transformer';
+
+export class FollowProfileResponseDto {
+  @ApiProperty()
+  @Expose()
+  id: string;
+
+  @ApiProperty({ type: () => ProfilePublicDto })
+  @Expose()
+  @Type(() => ProfilePublicDto)
+  profile: ProfilePublicDto;
+
+  @ApiProperty({ type: String, format: 'date-time' })
+  @Expose()
+  followedAt: Date;
+}

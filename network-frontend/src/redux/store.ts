@@ -6,6 +6,9 @@ import userReducer from './features/user/userSlice';
 import uiReducer from "./features/ui/uiSlice";
 import notificationReducer from './features/notifications/notificationSlice';
 import followRequestsReducer from "./features/follow-request/followRequestSlice";
+import messageReducer from "./features/chat/slices/messageSlice";
+import memberReducer from "./features/chat/slices/memberSlice";
+import conversationReducer from "./features/chat/slices/conversationSlice";
 
 import { combineReducers } from 'redux';
 import storage from 'redux-persist/lib/storage';
@@ -13,6 +16,7 @@ import { persistReducer, persistStore } from 'redux-persist';
 import { clearAuth, setAuthTokens } from './features/auth/authSlice'; // Thêm loginSuccess
 import { resetNotifications } from './features/notifications/notificationSlice';
 import { fetchNotifications, fetchUnreadCount } from './features/notifications/notificationThunks'; // Import thunks
+import { getUnreadCount } from './features/chat/thunks/messageThunks';
 
 // Tạo listener middleware
 export const listenerMiddleware = createListenerMiddleware();
@@ -33,6 +37,7 @@ listenerMiddleware.startListening({
         // Fetch notifications khi đăng nhập thành công
         listenerApi.dispatch(fetchNotifications({ limit: 20 }));
         listenerApi.dispatch(fetchUnreadCount());
+        listenerApi.dispatch(getUnreadCount());
     },
 });
 
@@ -49,6 +54,9 @@ const rootReducer = combineReducers({
     ui: uiReducer,
     notifications: notificationReducer,
     followRequests: followRequestsReducer,
+    message: messageReducer,
+    member: memberReducer,
+    conversation: conversationReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

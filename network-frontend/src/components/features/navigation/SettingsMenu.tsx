@@ -82,7 +82,7 @@ export default function SettingsMenu({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute bottom-12 left-0 w-56 bg-white rounded-lg shadow-lg py-1 z-50 border border-gray-200"
+            className="absolute bottom-12 left-0 w-56 bg-white rounded-lg shadow-lg py-1 z-[60] border border-gray-200"
           >
             <MenuItem label="Cài đặt" icon={Icons.settings} hasCheckmark />
             <MenuItem

@@ -1,5 +1,5 @@
 import { Notification } from "../entities/notification.entity";
-import { NotificationDto } from "../dto/notification.dto";
+import { NotificationDto } from "../dtos/notification.dto";
 import { NotificationType } from "../types/notification.type";
 
 export class NotificationMapper {

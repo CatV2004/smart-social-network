@@ -20,7 +20,7 @@ export class PaginationQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  limit?: number = 3;
+  limit?: number = 20;
 
   @ApiPropertyOptional({ example: 'createdAt' })
   @IsOptional()

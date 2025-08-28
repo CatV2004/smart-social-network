@@ -4,7 +4,7 @@ import { ReactionsService } from './reactions.service';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
-import { ToggleReactionPostDto } from '@/modules/reactions/dto/toggle-reaction-post.dto';
+import { ToggleReactionPostDto } from '@/modules/reactions/dtos/toggle-reaction-post.dto';
 
 @ApiTags('Reactions')
 @ApiBearerAuth()

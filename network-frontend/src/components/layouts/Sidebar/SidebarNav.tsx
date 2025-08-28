@@ -1,4 +1,3 @@
-// components/layout/Sidebar/SidebarNav.tsx
 import { useActiveTab } from "@/hooks/useActiveTab";
 import { SidebarNavItem } from "./SidebarNavItem";
 import { useAppSelector } from "@/redux/hooks";
@@ -11,27 +10,38 @@ export function SidebarNav({
   userAvatar,
   isCollapsed,
   isTransitioning,
-  activeOverlay, // Nhận activeOverlay từ props
+  activeOverlay,
 }: any) {
   const isActiveTab = useActiveTab();
   const unreadCount = useAppSelector(selectCountUnReadOnly);
+  const messageUnreadCount = 2
 
   return (
     <ul>
-      {items.map((item: any, index: number) => (
-        <li key={item.name} className="mb-2">
-          <SidebarNavItem
-            item={item}
-            isActive={isActiveTab(item, activeOverlay)}
-            onClick={(e: any) => handleItemClick(e, item)}
-            userAvatar={userAvatar}
-            isCollapsed={isCollapsed}
-            isTransitioning={isTransitioning}
-            index={index}
-            badgeCount={item.overlay === "notifications" ? unreadCount : 0}
-          />
-        </li>
-      ))}
+      {items.map((item: any, index: number) => {
+        // Xác định badge count cho từng item
+        let badgeCount = 0;
+        if (item.overlay === "notifications") {
+          badgeCount = unreadCount;
+        } else if (item.href?.startsWith("/direct")) {
+          badgeCount = messageUnreadCount; // Sử dụng cho mục tin nhắn
+        }
+
+        return (
+          <li key={item.name} className="mb-2">
+            <SidebarNavItem
+              item={item}
+              isActive={isActiveTab(item, activeOverlay)}
+              onClick={(e: any) => handleItemClick(e, item)}
+              userAvatar={userAvatar}
+              isCollapsed={isCollapsed}
+              isTransitioning={isTransitioning}
+              index={index}
+              badgeCount={badgeCount} // Truyền badge count
+            />
+          </li>
+        );
+      })}
     </ul>
   );
 }

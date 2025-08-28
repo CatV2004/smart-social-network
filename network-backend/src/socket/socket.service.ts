@@ -142,6 +142,26 @@ export class SocketService implements OnModuleDestroy {
     }
   }
 
+  getOnlineUsersInNamespace(namespace: string): string[] {
+    const namespaceMap = this.namespaceConnections.get(namespace);
+    if (!namespaceMap) return [];
+
+    const onlineUsers: string[] = [];
+    for (const [userId, sockets] of namespaceMap.entries()) {
+      if (sockets.length > 0) {
+        onlineUsers.push(userId);
+      }
+    }
+    return onlineUsers;
+  }
+
+  emitToRoomInNamespace(namespace: string, room: string, event: string, data: any) {
+    const namespaceInstance = this.server.of(namespace);
+    if (namespaceInstance) {
+      namespaceInstance.to(room).emit(event, data);
+    }
+  }
+
 
   onModuleDestroy() {
     this.namespaceConnections.clear();

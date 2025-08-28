@@ -2,11 +2,11 @@ import { Controller, Post, Get, UseGuards, Body, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { SavePostsService } from './save-posts.service';
-import { ToggleSavePostDto } from './dto/toggle-save-post.dto';
+import { ToggleSavePostDto } from './dtos/toggle-save-post.dto';
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 import { PaginatedResponseDto } from '@/common/dtos/paginated-response.factory';
-import { PostResponseDto } from '../posts/dto/response-post.dto';
+import { PostResponseDto } from '../posts/dtos/response-post.dto';
 import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface';
 

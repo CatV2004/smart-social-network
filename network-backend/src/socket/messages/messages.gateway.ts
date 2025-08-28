@@ -11,6 +11,7 @@ import {
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { SocketService } from '../socket.service';
+import { MessageResponseDto } from '@/modules/messages/dtos/message-response.dto';
 
 @WebSocketGateway({
     cors: {
@@ -27,7 +28,8 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection, OnGa
     constructor(private readonly socketService: SocketService) { }
 
     afterInit(server: Server) {
-        this.logger.log('🚀 MessagesGateway initialized');
+        this.socketService.setServer(server);
+        this.logger.log('MessagesGateway initialized');
     }
 
     async handleConnection(client: Socket) {
@@ -40,10 +42,13 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection, OnGa
                 return;
             }
 
+            // Đăng ký kết nối với namespace messages
+            this.socketService.registerConnection('/messages', client.id, userId);
+
             // Join user room trong messages namespace
             client.join(`user_${userId}`);
 
-            this.logger.log(`✅ User ${userId} connected to messages (socket: ${client.id})`);
+            this.logger.log(`User ${userId} connected to messages (socket: ${client.id})`);
 
         } catch (error) {
             this.logger.error(`Messages connection error: ${error.message}`);
@@ -52,9 +57,10 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection, OnGa
     }
 
     handleDisconnect(client: Socket) {
+        this.socketService.unregisterConnection(client.id);
         const userId = this.socketService.getUserIdBySocketId(client.id);
         if (userId) {
-            this.logger.log(`❌ User ${userId} disconnected from messages (socket: ${client.id})`);
+            this.logger.log(`User ${userId} disconnected from messages (socket: ${client.id})`);
         }
     }
 
@@ -96,12 +102,24 @@ export class MessagesGateway implements OnGatewayInit, OnGatewayConnection, OnGa
     // Gửi message đến conversation
     sendToConversation(conversationId: string, message: any) {
         this.server.to(`conversation_${conversationId}`).emit('new_message', message);
-        this.logger.debug(`📩 Sent message to conversation ${conversationId}`);
+        this.logger.debug(` Sent message to conversation ${conversationId}`);
     }
 
-    // Gửi message đến user
-    sendToUser(userId: string, message: any) {
-        this.server.to(`user_${userId}`).emit('new_message', message);
-        this.logger.debug(`📩 Sent message to user ${userId}`);
+    // Gửi message đến user cụ thể trong namespace messages
+    sendToUser(userId: string, message: MessageResponseDto) {
+        this.socketService.emitToUserInNamespace(userId, '/messages', 'new_message', message);
+        this.logger.debug(`Sent message to user ${userId} in messages namespace`);
+    }
+
+    // Gửi message đến nhiều users
+    sendToUsers(userIds: string[], message: any) {
+        userIds.forEach(userId => {
+            this.sendToUser(userId, message);
+        });
+    }
+
+    // Kiểm tra user có online trong messages namespace không
+    isUserOnline(userId: string): boolean {
+        return this.socketService.isUserOnlineInNamespace(userId, '/messages');
     }
 }

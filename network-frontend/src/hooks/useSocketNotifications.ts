@@ -1,4 +1,3 @@
-// hooks/useSocketNotifications.ts - SỬA LẠI
 "use client";
 
 import { useEffect } from 'react';

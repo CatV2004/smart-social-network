@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpCode, UseGuards, Query, BadRequestException, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import { CreatePostDto } from './dto/create-post.dto';
+import { CreatePostDto } from './dtos/create-post.dto';
 import { ApiBadRequestResponse, ApiBody, ApiConsumes, ApiCreatedResponse, ApiForbiddenResponse, ApiNoContentResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { Post as PostEntity } from './entities/post.entity';
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
@@ -9,13 +9,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PostOwnerGuard } from './guards/post-owner.guard';
 import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
 import { PaginatedResponseDto } from '@/common/dtos/paginated-response.factory';
-import { PostResponseDto } from './dto/response-post.dto';
+import { PostResponseDto } from './dtos/response-post.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface';
 import { PostOwnerGuardForHardDeleteAndRestore } from './guards/post-owner-hard-restore.gaurd';
-import { UpdatePostDto } from './dto/update-post.dto';
-import { UpdateMediaDto } from '../media/dto/update-media.dto';
+import { UpdatePostDto } from './dtos/update-post.dto';
+import { UpdateMediaDto } from '../media/dtos/update-media.dto';
 import { AnyFilesInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { PostEditResponseDto } from './dto/post-edit-response.dto';
+import { PostEditResponseDto } from './dtos/post-edit-response.dto';
 import { plainToInstance } from 'class-transformer';
 
 @ApiTags('Posts')

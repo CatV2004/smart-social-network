@@ -2,13 +2,13 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
-import { CreateCommentDto } from './dto/create-comment.dto';
+import { CreateCommentDto } from './dtos/create-comment.dto';
 import { PostsService } from '../posts/posts.service';
 import { ProfilesService } from '../profiles/profiles.service';
 import { plainToInstance } from 'class-transformer';
-import { CommentResponseDto } from './dto/comment-response.dto';
+import { CommentResponseDto } from './dtos/comment-response.dto';
 import { paginate } from '@/common/utils/pagination.util';
-import { PaginatedCommentResponseDto } from './dto/paginated-comment-response.dto';
+import { PaginatedCommentResponseDto } from './dtos/paginated-comment-response.dto';
 import { Profile } from '../profiles/entities/profile.entity';
 import { Post } from '../posts/entities/post.entity';
 

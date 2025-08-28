@@ -14,7 +14,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { MediaService } from './media.service';
-import { CreateMediaDto } from './dto/create-media.dto';
+import { CreateMediaDto } from './dtos/create-media.dto';
 import { Media } from './entities/media.entity';
 import {
   ApiTags,
@@ -25,7 +25,7 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { MediaResponseDto } from './dto/response-media.dto';
+import { MediaResponseDto } from './dtos/response-media.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Media')

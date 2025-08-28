@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
-import { MediaType } from '@/modules/media/types/media.types';
+import { MediaType } from '@/modules/media/types/media.type';
 import { Post } from '@/modules/posts/entities/post.entity';
 
 @Entity({ name: 'media' })

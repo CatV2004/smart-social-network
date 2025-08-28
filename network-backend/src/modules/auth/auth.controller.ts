@@ -12,10 +12,10 @@ import {
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { Public } from '@/common/decorators/public.decorator';
 import { AuthService } from './auth.service';
-import { SignInDto } from './dto/sign-in.dto';
-import { TokensResponseDto } from './dto/tokens-response.dto';
+import { SignInDto } from './dtos/sign-in.dto';
+import { TokensResponseDto } from './dtos/tokens-response.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { RefreshTokenDto } from './dtos/refresh-token.dto';
 
 @ApiTags('auth')
 @Controller('auth')
