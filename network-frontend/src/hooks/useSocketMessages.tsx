@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
-import { useMessagesSocket as useMessagesSocketContext } from "@/context/MessagesSocketContext";
+import { useSingleSocket } from "@/context/SingleSocketContext";
+import { MessageResponse } from "@/types/message";
+import { useAppDispatch } from "@/redux/hooks";
+import { inCreaseUnreadCount, updateConversationLastMessage } from "@/redux/features/chat/slices/conversationSlice";
 
-export function useMessagesSocket() {
+export function useSocketMessages() {
   const {
     socket,
     isConnected,
@@ -12,12 +15,28 @@ export function useMessagesSocket() {
     sendTyping,
     onNewMessage,
     onUserTyping,
-  } = useMessagesSocketContext();
+  } = useSingleSocket();
 
+  const dispatch = useAppDispatch();
   const messageListenersRef = useRef<Set<() => void>>(new Set());
   const typingListenersRef = useRef<Set<() => void>>(new Set());
 
-  // Helper cho new_message
+  const handleGlobalMessage = useCallback(
+    (message: MessageResponse) => {
+      console.log("Global message received for conversation update:", message);
+
+      dispatch(
+        updateConversationLastMessage({
+          conversationId: message.conversationId,
+          lastMessage: message,
+        })
+      );
+
+      dispatch(inCreaseUnreadCount({ conversationId: message.conversationId }));
+    },
+    [dispatch]
+  );
+
   const subscribeNewMessage = useCallback(
     (callback: (msg: any) => void) => {
       const unsubscribe = onNewMessage(callback);
@@ -30,7 +49,6 @@ export function useMessagesSocket() {
     [onNewMessage]
   );
 
-  // Helper cho user_typing
   const subscribeUserTyping = useCallback(
     (callback: (data: { userId: string; isTyping: boolean }) => void) => {
       const unsubscribe = onUserTyping(callback);
@@ -43,15 +61,17 @@ export function useMessagesSocket() {
     [onUserTyping]
   );
 
-  // Cleanup khi unmount
   useEffect(() => {
+    const unsubscribe = onNewMessage(handleGlobalMessage);
+
     return () => {
+      unsubscribe();
       messageListenersRef.current.forEach((unsubscribe) => unsubscribe());
       typingListenersRef.current.forEach((unsubscribe) => unsubscribe());
       messageListenersRef.current.clear();
       typingListenersRef.current.clear();
     };
-  }, []);
+  }, [onNewMessage, handleGlobalMessage]);
 
   return {
     socket,

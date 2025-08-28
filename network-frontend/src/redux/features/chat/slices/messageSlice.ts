@@ -2,7 +2,6 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { MessageResponse } from '@/types/message';
 import { PaginationMeta } from '@/types/pagination-meta';
 import { fetchMessages, markMessageAsRead, sendMessage } from '../thunks/messageThunks';
-import { stat } from 'fs';
 
 interface MessageState {
     messages: MessageResponse[];

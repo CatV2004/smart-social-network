@@ -28,6 +28,7 @@ export class MessageMapper {
             createdAt: message.createdAt,
             updatedAt: message.updatedAt,
             sender: senderProfile,
+            conversationId: message.conversation.id,
             attachments:
                 message.attachments?.map(
                     (a) =>

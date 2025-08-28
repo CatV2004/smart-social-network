@@ -13,9 +13,7 @@ import { UsersModule } from '../users/users.module';
 import { CloudinaryModule } from '@/cloudinary/cloudinary.module';
 import { IsMemberIdsValid } from './validators/is-memberIds.validator';
 import { MessageRead } from './entities/message-read.entity';
-import { MessagesGateway } from '@/socket/messages/messages.gateway';
 import { SocketModule } from '@/socket/socket.module';
-import { MessageRealtimeService } from './services/message-realtime.service';
 import { ConversationMembersService } from './services/conversation-members-service';
 
 @Module({
@@ -30,8 +28,6 @@ import { ConversationMembersService } from './services/conversation-members-serv
     MembersService,
     MessagesService,
     IsMemberIdsValid,
-    MessagesGateway,
-    MessageRealtimeService,
     ConversationMembersService],
   controllers: [ConversationsController, MembersController, MessagesController],
 })

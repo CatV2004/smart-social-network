@@ -1,7 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { conversationResponse } from '@/types/conversation';
-import { fetchConversations, createConversation } from '../thunks/conversationThunks';
+import { fetchConversations, createConversation, markConversationAsRead } from '../thunks/conversationThunks';
 import { PaginationMeta } from '@/types/pagination-meta';
+import { MessageResponse } from '@/types/message';
+import { ConservationService } from '@/services/conversation.service';
 
 interface ConversationState {
     conversations: conversationResponse[];
@@ -43,6 +45,34 @@ const conversationSlice = createSlice({
                 totalPages: 1,
             };
         },
+        updateConversationLastMessage: (
+            state,
+            action: PayloadAction<{ conversationId: string; lastMessage: MessageResponse }>
+        ) => {
+            const { conversationId, lastMessage } = action.payload;
+            const index = state.conversations.findIndex(c => c.id === conversationId);
+            if (index !== -1) {
+                console.log("lastMessage in slice:", lastMessage)
+                state.conversations[index].lastMessage = ConservationService.mapToSummary(lastMessage);
+                state.conversations[index].updatedAt = lastMessage.createdAt;
+                const updatedConv = state.conversations.splice(index, 1)[0];
+                state.conversations.unshift(updatedConv);
+            }
+        },
+        inCreaseUnreadCount: (state, action: PayloadAction<{ conversationId: string }>) => {
+            const conversationId = action.payload.conversationId
+            const index = state.conversations.findIndex(c => c.id === conversationId)
+            if (index !== -1) {
+                state.conversations[index].unreadCount += 1;
+            }
+        },
+        deCreaseUnreadCount: (state, action: PayloadAction<{ conversationId: string }>) => {
+            const conversationId = action.payload.conversationId
+            const index = state.conversations.findIndex(c => c.id === conversationId)
+            if (index !== -1) {
+                state.conversations[index].unreadCount -= 1;
+            }
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -100,11 +130,21 @@ const conversationSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
+            .addCase(markConversationAsRead.fulfilled, (state, action) => {
+                const conversationId = action.meta.arg;
+                const index = state.conversations.findIndex(c => c.id === conversationId);
+                if (index !== -1) {
+                    state.conversations[index].unreadCount = 0;
+                }
+            })
     },
 });
 
 export const {
     addConversation,
     resetConversations,
+    updateConversationLastMessage,
+    inCreaseUnreadCount,
+    deCreaseUnreadCount
 } = conversationSlice.actions;
 export default conversationSlice.reducer;

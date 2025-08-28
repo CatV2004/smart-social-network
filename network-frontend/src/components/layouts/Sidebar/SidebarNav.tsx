@@ -2,6 +2,7 @@ import { useActiveTab } from "@/hooks/useActiveTab";
 import { SidebarNavItem } from "./SidebarNavItem";
 import { useAppSelector } from "@/redux/hooks";
 import { selectCountUnReadOnly } from "@/redux/features/notifications/notificationSelectors";
+import { selectTotalUnreadCount } from "@/redux/features/chat/selectors";
 
 export function SidebarNav({
   items,
@@ -14,7 +15,7 @@ export function SidebarNav({
 }: any) {
   const isActiveTab = useActiveTab();
   const unreadCount = useAppSelector(selectCountUnReadOnly);
-  const messageUnreadCount = 2
+  const messageUnreadCount = useAppSelector(selectTotalUnreadCount);
 
   return (
     <ul>

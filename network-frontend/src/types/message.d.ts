@@ -20,6 +20,7 @@ export interface MessageResponse {
   updatedAt: string;
   sender: AuthorProfile;
   attachments: Attachment[];
+  conversationId: string;
 }
 
 export interface MessageRead {

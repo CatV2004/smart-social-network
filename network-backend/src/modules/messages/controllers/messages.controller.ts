@@ -1,7 +1,6 @@
 import { Controller, Post, Get, Patch, Param, Body, UseInterceptors, UploadedFiles, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { MessagesService } from '../services/messages.service';
-import { SendMessageDto } from '../dtos/send-message.dto';
 import { UpdateMessageStatusDto } from '../dtos/update-message-status.dto';
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
@@ -112,6 +111,16 @@ export class MessagesController {
     ) {
         const count = await this.messagesService.countUnreadMessages(user.id);
         return { count };
+    }
+
+    @Get('unread/:conversationId')
+    @ApiOperation({ summary: 'Get unread message IDs for the current user in a conversation' })
+    @ApiOkResponse({ type: [String] })
+    async getUnreadMessageIds(
+        @ActiveUser() user: ActiveUserData,
+        @Param('conversationId') conversationId: string
+    ): Promise<string[]> {
+        return this.messagesService.getUnreadMessageIdsForUserInConversation(user.id, conversationId);
     }
 
 }

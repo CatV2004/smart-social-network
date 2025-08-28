@@ -11,6 +11,8 @@ export class SocketService implements OnModuleDestroy {
   private namespaceConnections: Map<string, Map<string, string[]>> = new Map();
   private socketInfo: Map<string, { userId: string; namespace: string }> = new Map();
 
+  private socketRooms: Map<string, Set<string>> = new Map();
+
   setServer(server: Server) {
     this.server = server;
   }
@@ -28,6 +30,8 @@ export class SocketService implements OnModuleDestroy {
 
     namespaceMap.get(userId)!.push(socketId);
     this.socketInfo.set(socketId, { userId, namespace });
+
+    this.socketRooms.set(socketId, new Set());
 
     this.logger.log(`🔗 Registered ${socketId} for user ${userId} in namespace ${namespace}`);
   }
@@ -52,8 +56,26 @@ export class SocketService implements OnModuleDestroy {
       }
 
       this.socketInfo.delete(socketId);
+      this.socketRooms.delete(socketId);
       this.logger.log(`🔗 Unregistered ${socketId} for user ${userId} in namespace ${namespace}`);
     }
+  }
+
+  // Theo dõi rooms của socket
+  addSocketToRoom(socketId: string, room: string) {
+    if (this.socketRooms.has(socketId)) {
+      this.socketRooms.get(socketId)!.add(room);
+    }
+  }
+
+  removeSocketFromRoom(socketId: string, room: string) {
+    if (this.socketRooms.has(socketId)) {
+      this.socketRooms.get(socketId)!.delete(room);
+    }
+  }
+
+  isSocketInRoom(socketId: string, room: string): boolean {
+    return this.socketRooms.get(socketId)?.has(room) || false;
   }
 
   getUserIdBySocketId(socketId: string): string | undefined {
@@ -160,6 +182,13 @@ export class SocketService implements OnModuleDestroy {
     if (namespaceInstance) {
       namespaceInstance.to(room).emit(event, data);
     }
+  }
+
+  getRoomsBySocketId(socketId: string, namespace = '/'): string[] {
+    const nsp = this.server.of(namespace);
+    const socket = nsp.sockets.get(socketId);
+    if (!socket) return [];
+    return [...socket.rooms];
   }
 
 

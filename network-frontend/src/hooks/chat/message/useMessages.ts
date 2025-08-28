@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MessageRequest, MessageResponse } from "@/types/message";
 import { QueryParams } from "@/types/pagination-meta";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
@@ -12,13 +12,27 @@ import {
     clearMessages,
     resetMessagesPagination,
 } from "@/redux/features/chat/slices/messageSlice";
-import { useConversation } from "../conversation/useConversation";
+import { inCreaseUnreadCount, updateConversationLastMessage } from "@/redux/features/chat/slices/conversationSlice";
 
 export const useMessages = (conversationId: string) => {
     const dispatch = useAppDispatch();
     const { messages, loading, error, pagination } = useAppSelector(
         (state) => state.message
     );
+    const prevMessageIdsRef = useRef<string[]>([]);
+    const [newMessages, setNewMessages] = useState<MessageResponse[]>([]);
+
+    useEffect(() => {
+        const prevIds = prevMessageIdsRef.current;
+        const currentIds = messages.map(m => m.id);
+
+        const newMsgs = messages.filter(m => !prevIds.includes(m.id));
+        if (newMsgs.length > 0) {
+            setNewMessages(newMsgs);
+        }
+
+        prevMessageIdsRef.current = currentIds;
+    }, [messages]);
 
     useEffect(() => {
         if (conversationId) {
@@ -47,8 +61,10 @@ export const useMessages = (conversationId: string) => {
         async (messageData: MessageRequest) => {
             try {
                 const message = await dispatch(sendMessage(messageData)).unwrap();
-                console.log("meessage: ", message)
-
+                dispatch(updateConversationLastMessage({
+                    conversationId: conversationId,
+                    lastMessage: message
+                }));
                 return message;
             } catch (err) {
                 throw err;
@@ -57,11 +73,15 @@ export const useMessages = (conversationId: string) => {
         [dispatch, conversationId]
     );
 
-
     // Thêm tin nhắn từ socket
     const addNewMessage = useCallback(
-        (message: MessageResponse) => {
+        (message: MessageResponse, conversationId: string) => {
             dispatch(addMessage(message));
+            // dispatch(updateConversationLastMessage({
+            //     conversationId: conversationId,
+            //     lastMessage: message
+            // }));
+            // dispatch(inCreaseUnreadCount({ conversationId }))
         },
         [dispatch]
     );
@@ -77,24 +97,27 @@ export const useMessages = (conversationId: string) => {
         }
     }, [dispatch, pagination, conversationId, loading]);
 
-    const markMsgAsRead = useCallback(
-        async (messageId: string) => {
-            try {
-                return await dispatch(
-                    markMessageAsRead({ messageId })
-                ).unwrap();
-            } catch (err) {
-                throw err;
-            }
-        },
-        [dispatch]
-    );
+    // const markMsgAsRead = useCallback(
+    //     async (messageId: string) => {
+    //         try {
+    //             const result = await dispatch(
+    //                 markMessageAsRead({ messageId })
+    //             ).unwrap();
+    //             dispatch(deCreaseUnreadCount({ conversationId }))
+    //             return result;
+    //         } catch (err) {
+    //             throw err;
+    //         }
+    //     },
+    //     [dispatch]
+    // );
 
     const hasMoreMessages =
         pagination && pagination.page < pagination.totalPages;
 
     return {
         messages,
+        newMessages,
         loading,
         error,
         pagination,
@@ -103,6 +126,6 @@ export const useMessages = (conversationId: string) => {
         sendNewMessage,
         addNewMessage,
         loadMore,
-        markMsgAsRead,
+        // markMsgAsRead,
     };
 };

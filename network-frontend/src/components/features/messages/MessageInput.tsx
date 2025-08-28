@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, FormEvent } from "react";
+import { useState, useRef, FormEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Paperclip, Send, Smile, Mic, X } from "lucide-react";
@@ -12,6 +12,8 @@ import {
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { MessageRequest } from "@/types/message";
 import { useMessages } from "@/hooks/chat/message/useMessages";
+import { markConversationAsRead } from "@/redux/features/chat/thunks/conversationThunks";
+import { useAppDispatch } from "@/redux/hooks";
 
 interface MessageInputProps {
   conversationId: string;
@@ -19,13 +21,23 @@ interface MessageInputProps {
 }
 
 export function MessageInput({ conversationId, disabled }: MessageInputProps) {
-  console.log("messageInput component")
+  const dispatch = useAppDispatch();
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { sendNewMessage } = useMessages(conversationId);
+  const { sendNewMessage, newMessages } = useMessages(conversationId);
+
+  const handleFocus = () => setIsFocused(true);
+  const handleBlur = () => setIsFocused(false);
+
+  useEffect(() => {
+    if (isFocused && newMessages.length > 0) {
+      dispatch(markConversationAsRead(conversationId));
+    }
+  }, [isFocused, newMessages.length, conversationId, dispatch]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -169,6 +181,8 @@ export function MessageInput({ conversationId, disabled }: MessageInputProps) {
           placeholder="Nhắn tin..."
           value={message}
           onChange={handleInputChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           disabled={disabled}
           className="flex-1 rounded-full bg-gray-100 border-none focus-visible:ring-2 focus-visible:ring-blue-500"

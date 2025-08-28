@@ -42,7 +42,7 @@ export const markConversationAsRead = createAsyncThunk<
     string
 >(
     'conversation/markAsRead',
-    async (conversationId, { rejectWithValue, dispatch }) => {
+    async (conversationId, { rejectWithValue }) => {
         try {
             const res = await conversationApi.markConversationAsRead(conversationId);
             return res;

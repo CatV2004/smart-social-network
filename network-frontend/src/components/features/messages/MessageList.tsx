@@ -1,3 +1,4 @@
+// components/chat/MessageList.tsx
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MessageItem } from "./MessageItem";
@@ -28,8 +29,6 @@ export function MessageList({
   const user = useAppSelector(selectCurrentUser);
   const currentUserId = user?.id;
 
-  console.log("messagee: ", messages);
-
   const handleLoadMore = useCallback(() => {
     if (onLoadMore) {
       onLoadMore();
@@ -43,30 +42,44 @@ export function MessageList({
     threshold: 100,
   });
 
-  // Đảo ngược mảng messages để tin nhắn mới ở dưới
-  const displayedMessages = [...messages].reverse();
-
-  const lastOwnMessageId = displayedMessages
+  const lastOwnMessageId = messages
     .filter((m) => m.sender.user?.id === currentUserId)
     .at(-1)?.id;
 
-  // Luôn scroll tới cuối khi component mount
+  // Nhóm tin nhắn theo ngày
+  const groupMessagesByDate = (msgs: MessageResponse[]) => {
+    const groups: { date: string; messages: MessageResponse[] }[] = [];
+    msgs.forEach((message) => {
+      const messageDate = new Date(message.createdAt).toDateString();
+      const lastGroup = groups[groups.length - 1];
+      if (lastGroup && lastGroup.date === messageDate) {
+        lastGroup.messages.push(message);
+      } else {
+        groups.push({ date: messageDate, messages: [message] });
+      }
+    });
+    return groups;
+  };
+
+  const displayMsgs = [...messages].reverse();
+  const messageGroups = groupMessagesByDate(displayMsgs);
+
   useEffect(() => {
-    if (displayedMessages.length > 0) {
-      requestAnimationFrame(() => {
+    if (displayMsgs.length > 0 && isInitialLoadRef.current) {
+      const timeout = setTimeout(() => {
         endOfMessagesRef.current?.scrollIntoView({
           behavior: "auto",
           block: "end",
         });
         isInitialLoadRef.current = false;
         setIsAtBottom(true);
-      });
+      }, 50); 
+      return () => clearTimeout(timeout);
     }
-  }, [displayedMessages.length]);
+  }, [displayMsgs.length]);
 
-  // Scroll tới cuối khi có tin nhắn mới và đang ở bottom
   useEffect(() => {
-    if (isAtBottom && displayedMessages.length > 0 && !isLoadingMore) {
+    if (isAtBottom && messages.length > 0 && !isLoadingMore && !loading) {
       requestAnimationFrame(() => {
         endOfMessagesRef.current?.scrollIntoView({
           behavior: "smooth",
@@ -74,7 +87,7 @@ export function MessageList({
         });
       });
     }
-  }, [displayedMessages.length, isAtBottom, isLoadingMore]);
+  }, [messages.length, isAtBottom, isLoadingMore, loading]);
 
   const handleScrollWithTracking = (e: React.UIEvent<HTMLDivElement>) => {
     handleScroll();
@@ -96,23 +109,6 @@ export function MessageList({
     });
   };
 
-  // Nhóm tin nhắn theo ngày
-  const groupMessagesByDate = () => {
-    const groups: { date: string; messages: MessageResponse[] }[] = [];
-    displayedMessages.forEach((message) => {
-      const messageDate = new Date(message.createdAt).toDateString();
-      const lastGroup = groups[groups.length - 1];
-      if (lastGroup && lastGroup.date === messageDate) {
-        lastGroup.messages.push(message);
-      } else {
-        groups.push({ date: messageDate, messages: [message] });
-      }
-    });
-    return groups;
-  };
-
-  const messageGroups = groupMessagesByDate();
-
   return (
     <div
       ref={containerRef}
@@ -120,7 +116,7 @@ export function MessageList({
       onScroll={handleScrollWithTracking}
     >
       {/* Loading indicator */}
-      {(isLoadingMore || loading) && (
+      {isLoadingMore && (
         <div className="sticky top-0 flex justify-center z-10 mb-4 transition-all duration-300">
           <div className="bg-background/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-sm border">
             <div className="flex items-center gap-2">

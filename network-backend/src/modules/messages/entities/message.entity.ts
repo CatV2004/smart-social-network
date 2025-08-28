@@ -7,6 +7,7 @@ import {
     ManyToOne,
     JoinColumn,
     OneToMany,
+    Index,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@/modules/users/entities/user.entity';
@@ -21,6 +22,7 @@ export enum MessageStatus {
 }
 
 @Entity('messages')
+@Index('idx_message_conversation', ['conversation'])
 export class Message {
     @ApiProperty({ description: 'Unique ID of the message' })
     @PrimaryGeneratedColumn('uuid')

@@ -7,12 +7,10 @@ import { useConversation } from "@/hooks/chat/conversation/useConversation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCallback, useEffect, useState } from "react";
 import { MessageList } from "./MessageList";
-import { useMessagesSocket } from "@/hooks/useSocketMessages";
+import { useSocketMessages } from "@/hooks/useSocketMessages";
 import { MessageResponse } from "@/types/message";
-import { useAppDispatch } from "@/redux/hooks";
 import { conversationResponse } from "@/types/conversation";
 export function MessageContainer() {
-  const dispatch = useAppDispatch();
   const params = useParams();
   const conversationId = params.conversationId as string;
   const [selectedConversation, setSelectedConversation] =
@@ -21,9 +19,7 @@ export function MessageContainer() {
   const {
     isConnected,
     subscribeNewMessage,
-    joinConversation,
-    leaveConversation,
-  } = useMessagesSocket();
+  } = useSocketMessages();
 
   const {
     loading: conversationLoading,
@@ -36,19 +32,21 @@ export function MessageContainer() {
 
   console.log("loading", conversationId);
 
-  useEffect(() => {
-    if (!isConnected || !conversationId) return;
-    console.log("Joining conversation:", conversationId);
-    joinConversation(conversationId);
-    return () => {
-      console.log("Leaving conversation:", conversationId);
-      leaveConversation(conversationId);
-    };
-  }, [conversationId]);
+  // useEffect(() => {
+  //   if (!isConnected || !conversationId) return;
+
+  //   console.log("Joining conversation:", conversationId);
+  //   joinConversation(conversationId);
+
+  //   return () => {
+  //     console.log("Leaving conversation:", conversationId);
+  //     leaveConversation(conversationId);
+  //   };
+  // }, [conversationId, isConnected, joinConversation, leaveConversation]);
 
   const handleNewMessage = useCallback(
     (newMessage: MessageResponse) => {
-      addNewMessage(newMessage);
+      addNewMessage(newMessage, conversationId);
     },
     [addNewMessage, conversationId]
   );

@@ -13,8 +13,7 @@ import {
 } from "@/redux/features/notifications/notificationThunks";
 
 import { useSocketNotifications } from "@/hooks/useSocketNotifications";
-import { useMessagesSocket } from "@/context/MessagesSocketContext";
-// import { useMessagesSocket } from "@/context/MessagesSocketContext";
+import { useSocketMessages } from "@/hooks/useSocketMessages";
 
 export default function AppInitializer({
   children,
@@ -24,7 +23,7 @@ export default function AppInitializer({
   const dispatch = useAppDispatch();
 
   useSocketNotifications();
-  useMessagesSocket();
+  useSocketMessages();
 
   const initializeApp = useCallback(async () => {
     const token = getCookie("accessToken");

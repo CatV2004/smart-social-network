@@ -5,17 +5,14 @@ import { Notification } from './entities/notification.entity';
 import { CreateNotificationDto } from './dtos/create-notification.dto';
 import { UpdateNotificationDto } from './dtos/update-notification.dto';
 import { NotificationType } from './types/notification.type';
-import { NotificationsGateway } from '../../socket/notifications/notifications.gateway';
-import { paginate } from '@/common/utils/pagination.util';
 import { NotificationDto } from './dtos/notification.dto';
-import { SocketService } from '@/socket/socket.service';
 import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
 import { IPaginated } from '@/common/dtos/paginated.interface';
 import { ProfilesService } from '../profiles/profiles.service';
-import { plainToInstance } from 'class-transformer';
 import { NotificationMapper } from './mappers/notification.mapper';
 import { paginateWithMapper } from '@/common/utils/paginate-with-mapper';
 import { FollowProfileResponseDto } from '../follows/dtos/follow-profile-response.dto';
+import { NotificationRealtimeService } from '@/socket/notifications/notification-realtime.service';
 
 @Injectable()
 export class NotificationsService {
@@ -24,7 +21,7 @@ export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
     private readonly notificationRepo: Repository<Notification>,
-    private readonly notificationGateway: NotificationsGateway,
+    private readonly notificationRealtimeService: NotificationRealtimeService,
     @Inject(forwardRef(() => ProfilesService))
     private readonly profilesService: ProfilesService,
   ) { }
@@ -37,7 +34,7 @@ export class NotificationsService {
     const receiverUserId = receiverProfile.user.id;
 
     // Kiểm tra user có online trong namespace notifications không
-    const isReceiverOnline = this.notificationGateway.isUserOnline(receiverUserId);
+    const isReceiverOnline = this.notificationRealtimeService.isUserOnline(receiverUserId);
 
     try {
       const noti = this.notificationRepo.create({
@@ -59,7 +56,7 @@ export class NotificationsService {
 
 
       if (isReceiverOnline && saved) {
-        this.notificationGateway.sendNotificationToUser(receiverUserId, notiDto);
+        this.notificationRealtimeService.sendNotification(receiverUserId, notiDto);
         this.logger.log(`Notification sent realtime to user ${receiverUserId}`);
       } else {
         this.logger.log(`User ${receiverUserId} is offline, notification saved only`);
@@ -216,7 +213,7 @@ export class NotificationsService {
 
   async notifyFollowRequestAccepted(senderId: string, receiverId: string) {
     return this.create({
-      senderId,    
+      senderId,
       receiverId,
       type: NotificationType.FOLLOW_REQUEST_ACCEPTED,
       metadata: {

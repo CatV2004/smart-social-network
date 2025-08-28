@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { NotificationsService } from './notifications.service';
 import { NotificationsController } from './notifications.controller';
 import { Notification } from './entities/notification.entity';
-import { NotificationsGateway } from '../../socket/notifications/notifications.gateway';
 import { SocketModule } from '@/socket/socket.module';
 import { ProfilesModule } from '../profiles/profiles.module';
 
@@ -14,7 +13,7 @@ import { ProfilesModule } from '../profiles/profiles.module';
     forwardRef(() => ProfilesModule),
   ],
   controllers: [NotificationsController],
-  providers: [NotificationsService, NotificationsGateway],
+  providers: [NotificationsService],
   exports: [NotificationsService],
 })
 export class NotificationsModule { }

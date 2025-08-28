@@ -14,7 +14,7 @@ import { MessageReadDto, MessageResponseDto } from '../dtos/message-response.dto
 import { paginateWithMapper } from '@/common/utils/paginate-with-mapper';
 import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
 import { MessageRead } from '../entities/message-read.entity';
-import { MessageRealtimeService } from './message-realtime.service';
+import { MessageRealtimeService } from '../../../socket/messages/message-realtime.service';
 import { ConversationMembersService } from './conversation-members-service';
 
 @Injectable()
@@ -23,9 +23,6 @@ export class MessagesService {
     constructor(
         @InjectRepository(Message)
         private messageRepo: Repository<Message>,
-
-        @InjectRepository(Conversation)
-        private conversationRepo: Repository<Conversation>,
 
         @InjectRepository(MessageRead)
         private readonly messageReadRepo: Repository<MessageRead>,
@@ -88,12 +85,12 @@ export class MessagesService {
                     'sender',
                     'sender.profile',
                     'attachments',
+                    "conversation"
                 ],
             });
             const messageDto = await MessageMapper.toResponseDto(loadedMessage!);
 
             const recipientIds = await this.conversationMembersService.getUserIdsByConversation(dto.conversationId, senderId)
-            this.logger.log("recipientIds: ", recipientIds)
             this.messageRealtimeService.sendNewMessage(
                 conversation.id,
                 messageDto,
@@ -283,6 +280,19 @@ export class MessagesService {
             .getCount();
 
         return count;
+    }
+
+    async getUnreadMessageIdsForUserInConversation(userId: string, conversationId: string): Promise<string[]> {
+        const unreadMessages = await this.dataSource
+            .getRepository(Message)
+            .createQueryBuilder('message')
+            .leftJoin(MessageRead, 'read', 'read.messageId = message.id AND read.userId = :userId', { userId })
+            .where('message.conversation_id = :conversationId', { conversationId })
+            .andWhere('read.id IS NULL')
+            .select('message.id')
+            .getRawMany();
+
+        return unreadMessages.map(row => row.message_id);
     }
 
 }

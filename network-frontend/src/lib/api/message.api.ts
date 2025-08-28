@@ -46,6 +46,19 @@ export const messageApi = {
             .then((res) => res.data);
     },
 
+    getUnreadMessageIds: (conversationId: string): Promise<string[]> => {
+        return axiosClient
+            .get(`/messages/unread/${conversationId}`)
+            .then((res) => res.data);
+    },
+
+
+    getMessageUnreads: (messageId: string): Promise<MessageRead[]> => {
+        return axiosClient
+            .get(`/messages/${messageId}/unreads`)
+            .then((res) => res.data);
+    },
+
     getUnreadCount: (): Promise<{ count: number }> => {
         return axiosClient.get("/messages/unread/count").then((res) => res.data);
     },

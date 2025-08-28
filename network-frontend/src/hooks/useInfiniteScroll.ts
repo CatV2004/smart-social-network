@@ -1,3 +1,4 @@
+// hooks/useInfiniteScroll.ts
 import { useState, useRef, useEffect, useCallback } from "react";
 
 interface UseInfiniteScrollOptions {
@@ -33,13 +34,14 @@ export function useInfiniteScroll<T extends HTMLElement>({
             return;
         }
 
-        const { scrollTop } = containerRef.current;
+        const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+        const distanceFromTop = scrollTop;
 
-        // Chỉ load more khi scroll lên gần đầu
-        if (scrollTop < threshold && hasMore && !loading && !isLoadingRef.current) {
-            // Lưu vị trí scroll hiện tại trước khi load
-            scrollHeightBeforeLoadRef.current = containerRef.current.scrollHeight;
-            scrollTopBeforeLoadRef.current = containerRef.current.scrollTop;
+        // Chỉ load more khi scroll lên gần đầu (trong vùng threshold)
+        if (distanceFromTop < threshold && hasMore && !loading && !isLoadingRef.current) {
+            // Lưu vị trí scroll và chiều cao hiện tại trước khi load
+            scrollHeightBeforeLoadRef.current = scrollHeight;
+            scrollTopBeforeLoadRef.current = scrollTop;
 
             isLoadingRef.current = true;
             setIsLoadingMore(true);
@@ -48,9 +50,9 @@ export function useInfiniteScroll<T extends HTMLElement>({
         }
     }, [hasMore, loading, onLoadMore, threshold]);
 
-    // Khôi phục vị trí scroll sau khi load more
+    // Khôi phục vị trí scroll sau khi load more xong
     useEffect(() => {
-        if (isLoadingMore && containerRef.current) {
+        if (isLoadingMore && !loading && containerRef.current) {
             isRestoringScrollRef.current = true;
 
             // Sử dụng requestAnimationFrame để đảm bảo DOM đã update
@@ -59,7 +61,7 @@ export function useInfiniteScroll<T extends HTMLElement>({
                     const scrollHeightAfterLoad = containerRef.current.scrollHeight;
                     const heightDifference = scrollHeightAfterLoad - scrollHeightBeforeLoadRef.current;
 
-                    // Giữ nguyên vị trí scroll bằng cách thêm độ chênh lệch chiều cao
+                    // Khôi phục vị trí scroll bằng cách giữ nguyên khoảng cách từ top
                     containerRef.current.scrollTop = scrollTopBeforeLoadRef.current + heightDifference;
                 }
 
@@ -72,7 +74,7 @@ export function useInfiniteScroll<T extends HTMLElement>({
                 });
             });
         }
-    }, [isLoadingMore]);
+    }, [isLoadingMore, loading]);
 
     return { containerRef, handleScroll, isLoadingMore };
 }
