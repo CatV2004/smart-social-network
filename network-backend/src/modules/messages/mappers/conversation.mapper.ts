@@ -28,6 +28,7 @@ export class ConversationMapper {
             const opponent = convo.members?.find(m => m.user.id !== currentUserId)?.user;
             dto.displayName = opponent ? `${opponent.firstName} ${opponent.lastName}` : undefined;
             dto.displayAvatar = opponent?.profile.avatar;
+            dto.targetUserId = opponent?.id;
         }
 
         if (lastMessage) {

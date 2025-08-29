@@ -21,21 +21,21 @@ export function useSocketMessages() {
   const messageListenersRef = useRef<Set<() => void>>(new Set());
   const typingListenersRef = useRef<Set<() => void>>(new Set());
 
-  const handleGlobalMessage = useCallback(
-    (message: MessageResponse) => {
-      console.log("Global message received for conversation update:", message);
+  // const handleGlobalMessage = useCallback(
+  //   (message: MessageResponse) => {
+  //     console.log("Global message received for conversation update:", message);
 
-      dispatch(
-        updateConversationLastMessage({
-          conversationId: message.conversationId,
-          lastMessage: message,
-        })
-      );
+  //     dispatch(
+  //       updateConversationLastMessage({
+  //         conversationId: message.conversationId,
+  //         lastMessage: message,
+  //       })
+  //     );
 
-      dispatch(inCreaseUnreadCount({ conversationId: message.conversationId }));
-    },
-    [dispatch]
-  );
+  //     dispatch(inCreaseUnreadCount({ conversationId: message.conversationId }));
+  //   },
+  //   [dispatch]
+  // );
 
   const subscribeNewMessage = useCallback(
     (callback: (msg: any) => void) => {
@@ -62,16 +62,16 @@ export function useSocketMessages() {
   );
 
   useEffect(() => {
-    const unsubscribe = onNewMessage(handleGlobalMessage);
+    // const unsubscribe = onNewMessage(handleGlobalMessage);
 
     return () => {
-      unsubscribe();
+      // unsubscribe();
       messageListenersRef.current.forEach((unsubscribe) => unsubscribe());
       typingListenersRef.current.forEach((unsubscribe) => unsubscribe());
       messageListenersRef.current.clear();
       typingListenersRef.current.clear();
     };
-  }, [onNewMessage, handleGlobalMessage]);
+  }, [onNewMessage]);
 
   return {
     socket,

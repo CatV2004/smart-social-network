@@ -1,13 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { MessageResponse } from '@/types/message';
+import { MessageRead, MessageResponse } from '@/types/message';
 import { PaginationMeta } from '@/types/pagination-meta';
-import { fetchMessages, markMessageAsRead, sendMessage } from '../thunks/messageThunks';
+import { fetchMessages, getMessageReads, markMessageAsRead, sendMessage } from '../thunks/messageThunks';
 
 interface MessageState {
     messages: MessageResponse[];
     loading: boolean;
     error: string | null;
     pagination: PaginationMeta | null;
+    messageReads: Record<string, MessageRead[]>;
 }
 
 const initialState: MessageState = {
@@ -15,6 +16,7 @@ const initialState: MessageState = {
     loading: false,
     error: null,
     pagination: null,
+    messageReads: {},
 };
 
 const messageSlice = createSlice({
@@ -42,6 +44,7 @@ const messageSlice = createSlice({
                 limit: 20,
                 totalPages: 1,
             };
+            state.messageReads = {};
         },
         resetMessagesPagination: (state) => {
             state.pagination = {
@@ -116,6 +119,10 @@ const messageSlice = createSlice({
                     return msg;
                 });
             })
+            .addCase(getMessageReads.fulfilled, (state, action) => {
+                const messageId = action.meta.arg;
+                state.messageReads[messageId] = action.payload;
+            });
     },
 });
 

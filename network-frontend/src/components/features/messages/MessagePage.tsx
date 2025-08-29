@@ -5,11 +5,15 @@ import { MessageInput } from "./MessageInput";
 import { useMessages } from "@/hooks/chat/message/useMessages";
 import { useConversation } from "@/hooks/chat/conversation/useConversation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MessageList } from "./MessageList";
 import { useSocketMessages } from "@/hooks/useSocketMessages";
 import { MessageResponse } from "@/types/message";
 import { conversationResponse } from "@/types/conversation";
+import { useAppSelector } from "@/redux/hooks";
+import { selectCurrentUser } from "@/redux/features/user/userSelectors";
+import { TypingIndicator } from "@/components/common/TypingIndicator";
+import debounce from "lodash.debounce";
 export function MessageContainer() {
   const params = useParams();
   const conversationId = params.conversationId as string;
@@ -17,32 +21,78 @@ export function MessageContainer() {
     useState<conversationResponse | null>(null);
 
   const {
-    isConnected,
-    subscribeNewMessage,
-  } = useSocketMessages();
-
-  const {
     loading: conversationLoading,
     error,
     getConversationById,
   } = useConversation();
-
   const { messages, loading, loadMore, pagination, addNewMessage } =
     useMessages(conversationId);
 
-  console.log("loading", conversationId);
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
+  const typingTimeoutRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const user = useAppSelector(selectCurrentUser);
+  const currentUserId = user?.id;
 
-  // useEffect(() => {
-  //   if (!isConnected || !conversationId) return;
+  const {
+    isConnected,
+    subscribeNewMessage,
+    joinConversation,
+    leaveConversation,
+    subscribeUserTyping,
+    sendTyping,
+  } = useSocketMessages();
 
-  //   console.log("Joining conversation:", conversationId);
-  //   joinConversation(conversationId);
+  const handleUserTyping = useCallback(
+    (data: { userId: string; isTyping: boolean }) => {
+      setTypingUsers((prev) => {
+        const newSet = new Set(prev);
 
-  //   return () => {
-  //     console.log("Leaving conversation:", conversationId);
-  //     leaveConversation(conversationId);
-  //   };
-  // }, [conversationId, isConnected, joinConversation, leaveConversation]);
+        if (data.isTyping) {
+          newSet.add(data.userId);
+
+          if (typingTimeoutRef.current.has(data.userId)) {
+            clearTimeout(typingTimeoutRef.current.get(data.userId)!);
+          }
+
+          const timeout = setTimeout(() => {
+            setTypingUsers((prev) => {
+              const updatedSet = new Set(prev);
+              updatedSet.delete(data.userId);
+              return updatedSet;
+            });
+            typingTimeoutRef.current.delete(data.userId);
+          }, 3000);
+
+          typingTimeoutRef.current.set(data.userId, timeout);
+        } else {
+          newSet.delete(data.userId);
+
+          if (typingTimeoutRef.current.has(data.userId)) {
+            clearTimeout(typingTimeoutRef.current.get(data.userId)!);
+            typingTimeoutRef.current.delete(data.userId);
+          }
+        }
+        return newSet;
+      });
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (!isConnected || !conversationId) return;
+
+    console.log("Joining conversation:", conversationId);
+    joinConversation(conversationId);
+
+    return () => {
+      console.log("Leaving conversation:", conversationId);
+      leaveConversation(conversationId);
+
+      typingTimeoutRef.current.forEach((timeout) => clearTimeout(timeout));
+      typingTimeoutRef.current.clear();
+      setTypingUsers(new Set());
+    };
+  }, [conversationId, isConnected, joinConversation, leaveConversation]);
 
   const handleNewMessage = useCallback(
     (newMessage: MessageResponse) => {
@@ -54,10 +104,29 @@ export function MessageContainer() {
   useEffect(() => {
     if (!isConnected || !conversationId) return;
     const unsubscribeNewMessage = subscribeNewMessage(handleNewMessage);
+
+    const unsubscribeUserTyping = subscribeUserTyping(
+      (data: { userId: string; isTyping: boolean }) => {
+        if (data.userId !== currentUserId) {
+          handleUserTyping(data);
+        }
+      }
+    );
+
     return () => {
       unsubscribeNewMessage();
+      unsubscribeUserTyping();
+      typingTimeoutRef.current.forEach((timeout) => clearTimeout(timeout));
+      typingTimeoutRef.current.clear();
+      setTypingUsers(new Set());
     };
-  }, [isConnected, conversationId, subscribeNewMessage, handleNewMessage]);
+  }, [
+    isConnected,
+    conversationId,
+    subscribeNewMessage,
+    handleNewMessage,
+    handleUserTyping,
+  ]);
 
   useEffect(() => {
     if (!conversationId) return;
@@ -73,7 +142,15 @@ export function MessageContainer() {
     };
 
     fetchConversation();
-  }, [conversationId]);
+  }, [conversationId, getConversationById]);
+
+  const handleTyping = useCallback(
+    debounce((isTyping: boolean) => {
+      if (!isConnected || !conversationId || !currentUserId) return;
+      sendTyping(conversationId, isTyping);
+    }, 300),
+    [isConnected, conversationId, currentUserId, sendTyping]
+  );
 
   if (error) {
     return (
@@ -184,7 +261,6 @@ export function MessageContainer() {
     <div className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-blue-50/30">
       <MessagesHeader
         conversation={selectedConversation}
-        isConnected={isConnected}
       />
       <MessageList
         messages={messages}
@@ -192,9 +268,14 @@ export function MessageContainer() {
         hasMore={pagination?.page! < pagination?.totalPages!}
         loading={loading}
       />
+      <TypingIndicator
+        typingUsers={typingUsers}
+        conversation={selectedConversation}
+      />
       <MessageInput
         conversationId={conversationId}
         disabled={loading || !isConnected}
+        onTyping={handleTyping}
       />{" "}
     </div>
   );

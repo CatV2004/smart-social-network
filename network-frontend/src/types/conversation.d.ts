@@ -28,4 +28,5 @@ export interface conversationResponse {
     memberCount: number;
     isPinned: boolean;
     lastMessage?: MessageSummaryResponse;
+    targetUserId?: string;
 }

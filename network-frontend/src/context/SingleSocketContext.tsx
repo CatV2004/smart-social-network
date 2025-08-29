@@ -30,12 +30,23 @@ interface SingleSocketContextValue {
   markAllNotificationsRead: () => void;
   // Event listeners
   onNewMessage: (callback: (message: MessageResponse) => void) => () => void;
-  onUserTyping: (callback: (data: { userId: string; isTyping: boolean }) => void) => () => void;
-  onNewNotification: (callback: (notification: Notification) => void) => () => void;
-  onNewNotificationsBatch: (callback: (notifications: Notification[]) => void) => () => void;
+  onUserTyping: (
+    callback: (data: { userId: string; isTyping: boolean }) => void
+  ) => () => void;
+  onNewNotification: (
+    callback: (notification: Notification) => void
+  ) => () => void;
+  onNewNotificationsBatch: (
+    callback: (notifications: Notification[]) => void
+  ) => () => void;
+
+  onUserOnline: (callback: (data: { userId: string }) => void) => () => void;
+  onUserOffline: (callback: (data: { userId: string }) => void) => () => void;
 }
 
-const SingleSocketContext = createContext<SingleSocketContextValue | undefined>(undefined);
+const SingleSocketContext = createContext<SingleSocketContextValue | undefined>(
+  undefined
+);
 
 export const SingleSocketProvider: React.FC<{
   children: React.ReactNode;
@@ -48,15 +59,23 @@ export const SingleSocketProvider: React.FC<{
   const isConnectingRef = useRef(false);
 
   // Refs để quản lý listeners
-  const newMessageListenersRef = useRef<Map<string, (message: any) => void>>(new Map());
-  const userTypingListenersRef = useRef<Map<string, (data: any) => void>>(new Map());
-  const newNotificationListenersRef = useRef<Map<string, (notification: any) => void>>(new Map());
-  const newNotificationsBatchListenersRef = useRef<Map<string, (notifications: any[]) => void>>(new Map());
+  const newMessageListenersRef = useRef<Map<string, (message: any) => void>>(
+    new Map()
+  );
+  const userTypingListenersRef = useRef<Map<string, (data: any) => void>>(
+    new Map()
+  );
+  const newNotificationListenersRef = useRef<
+    Map<string, (notification: any) => void>
+  >(new Map());
+  const newNotificationsBatchListenersRef = useRef<
+    Map<string, (notifications: any[]) => void>
+  >(new Map());
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
       if (socketRef.current) {
-        console.log('Disconnecting due to no auth');
+        console.log("Disconnecting due to no auth");
         socketRef.current.disconnect();
         socketRef.current = null;
         setSocket(null);
@@ -81,8 +100,9 @@ export const SingleSocketProvider: React.FC<{
 
     isConnectingRef.current = true;
 
-    const socketUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-    console.log('Connecting to main socket:', socketUrl);
+    const socketUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    console.log("Connecting to main socket:", socketUrl);
 
     const newSocket = io(socketUrl, {
       path: process.env.NEXT_PUBLIC_SOCKET_PATH || "/socket.io",
@@ -95,22 +115,22 @@ export const SingleSocketProvider: React.FC<{
     });
 
     newSocket.on("connect", () => {
-      console.log('Connected to main socket with ID:', newSocket.id);
+      console.log("Connected to main socket with ID:", newSocket.id);
       setIsConnected(true);
       isConnectingRef.current = false;
-      
+
       // Auto join notifications khi connect
       newSocket.emit("join_notifications");
     });
 
     newSocket.on("disconnect", (reason) => {
-      console.log('Disconnected from main socket:', reason);
+      console.log("Disconnected from main socket:", reason);
       setIsConnected(false);
       isConnectingRef.current = false;
     });
 
     newSocket.on("connect_error", (error) => {
-      console.error('Connection error:', error.message);
+      console.error("Connection error:", error.message);
       setIsConnected(false);
       isConnectingRef.current = false;
     });
@@ -161,9 +181,12 @@ export const SingleSocketProvider: React.FC<{
     socketRef.current?.emit("leave_conversation", conversationId);
   }, []);
 
-  const sendTyping = useCallback((conversationId: string, isTyping: boolean) => {
-    socketRef.current?.emit("typing", { conversationId, isTyping });
-  }, []);
+  const sendTyping = useCallback(
+    (conversationId: string, isTyping: boolean) => {
+      socketRef.current?.emit("typing", { conversationId, isTyping });
+    },
+    []
+  );
 
   // Notifications methods
   const joinNotifications = useCallback(() => {
@@ -209,31 +232,57 @@ export const SingleSocketProvider: React.FC<{
     };
   }, []);
 
-  const onNewNotification = useCallback((callback: (notification: any) => void) => {
-    if (!socketRef.current) return () => {};
+  const onNewNotification = useCallback(
+    (callback: (notification: any) => void) => {
+      if (!socketRef.current) return () => {};
 
-    const key = crypto.randomUUID();
-    newNotificationListenersRef.current.set(key, callback);
-    socketRef.current.on("new_notification", callback);
+      const key = crypto.randomUUID();
+      newNotificationListenersRef.current.set(key, callback);
+      socketRef.current.on("new_notification", callback);
 
-    return () => {
-      socketRef.current?.off("new_notification", callback);
-      newNotificationListenersRef.current.delete(key);
-    };
-  }, []);
+      return () => {
+        socketRef.current?.off("new_notification", callback);
+        newNotificationListenersRef.current.delete(key);
+      };
+    },
+    []
+  );
 
-  const onNewNotificationsBatch = useCallback((callback: (notifications: any[]) => void) => {
-    if (!socketRef.current) return () => {};
+  const onNewNotificationsBatch = useCallback(
+    (callback: (notifications: any[]) => void) => {
+      if (!socketRef.current) return () => {};
 
-    const key = crypto.randomUUID();
-    newNotificationsBatchListenersRef.current.set(key, callback);
-    socketRef.current.on("new_notifications_batch", callback);
+      const key = crypto.randomUUID();
+      newNotificationsBatchListenersRef.current.set(key, callback);
+      socketRef.current.on("new_notifications_batch", callback);
 
-    return () => {
-      socketRef.current?.off("new_notifications_batch", callback);
-      newNotificationsBatchListenersRef.current.delete(key);
-    };
-  }, []);
+      return () => {
+        socketRef.current?.off("new_notifications_batch", callback);
+        newNotificationsBatchListenersRef.current.delete(key);
+      };
+    },
+    []
+  );
+
+  const onUserOnline = useCallback(
+    (callback: (data: { userId: string }) => void) => {
+      if (!socketRef.current) return () => {};
+      const key = crypto.randomUUID();
+      socketRef.current.on("user_online", callback);
+      return () => socketRef.current?.off("user_online", callback);
+    },
+    []
+  );
+
+  const onUserOffline = useCallback(
+    (callback: (data: { userId: string }) => void) => {
+      if (!socketRef.current) return () => {};
+      const key = crypto.randomUUID();
+      socketRef.current.on("user_offline", callback);
+      return () => socketRef.current?.off("user_offline", callback);
+    },
+    []
+  );
 
   return (
     <SingleSocketContext.Provider
@@ -251,6 +300,8 @@ export const SingleSocketProvider: React.FC<{
         onUserTyping,
         onNewNotification,
         onNewNotificationsBatch,
+        onUserOnline,
+        onUserOffline,
       }}
     >
       {children}
@@ -260,6 +311,7 @@ export const SingleSocketProvider: React.FC<{
 
 export const useSingleSocket = (): SingleSocketContextValue => {
   const context = useContext(SingleSocketContext);
-  if (!context) throw new Error("useSingleSocket must be used within SingleSocketProvider");
+  if (!context)
+    throw new Error("useSingleSocket must be used within SingleSocketProvider");
   return context;
 };

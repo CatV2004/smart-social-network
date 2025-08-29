@@ -5,19 +5,23 @@ import { Phone, Video, Info, MoreVertical, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { conversationResponse } from "@/types/conversation";
 import { Badge } from "@/components/ui/badge";
+import { useOnlineUsers } from "@/hooks/chat/useOnlineUsers";
 
 interface MessagesHeaderProps {
   conversation: conversationResponse | null;
-  isConnected: boolean;
 }
 
-export function MessagesHeader({
-  conversation,
-  isConnected,
-}: MessagesHeaderProps) {
+export function MessagesHeader({ conversation }: MessagesHeaderProps) {
   const displayName = conversation?.displayName;
   const displayAvatar = conversation?.displayAvatar;
-  const isOnline = !conversation?.isGroup && isConnected;
+  const { onlineUsers } = useOnlineUsers();
+
+  console.log("conversation.targetUserId: ", conversation?.targetUserId);
+
+  const isOnline =
+    !conversation?.isGroup && conversation?.targetUserId
+      ? onlineUsers.includes(conversation.targetUserId)
+      : false;
 
   return (
     <div className="border-b border-gray-200 p-4 flex items-center justify-between bg-white shadow-sm">

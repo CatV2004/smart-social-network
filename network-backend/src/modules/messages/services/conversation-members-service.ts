@@ -20,7 +20,6 @@ export class ConversationMembersService {
             throw new NotFoundException('No members found for this conversation');
         }
 
-        // Lọc ra những userId khác với currentUserId
         return members
             .map(member => member.user.id)
             .filter(userId => userId !== currentUserId);

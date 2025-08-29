@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, FormEvent, useEffect } from "react";
+import { useState, useRef, FormEvent, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Paperclip, Send, Smile, Mic, X } from "lucide-react";
@@ -13,35 +13,74 @@ import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { MessageRequest } from "@/types/message";
 import { useMessages } from "@/hooks/chat/message/useMessages";
 import { markConversationAsRead } from "@/redux/features/chat/thunks/conversationThunks";
-import { useAppDispatch } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import debounce from "lodash.debounce";
+import { selectCurrentUser } from "@/redux/features/user/userSelectors";
 
 interface MessageInputProps {
   conversationId: string;
   disabled?: boolean;
+  onTyping?: (isTyping: boolean) => void;
 }
 
-export function MessageInput({ conversationId, disabled }: MessageInputProps) {
+export function MessageInput({
+  conversationId,
+  disabled,
+  onTyping,
+}: MessageInputProps) {
   const dispatch = useAppDispatch();
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const currentUserId = useAppSelector(selectCurrentUser)?.id;
 
   const { sendNewMessage, newMessages } = useMessages(conversationId);
 
   const handleFocus = () => setIsFocused(true);
-  const handleBlur = () => setIsFocused(false);
+  const handleBlur = () => {
+    if (isTyping) {
+      sendTypingDebounced(false);
+    }
+    onTyping?.(false);
+  };
+
+  const sendTypingDebounced = useCallback(
+    debounce((typing: boolean) => {
+      if (onTyping) {
+        onTyping(typing);
+      }
+    }, 500),
+    [onTyping]
+  );
+
+  useEffect(() => {
+    if (conversationId) {
+      dispatch(markConversationAsRead(conversationId));
+    }
+  }, [conversationId, dispatch]);
 
   useEffect(() => {
     if (isFocused && newMessages.length > 0) {
-      dispatch(markConversationAsRead(conversationId));
+      const hasOthersMessages = newMessages.some(
+        (msg) => msg.sender.user?.id !== currentUserId
+      );
+      if (hasOthersMessages) {
+        dispatch(markConversationAsRead(conversationId));
+      }
     }
-  }, [isFocused, newMessages.length, conversationId, dispatch]);
+  }, [isFocused, newMessages, conversationId, dispatch, currentUserId]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if ((!message.trim() && files.length === 0) || disabled) return;
+
+    if (isTyping && onTyping) {
+      onTyping(false);
+      setIsTyping(false);
+    }
 
     const payload: MessageRequest = {
       conversationId,
@@ -59,12 +98,26 @@ export function MessageInput({ conversationId, disabled }: MessageInputProps) {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMessage(e.target.value);
+    const value = e.target.value;
+    setMessage(value);
+
+    if (value.trim().length > 0 && !isTyping) {
+      sendTypingDebounced(true);
+      onTyping?.(true);
+    } else if (value.trim().length === 0 && isTyping) {
+      sendTypingDebounced(false);
+      onTyping?.(false);
+    }
+
   };
 
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     setMessage((prev) => prev + emojiData.emoji);
     inputRef.current?.focus();
+
+    if (!isTyping && onTyping) {
+      sendTypingDebounced(true);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,6 +140,12 @@ export function MessageInput({ conversationId, disabled }: MessageInputProps) {
       handleSubmit(e);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      sendTypingDebounced.cancel();
+    };
+  }, [sendTypingDebounced]);
 
   return (
     <div className="bg-white border-t border-gray-200">

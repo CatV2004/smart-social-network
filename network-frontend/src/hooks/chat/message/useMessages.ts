@@ -4,7 +4,6 @@ import { QueryParams } from "@/types/pagination-meta";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {
     fetchMessages,
-    markMessageAsRead,
     sendMessage,
 } from "@/redux/features/chat/thunks/messageThunks";
 import {
@@ -12,7 +11,6 @@ import {
     clearMessages,
     resetMessagesPagination,
 } from "@/redux/features/chat/slices/messageSlice";
-import { inCreaseUnreadCount, updateConversationLastMessage } from "@/redux/features/chat/slices/conversationSlice";
 
 export const useMessages = (conversationId: string) => {
     const dispatch = useAppDispatch();
@@ -61,10 +59,10 @@ export const useMessages = (conversationId: string) => {
         async (messageData: MessageRequest) => {
             try {
                 const message = await dispatch(sendMessage(messageData)).unwrap();
-                dispatch(updateConversationLastMessage({
-                    conversationId: conversationId,
-                    lastMessage: message
-                }));
+                // dispatch(updateConversationLastMessage({
+                //     conversationId: conversationId,
+                //     lastMessage: message
+                // }));
                 return message;
             } catch (err) {
                 throw err;
@@ -77,11 +75,6 @@ export const useMessages = (conversationId: string) => {
     const addNewMessage = useCallback(
         (message: MessageResponse, conversationId: string) => {
             dispatch(addMessage(message));
-            // dispatch(updateConversationLastMessage({
-            //     conversationId: conversationId,
-            //     lastMessage: message
-            // }));
-            // dispatch(inCreaseUnreadCount({ conversationId }))
         },
         [dispatch]
     );

@@ -214,7 +214,6 @@ export function ProfileHeader({
                   isUploading={isUploading !== null}
                   userId={user.id}
                   onEdit={() => setIsEditModalOpen(true)}
-                  onMessage={() => console.log("Message user")}
                 />
               </div>
             </div>

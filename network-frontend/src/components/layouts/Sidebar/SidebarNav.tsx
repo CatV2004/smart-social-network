@@ -3,6 +3,8 @@ import { SidebarNavItem } from "./SidebarNavItem";
 import { useAppSelector } from "@/redux/hooks";
 import { selectCountUnReadOnly } from "@/redux/features/notifications/notificationSelectors";
 import { selectTotalUnreadCount } from "@/redux/features/chat/selectors";
+import { useEffect, useState } from "react";
+import { messageApi } from "@/lib/api/message.api";
 
 export function SidebarNav({
   items,
@@ -17,6 +19,19 @@ export function SidebarNav({
   const unreadCount = useAppSelector(selectCountUnReadOnly);
   const messageUnreadCount = useAppSelector(selectTotalUnreadCount);
 
+  const [localMessageUnread, setLocalMessageUnread] =
+    useState<number>(messageUnreadCount);
+
+  useEffect(() => {
+    if (messageUnreadCount === 0) {
+      messageApi.getUnreadCount().then((res) => {
+        setLocalMessageUnread(res.count);
+      });
+    } else {
+      setLocalMessageUnread(messageUnreadCount);
+    }
+  }, [messageUnreadCount]);
+
   return (
     <ul>
       {items.map((item: any, index: number) => {
@@ -25,7 +40,7 @@ export function SidebarNav({
         if (item.overlay === "notifications") {
           badgeCount = unreadCount;
         } else if (item.href?.startsWith("/direct")) {
-          badgeCount = messageUnreadCount; // Sử dụng cho mục tin nhắn
+          badgeCount = localMessageUnread; // Sử dụng cho mục tin nhắn
         }
 
         return (

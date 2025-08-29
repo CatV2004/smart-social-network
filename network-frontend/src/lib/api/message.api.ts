@@ -52,7 +52,6 @@ export const messageApi = {
             .then((res) => res.data);
     },
 
-
     getMessageUnreads: (messageId: string): Promise<MessageRead[]> => {
         return axiosClient
             .get(`/messages/${messageId}/unreads`)

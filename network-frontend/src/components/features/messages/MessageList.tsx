@@ -42,10 +42,6 @@ export function MessageList({
     threshold: 100,
   });
 
-  const lastOwnMessageId = messages
-    .filter((m) => m.sender.user?.id === currentUserId)
-    .at(-1)?.id;
-
   // Nhóm tin nhắn theo ngày
   const groupMessagesByDate = (msgs: MessageResponse[]) => {
     const groups: { date: string; messages: MessageResponse[] }[] = [];
@@ -64,6 +60,10 @@ export function MessageList({
   const displayMsgs = [...messages].reverse();
   const messageGroups = groupMessagesByDate(displayMsgs);
 
+  const lastOwnMessageId = displayMsgs
+    .filter((m) => m.sender.user?.id === currentUserId)
+    .at(-1)?.id;
+
   useEffect(() => {
     if (displayMsgs.length > 0 && isInitialLoadRef.current) {
       const timeout = setTimeout(() => {
@@ -73,7 +73,7 @@ export function MessageList({
         });
         isInitialLoadRef.current = false;
         setIsAtBottom(true);
-      }, 50); 
+      }, 50);
       return () => clearTimeout(timeout);
     }
   }, [displayMsgs.length]);

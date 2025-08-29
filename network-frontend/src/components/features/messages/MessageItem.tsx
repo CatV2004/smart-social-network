@@ -8,7 +8,7 @@ import "dayjs/locale/vi";
 import { Check, CheckCheck } from "lucide-react";
 import { MediaRenderer } from "./media/MediaRenderer";
 import { cn } from "@/lib/utils/cn";
-// import { useMessageReads } from "@/hooks/chat/message/useMessageReads";
+import { useMessageReads } from "@/hooks/chat/message/useMessageReads";
 
 dayjs.locale("vi");
 dayjs.extend(relativeTime);
@@ -28,7 +28,7 @@ export function MessageItem({
   const hasContent = message.content && message.content.trim().length > 0;
 
   const fullName = `${message.sender.user?.firstName} ${message.sender.user?.lastName}`;
-  // const reads = useMessageReads(message.id) ?? [];
+  const reads = useMessageReads(message.id) ?? [];
 
   const getAvatarFallback = () => {
     return fullName?.charAt(0)?.toUpperCase() || "?";
@@ -39,7 +39,7 @@ export function MessageItem({
   };
 
   const renderStatusIcon = () => {
-    // if (reads.length > 0) return null;
+    if (reads.length > 0) return null;
     if (message.status === "DELIVERED") {
       return <CheckCheck className="h-3 w-3 text-gray-400" />;
     }
@@ -115,17 +115,8 @@ export function MessageItem({
           )}
         </div>
 
+        {/* Footer */}
         {isOwnMessage ? (
-          <div className="flex items-center mt-1 gap-1 justify-end text-[10px] opacity-70">
-            <span>{formatTime(message.createdAt)}</span>
-            {renderStatusIcon()}
-          </div>
-        ) : (
-          <div className="flex items-center gap-1 mt-1 text-[10px] opacity-70 justify-start">
-            <span>{formatTime(message.createdAt)}</span>
-          </div>
-        )}
-        {/* {isOwnMessage ? (
           reads.length > 0 && isLastOwnMessage ? (
             <div className="flex justify-end gap-1 mt-1">
               {reads.map((read) => (
@@ -156,7 +147,7 @@ export function MessageItem({
           <div className="flex items-center gap-1 mt-1 text-[10px] opacity-70 justify-start">
             <span>{formatTime(message.createdAt)}</span>
           </div>
-        )} */}
+        )}
       </div>
     </div>
   );

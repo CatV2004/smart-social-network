@@ -74,4 +74,8 @@ export class ConversationResponseDto {
     @Expose()
     @Type(() => MessageSummaryDto)
     lastMessage?: MessageSummaryDto;
+
+    @ApiProperty({ description: 'singleMember 1-1' })
+    @Expose()
+    targetUserId?: string;
 }

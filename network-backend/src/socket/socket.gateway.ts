@@ -55,6 +55,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       client.join(`notifications_${userId}`);
 
       this.logger.log(`User ${userId} connected to main namespace (socket: ${client.id})`);
+
+      this.server.emit("user_online", { userId });
     } catch (error) {
       this.logger.error(`Connection error: ${error.message}`);
       client.disconnect();
@@ -62,8 +64,13 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   handleDisconnect(client: Socket) {
+    const userId = this.socketService.getUserIdBySocketId(client.id);
     this.socketService.unregisterConnection(client.id);
     this.logger.log(`Socket disconnected: ${client.id}`);
+
+    if (userId) {
+      this.server.emit("user_offline", { userId });
+    }
   }
 
   //region Messages Events

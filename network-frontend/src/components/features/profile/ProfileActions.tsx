@@ -18,13 +18,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAppDispatch } from "@/redux/hooks";
+import { useRouter } from "next/navigation"; 
+import { createConversation } from "@/redux/features/chat/thunks/conversationThunks";
 
 interface ProfileActionsProps {
   isCurrentUser: boolean;
   isUploading: boolean;
   userId: string;
   onEdit: () => void;
-  onMessage: () => void;
 }
 
 export function ProfileActions({
@@ -32,12 +34,26 @@ export function ProfileActions({
   isUploading,
   userId,
   onEdit,
-  onMessage,
 }: ProfileActionsProps) {
   const { followStatus, isLoading, handleFollow, handleUnfollow } = useFollow({
     userId,
   });
+  const dispatch = useAppDispatch();
+  const router = useRouter();
 
+  const handleMessage = async () => {
+    try {
+      const conversation = await dispatch(
+        createConversation({ isGroup: false, memberIds: [userId] })
+      ).unwrap();
+
+      if (conversation && conversation.id) {
+        router.push(`/direct/tab/${conversation.id}`);
+      }
+    } catch (error) {
+      console.log(`Failed to create conversation with ${userId}`);
+    }
+  };
 
   if (isCurrentUser) {
     return (
@@ -128,7 +144,7 @@ export function ProfileActions({
       <Button
         variant="ghost"
         className="cursor-pointer gap-2 rounded-full bg-gray-100/50 hover:bg-gray-200/70 text-gray-700 transition px-4 py-2 h-10 shadow-sm"
-        onClick={onMessage}
+        onClick={handleMessage}
       >
         <MessageCircle className="w-4 h-4" />
         Nhắn tin
