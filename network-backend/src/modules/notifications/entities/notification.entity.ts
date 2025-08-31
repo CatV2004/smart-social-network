@@ -1,4 +1,3 @@
-// notifications/entities/notification.entity.ts
 import { Profile } from '@/modules/profiles/entities/profile.entity';
 import {
     Entity,

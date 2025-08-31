@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { MoreVertical } from "lucide-react";
 import { Post } from "@/types/post";
 import { useSelector } from "react-redux";
-import { selectCurrentUser } from "@/redux/features/user/userSelectors";
+import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
 
 interface PostHeaderProps {
   post: Post;
@@ -39,8 +39,8 @@ export function PostHeader({
 }: PostHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const currentUser = useSelector(selectCurrentUser);
-  const isCurrentUser = currentUser?.id && author.user?.id === currentUser.id;
+  const currentProfile = useSelector(selectMyProfile);
+  const isCurrentUser = currentProfile?.user?.id && author.user?.id === currentProfile?.user.id;
 
   const fullName = author.user
     ? `${author.user.firstName} ${author.user.lastName}`

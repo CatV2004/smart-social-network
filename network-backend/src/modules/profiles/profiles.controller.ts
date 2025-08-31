@@ -1,12 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Put, ParseUUIDPipe, UseInterceptors, UploadedFile, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Put, ParseUUIDPipe, UseInterceptors, UploadedFile, UploadedFiles, UseGuards, Query } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
 import { UpdateProfileDto } from './dtos/update-profile.dto';
-import { ApiBadRequestResponse, ApiBody, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiBody, ApiConsumes, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { ProfileResponseDto } from './dtos/response-profile.dto';
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
-import { UpdateProfileImageDto } from './dtos/update-profile-image.dto';
+import { PaginatedResponseDto } from '@/common/dtos/paginated-response.factory';
+import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
+import { IPaginated } from '@/common/dtos/paginated.interface';
+import { UserRole } from '../users/entities/user.entity';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
 
 @Controller('profiles')
 export class ProfilesController {
@@ -112,6 +117,25 @@ export class ProfilesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.profilesService.remove(+id);
+  }
+
+  @Get()
+  @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get list of profiles with pagination' })
+  @ApiOkResponse({ type: PaginatedResponseDto(ProfileResponseDto) })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    enum: UserRole,
+    description: 'Filter profiles by user role',
+  })
+  async getProfiles(
+    @Query() pagination: PaginationQueryDto,
+    @Query('role') role?: UserRole,
+  ): Promise<IPaginated<ProfileResponseDto>> {
+    return this.profilesService.getAllProfiles(pagination, role);
   }
 
   // @Put('upload-image')

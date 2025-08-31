@@ -33,4 +33,5 @@ export const authApi = {
   resendVerification: (email: string): Promise<{ message: string }> => {
     return axiosClient.post('/users/resend-verification', { email });
   },
+  
 };

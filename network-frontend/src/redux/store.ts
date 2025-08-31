@@ -50,7 +50,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
     auth: authReducer,
     profile: profileReducer,
-    user: userReducer,
+    users: userReducer,
     ui: uiReducer,
     notifications: notificationReducer,
     followRequests: followRequestsReducer,

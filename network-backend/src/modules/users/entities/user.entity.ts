@@ -14,6 +14,7 @@ import {
 } from 'typeorm';
 import dayjs from 'dayjs';
 import { Profile } from '@/modules/profiles/entities/profile.entity';
+import { UserStatus } from '../types/UserStatus';
 // import { ConfigService } from '@nestjs/config';
 
 export enum UserRole {
@@ -34,7 +35,9 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToOne(() => Profile, profile => profile.user)
+  @OneToOne(() => Profile, profile => profile.user, {
+    cascade: true,
+  })
   profile: Profile;
 
   @ApiProperty({ description: 'Email of user', example: 'atest@email.com' })
@@ -53,7 +56,7 @@ export class User {
   @Column()
   @Exclude({ toPlainOnly: true })
   password: string;
-  
+
   @ApiProperty({
     description: 'Unique username for the profile',
     example: 'catv2004',
@@ -66,9 +69,13 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
 
-  @ApiProperty({ description: 'account is active?', example: 'True or False' })
-  @Column({ default: true })
-  isActive: boolean;
+  // @ApiProperty({ description: 'account is active?', example: 'True or False' })
+  // @Column({ default: true })
+  // isActive: boolean;
+
+  @ApiProperty({ description: 'Status of the account', example: UserStatus.ACTIVE })
+  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
+  status: UserStatus;
 
   @ApiProperty({ description: 'Email is verified?', example: false })
   @Column({ name: 'is_verified', default: false })

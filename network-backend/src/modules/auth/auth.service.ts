@@ -10,6 +10,7 @@ import { User } from '@/modules/users/entities/user.entity';
 import { BcryptService } from './bcrypt.service';
 import { TokensResponseDto } from './dtos/tokens-response.dto';
 import { UsersService } from '../users/users.service';
+import { UserStatus } from '../users/types/UserStatus';
 
 @Injectable()
 export class AuthService {
@@ -44,8 +45,8 @@ export class AuthService {
     const refreshTokenExpiresIn = Number(this.configService.get('jwt.refreshTokenTtl') || 86400);
 
 
-    const accessTokenExpiresText = this.configService.get<string>('jwt.expiresIn'); // e.g. "15m"
-    const refreshTokenExpiresText = this.configService.get<string>('jwt.refreshExpiresIn'); // e.g. "7d"
+    const accessTokenExpiresText = this.configService.get<string>('jwt.expiresIn');
+    const refreshTokenExpiresText = this.configService.get<string>('jwt.refreshExpiresIn');
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
@@ -79,19 +80,15 @@ export class AuthService {
 
   async validateUser(userName: string, password: string): Promise<Partial<User>> {
     const user = await this.usersService.findByUsernameOrEmail(userName);
-    if (!user) {
-      throw new UnauthorizedException('User not found');
-    }
 
     const isPasswordValid = await this.bcryptService.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
 
-    if (!user.isActive) {
-      throw new ForbiddenException('Your account is inactive. Please contact support.');
-    }
-
+    // if (user.status !== UserStatus.ACTIVE) {
+    //   throw new ForbiddenException('Your account is not active. Please contact support.');
+    // }
     if (!user.isVerified) {
       throw new ForbiddenException('Email not verified. Please check your email.');
     }
@@ -99,7 +96,6 @@ export class AuthService {
     const { password: _, ...result } = user;
     return result;
   }
-
 }
 
 function Inject(KEY: string | symbol): (target: typeof AuthService, propertyKey: undefined, parameterIndex: 1) => void {

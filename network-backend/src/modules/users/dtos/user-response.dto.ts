@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User, UserRole } from '../entities/user.entity';
 import { Expose } from 'class-transformer';
 import { Column } from 'typeorm';
+import { UserStatus } from '../types/UserStatus';
 
 export class UserResponseDto {
   @ApiProperty({ description: 'ID of user' })
@@ -36,6 +37,12 @@ export class UserResponseDto {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   @Expose()
   role: UserRole;
+
+  @ApiProperty({ description: 'status of user', example: 'ACTIVE' })
+  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
+  @Expose()
+  status: UserStatus;
+
 
   // constructor(user: User) {
   //   this.id = user.id;

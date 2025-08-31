@@ -28,7 +28,7 @@ export class Profile {
   id: string;
 
   @ApiProperty({ description: 'User account associated with this profile' })
-  @OneToOne(() => User)
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

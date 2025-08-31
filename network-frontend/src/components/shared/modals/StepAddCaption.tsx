@@ -11,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { selectCurrentUser } from "@/redux/features/user/userSelectors";
 import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
 import { useAppSelector } from "@/redux/hooks";
 
@@ -36,7 +35,6 @@ export function StepAddCaption({
 }: StepAddCaptionProps) {
   const displayFile = croppedFile || file;
   const url = URL.createObjectURL(displayFile);
-  const user = useAppSelector(selectCurrentUser);
   const profile = useAppSelector(selectMyProfile);
 
   return (
@@ -81,11 +79,11 @@ export function StepAddCaption({
           <Avatar className="w-8 h-8">
             <AvatarImage src={profile?.avatar || "/default-avatar.jpg"} />
             <AvatarFallback>
-              {user?.email?.[0]?.toUpperCase() || "U"}
+              {profile?.user?.email?.[0]?.toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
           <span className="font-semibold text-sm">
-            {`${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+            {`${profile?.user?.firstName || ""} ${profile?.user?.lastName || ""}`.trim() ||
               "Người dùng"}
           </span>
         </div>

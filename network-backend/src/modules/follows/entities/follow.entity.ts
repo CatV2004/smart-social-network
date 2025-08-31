@@ -7,7 +7,6 @@ import {
   JoinColumn,
   Column,
 } from 'typeorm';
-import { User } from '@/modules/users/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Profile } from '@/modules/profiles/entities/profile.entity';
 
@@ -38,7 +37,7 @@ export class Follow {
   @Column({
     type: 'enum',
     enum: FollowStatus,
-    default: FollowStatus.ACCEPTED, // mặc định là accepted nếu profile công khai
+    default: FollowStatus.ACCEPTED,
   })
   status: FollowStatus;
 

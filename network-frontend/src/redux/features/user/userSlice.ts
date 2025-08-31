@@ -1,60 +1,101 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { User } from '@/types/user';
-import { fetchCurrentUser } from './userThunks';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Profile } from "@/types/profile";
+import { UserFilters } from "@/types/user";
+import { PaginationMeta } from "@/types/pagination-meta";
+import { fetchUsers, updateUserStatus } from "./userThunks";
+import { stat } from "fs";
 
 interface UserState {
-  currentUser: User | null;
+  users: Profile[];
+  filters: UserFilters;
   loading: boolean;
   error: string | null;
-  initialized: boolean;
+  pagination: PaginationMeta | null;
 }
 
 const initialState: UserState = {
-  currentUser: null,
+  users: [],
+  filters: {
+    page: 1,
+    limit: 10,
+    sortBy: "createdAt",
+    sortOrder: "DESC",
+  },
   loading: false,
   error: null,
-  initialized: false
+  pagination: null,
 };
 
-const userSlice = createSlice({
-  name: 'user',
+const usersSlice = createSlice({
+  name: "users",
   initialState,
   reducers: {
-    setUser: (state, action: PayloadAction<User>) => {
-      state.currentUser = action.payload;
-      state.initialized = true;
+    setFilters: (state, action: PayloadAction<Partial<UserFilters>>) => {
+      state.filters = { ...state.filters, ...action.payload };
     },
-    clearUser: (state) => {
-      state.currentUser = null;
-      state.initialized = true;
+    resetFilters: (state) => {
+      state.filters = initialState.filters;
     },
-    updateUserInfo: (state, action: PayloadAction<Partial<User>>) => {
-      if (state.currentUser) {
-        state.currentUser = { ...state.currentUser, ...action.payload };
-      }
+    clearError: (state) => {
+      state.error = null;
     },
-    setInitialized(state) {
-      state.initialized = true;
+    resetUsers: (state) => {
+      state.users = [];
+      state.loading = false;
+      state.error = null;
+      state.pagination = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCurrentUser.pending, (state) => {
+      // Fetch users
+      .addCase(fetchUsers.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+      .addCase(fetchUsers.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentUser = action.payload;
-        state.initialized = true;
+
+        const data = action.payload?.data || [];
+        const meta = action.payload?.meta || {
+          page: 1,
+          limit: 10,
+          total: 0,
+          totalPages: 0,
+        };
+
+        if (meta.page === 1) {
+          state.users = data;
+        } else {
+          state.users.push(...data);
+        }
+
+        state.pagination = meta;
       })
-      .addCase(fetchCurrentUser.rejected, (state, action) => {
+      .addCase(fetchUsers.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
-        state.initialized = true;
+        state.error = action.error.message || "Failed to fetch users";
+
+        state.pagination = state.pagination || {
+          page: 1,
+          limit: 10,
+          total: 0,
+          totalPages: 0,
+        };
       });
-  }
+    builder
+      .addCase(updateUserStatus.fulfilled, (state, action) => {
+        const updatedUser = action.payload;
+        const index = state.users.findIndex((u) => u.id === updatedUser.id);
+        if (index !== -1) {
+          state.users[index] = { ...state.users[index], ...updatedUser };
+        }
+      })
+      .addCase(updateUserStatus.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
+  },
 });
 
-export const { setUser, clearUser, updateUserInfo, setInitialized } = userSlice.actions;
-export default userSlice.reducer;
+export const { setFilters, resetFilters, clearError, resetUsers } = usersSlice.actions;
+export default usersSlice.reducer;

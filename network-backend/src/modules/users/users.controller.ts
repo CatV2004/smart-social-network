@@ -10,6 +10,8 @@ import {
   Query,
   UseGuards,
   Param,
+  Patch,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -23,6 +25,7 @@ import {
   ApiQuery,
   ApiNotFoundResponse,
   ApiParam,
+  ApiResponse,
 } from '@nestjs/swagger';
 
 import { ActiveUser } from '@/common/decorators/active-user.decorator';
@@ -32,6 +35,10 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { UserResponseDto } from './dtos/user-response.dto';
 import { ResendVerificationDto } from './dtos/resend-verification.dto';
 import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
+import { User, UserRole } from './entities/user.entity';
+import { UpdateUserStatusDto } from './dtos/update-user-status.dto';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
 
 @ApiTags('users')
 @Controller('users')
@@ -167,4 +174,17 @@ export class UsersController {
   ): Promise<UserResponseDto> {
     return this.usersService.findUserByUsername(username);
   }
+
+  @Patch(':id/status')
+  @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Update status of a user' })
+  @ApiResponse({ status: 200, description: 'User status updated successfully', type: User })
+  async updateStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateUserStatusDto,
+  ): Promise<User> {
+    return this.usersService.updateStatus(id, dto);
+  }
+
 }

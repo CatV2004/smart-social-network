@@ -1,7 +1,6 @@
 "use client";
 
 import { useAppSelector } from "@/redux/hooks";
-import { selectUserLoading } from "@/redux/features/user/userSelectors";
 import { Loader2, Rocket, Sparkles } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -12,13 +11,12 @@ export default function AppLoadingGate({
 }: {
   children: React.ReactNode;
 }) {
-  const loadingUser = useAppSelector(selectUserLoading);
   const loadingProfile = useAppSelector(selectProfileLoading);
   const [progress, setProgress] = useState(0);
   const [showLoader, setShowLoader] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
 
-  const isInitializing = loadingUser || loadingProfile;
+  const isInitializing = loadingProfile;
 
   // Hiệu ứng progress bar động
   useEffect(() => {

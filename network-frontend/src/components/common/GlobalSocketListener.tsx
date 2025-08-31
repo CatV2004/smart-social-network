@@ -15,6 +15,7 @@ export function GlobalSocketListener() {
 
   useEffect(() => {
     const handleGlobalMessage = (message: MessageResponse) => {
+      console.log("message: ", message)
       dispatch(
         updateConversationLastMessage({
           conversationId: message.conversationId,

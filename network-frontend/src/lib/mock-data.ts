@@ -15,19 +15,18 @@ export interface Post {
 }
 
 export const mockStories: Story[] = [
-  { id: 1, username: 'turhaaaaa', avatarUrl: '/images/story_1.jpg' },
-  { id: 2, username: 'ika.soft', avatarUrl: '/images/story_2.jpg' },
-  { id: 3, username: 'hunvkhang', avatarUrl: '/images/story_3.jpg' },
-  { id: 4, username: 'quinnje..', avatarUrl: '/images/story_4.jpg' },
-  { id: 5, username: 'casio.hcm', avatarUrl: '/images/story_5.jpg' },
-  { id: 6, username: 'casio.hcm', avatarUrl: '/images/story_5.jpg' },
-  { id: 7, username: 'casio.hcm', avatarUrl: '/images/story_5.jpg' },
-  { id: 8, username: 'casio.hcm', avatarUrl: '/images/story_5.jpg' },
-  { id: 9, username: 'casio.hcm', avatarUrl: '/images/story_5.jpg' },
-  { id: 10, username: 'casio.hcm', avatarUrl: '/images/story_5.jpg' },
-  { id: 11, username: 'casio.hcm', avatarUrl: '/images/story_5.jpg' },
-  { id: 12, username: 'casio.hcm', avatarUrl: '/images/story_5.jpg' },
-
+  { id: 1, username: 'nvanA', avatarUrl: '/images/story_1.jpg' },
+  { id: 2, username: 'nvanB', avatarUrl: '/images/story_2.jpg' },
+  { id: 3, username: 'nvanC', avatarUrl: '/images/story_3.jpg' },
+  { id: 4, username: 'nvanD', avatarUrl: '/images/story_4.jpg' },
+  { id: 5, username: 'nvanE', avatarUrl: '/images/story_5.jpg' },
+  { id: 6, username: 'nvanF', avatarUrl: '/images/story_5.jpg' },
+  { id: 7, username: 'nvanG', avatarUrl: '/images/story_5.jpg' },
+  { id: 8, username: 'nvanH', avatarUrl: '/images/story_5.jpg' },
+  { id: 9, username: 'nvanI', avatarUrl: '/images/story_5.jpg' },
+  { id: 10, username: 'nvanK', avatarUrl: '/images/story_5.jpg' },
+  { id: 11, username: 'nvanL', avatarUrl: '/images/story_5.jpg' },
+  { id: 12, username: 'nvanM', avatarUrl: '/images/story_5.jpg' },
 ];
 
 export const mockPosts: Post[] = [
@@ -45,23 +44,23 @@ export const mockPosts: Post[] = [
 
 export const mockSuggestions = [
   {
-    username: 'dangthedanh',
+    username: 'Test1',
     note: 'Gợi ý cho bạn',
   },
   {
-    username: 'a._.p',
+    username: 'Test2',
     note: 'Có whp._oaht_ và 12 người khác theo dõi',
   },
   {
-    username: 'justmymems_',
+    username: 'Test3',
     note: 'Đang theo dõi _thnnhggg',
   },
   {
-    username: 'haophan1102',
+    username: 'Test4',
     note: 'Có thanchou.cvt theo dõi',
   },
   {
-    username: 'lvannam_',
+    username: 'Test5',
     note: 'Có neti.ber và 5 người khác theo dõi',
   },
 ];

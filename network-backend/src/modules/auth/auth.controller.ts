@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Request, Get } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -16,6 +16,7 @@ import { SignInDto } from './dtos/sign-in.dto';
 import { TokensResponseDto } from './dtos/tokens-response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
+import { ActiveUserData } from '@/common/interfaces/active-user-data.interface';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -55,6 +56,18 @@ export class AuthController {
     @ActiveUser() payload: RefreshTokenDto,
   ): Promise<TokensResponseDto> {
     return this.authService.refreshToken(payload.userId, payload.tokenId);
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard('jwt')) 
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  getCurrentUser(@ActiveUser() user: ActiveUserData) {
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
   }
 
 }

@@ -13,6 +13,10 @@ import { UpdateProfileImageDto } from './dtos/update-profile-image.dto';
 import { CloudinaryService } from '@/cloudinary/cloudinary.service';
 import { SearchService } from '../search/search.service';
 import { FollowStatus } from '../follows/entities/follow.entity';
+import { PaginationQueryDto } from '@/common/dtos/pagination-query.dto';
+import { IPaginated } from '@/common/dtos/paginated.interface';
+import { paginate } from '@/common/utils/pagination.util';
+import { UserRole } from '../users/entities/user.entity';
 
 @Injectable()
 export class ProfilesService {
@@ -269,9 +273,31 @@ export class ProfilesService {
     });
   }
 
-
   remove(id: number) {
     return `This action removes a #${id} profile`;
   }
+
+  async getAllProfiles(
+    pagination: PaginationQueryDto,
+    role?: UserRole,
+  ): Promise<IPaginated<ProfileResponseDto>> {
+    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'DESC' } =
+      pagination;
+
+    const qb = this.profileRepository
+      .createQueryBuilder('profile')
+      .leftJoinAndSelect('profile.user', 'user')
+      // Nếu muốn filter theo role
+      .where(role ? 'user.role = :role' : '1=1', { role })
+      // Chỉ load số lượng followers/following
+      .loadRelationCountAndMap('profile.followersCount', 'profile.followers')
+      .loadRelationCountAndMap('profile.followingCount', 'profile.following')
+      .orderBy(`profile.${sortBy}`, sortOrder as 'ASC' | 'DESC');
+
+    return paginate(qb, page, limit, ProfileResponseDto);
+  }
+
+
+
 
 }

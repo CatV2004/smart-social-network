@@ -1,4 +1,3 @@
-// components/chat/MessageList.tsx
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { MessageItem } from "./MessageItem";
@@ -6,8 +5,8 @@ import { MessageResponse } from "@/types/message";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
-import { selectCurrentUser } from "@/redux/features/user/userSelectors";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
 
 interface MessageListProps {
   messages: MessageResponse[];
@@ -26,8 +25,8 @@ export function MessageList({
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const isInitialLoadRef = useRef(true);
-  const user = useAppSelector(selectCurrentUser);
-  const currentUserId = user?.id;
+  const profile = useAppSelector(selectMyProfile);
+  const currentUserId = profile?.user.id;
 
   const handleLoadMore = useCallback(() => {
     if (onLoadMore) {

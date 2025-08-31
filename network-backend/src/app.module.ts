@@ -28,6 +28,7 @@ import { SearchModule } from './modules/search/search.module';
 import { SyncModule } from './modules/sync/sync.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { MessagesModule } from './modules/messages/messages.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
 
 
 @Module({
@@ -80,7 +81,8 @@ import { MessagesModule } from './modules/messages/messages.module';
     CommentsModule,
     SyncModule,
     NotificationsModule,
-    MessagesModule
+    MessagesModule,
+    StatisticsModule
   ],
   controllers: [AppController],
   providers: [

@@ -1,4 +1,3 @@
-// redux/features/ui/uiSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type OverlayType = "none" | "notifications" | "search" | "chat";

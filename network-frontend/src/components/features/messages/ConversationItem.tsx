@@ -1,4 +1,3 @@
-// src/components/chat/ConversationItem.tsx
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import dayjs from "dayjs";
@@ -6,8 +5,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
 import { conversationResponse } from "@/types/conversation";
 import { useAppSelector } from "@/redux/hooks";
-import { selectCurrentUser } from "@/redux/features/user/userSelectors";
 import { cn } from "@/lib/utils/cn";
+import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -23,7 +22,8 @@ export function ConversationItem({
   isActive,
   onClick,
 }: ConversationItemProps) {
-  const user = useAppSelector(selectCurrentUser);
+  const profile = useAppSelector(selectMyProfile);
+  console.log("profile: ", profile);
   const displayInfo = {
     name:
       conversation.displayName ||
@@ -46,7 +46,7 @@ export function ConversationItem({
     if (conversation.isGroup) {
       prefix = senderFullName;
     } else {
-      prefix = senderId === user?.id ? "Bạn" : senderFullName;
+      prefix = senderId === profile?.user?.id ? "Bạn" : senderFullName;
     }
 
     if (attachments && attachments.length > 0) {
@@ -108,7 +108,7 @@ export function ConversationItem({
         <div className="flex justify-between items-center gap-2">
           <p
             className={cn(
-              "text-base font-semibold truncate", 
+              "text-base font-semibold truncate",
               hasUnread ? "text-gray-900" : "text-gray-700"
             )}
           >
@@ -118,7 +118,7 @@ export function ConversationItem({
           {lastMessage && (
             <span
               className={cn(
-                "text-xs whitespace-nowrap flex-shrink-0", 
+                "text-xs whitespace-nowrap flex-shrink-0",
                 hasUnread ? "text-blue-600" : "text-gray-400"
               )}
             >
@@ -130,7 +130,7 @@ export function ConversationItem({
         <div className="flex justify-between items-center gap-2">
           <p
             className={cn(
-              "text-sm truncate flex-1", 
+              "text-sm truncate flex-1",
               hasUnread ? "text-gray-900 font-medium" : "text-gray-500"
             )}
           >

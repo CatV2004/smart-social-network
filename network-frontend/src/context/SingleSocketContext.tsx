@@ -12,9 +12,9 @@ import { io, Socket } from "socket.io-client";
 import { getCookie } from "cookies-next";
 import { useAppSelector } from "@/redux/hooks";
 import { selectIsAuthenticated } from "@/redux/features/auth/authSelectors";
-import { selectCurrentUser } from "@/redux/features/user/userSelectors";
 import { MessageResponse } from "@/types/message";
 import { Notification } from "@/types/notification";
+import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
 
 interface SingleSocketContextValue {
   socket: Socket | null;
@@ -54,11 +54,10 @@ export const SingleSocketProvider: React.FC<{
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const user = useAppSelector(selectCurrentUser);
+  const profile = useAppSelector(selectMyProfile);
   const socketRef = useRef<Socket | null>(null);
   const isConnectingRef = useRef(false);
 
-  // Refs để quản lý listeners
   const newMessageListenersRef = useRef<Map<string, (message: any) => void>>(
     new Map()
   );
@@ -73,7 +72,7 @@ export const SingleSocketProvider: React.FC<{
   >(new Map());
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
+    if (!isAuthenticated || !profile) {
       if (socketRef.current) {
         console.log("Disconnecting due to no auth");
         socketRef.current.disconnect();
@@ -107,7 +106,7 @@ export const SingleSocketProvider: React.FC<{
     const newSocket = io(socketUrl, {
       path: process.env.NEXT_PUBLIC_SOCKET_PATH || "/socket.io",
       transports: ["websocket", "polling"],
-      auth: { token, userId: user.id },
+      auth: { token, userId: profile?.user.id },
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: 5,
@@ -170,7 +169,7 @@ export const SingleSocketProvider: React.FC<{
         newSocket.off("new_notifications_batch", callback);
       });
     };
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, profile?.user?.id]);
 
   // Messages methods
   const joinConversation = useCallback((conversationId: string) => {

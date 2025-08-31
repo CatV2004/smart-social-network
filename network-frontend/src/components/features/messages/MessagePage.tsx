@@ -11,9 +11,9 @@ import { useSocketMessages } from "@/hooks/useSocketMessages";
 import { MessageResponse } from "@/types/message";
 import { conversationResponse } from "@/types/conversation";
 import { useAppSelector } from "@/redux/hooks";
-import { selectCurrentUser } from "@/redux/features/user/userSelectors";
 import { TypingIndicator } from "@/components/common/TypingIndicator";
 import debounce from "lodash.debounce";
+import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
 export function MessageContainer() {
   const params = useParams();
   const conversationId = params.conversationId as string;
@@ -30,8 +30,8 @@ export function MessageContainer() {
 
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const typingTimeoutRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
-  const user = useAppSelector(selectCurrentUser);
-  const currentUserId = user?.id;
+  const profile = useAppSelector(selectMyProfile);
+  const currentUserId = profile?.user.id;
 
   const {
     isConnected,

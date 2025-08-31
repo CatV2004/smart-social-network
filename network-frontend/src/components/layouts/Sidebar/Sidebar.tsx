@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import NProgress from "nprogress";
 import Link from "next/link";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
-import { selectCurrentUser } from "@/redux/features/user/userSelectors";
 import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
 import {
   setActiveOverlay,
@@ -27,7 +26,7 @@ function SidebarComponent() {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
 
-  const currentUser = useAppSelector(selectCurrentUser);
+  const myProfile = useAppSelector(selectMyProfile);
   const currentProfile = useAppSelector(selectMyProfile);
   const activeOverlay = useAppSelector((state) => state.ui.activeOverlay);
   const isSidebarCollapsed = useAppSelector(selectIsSidebarCollapsed);
@@ -37,7 +36,7 @@ function SidebarComponent() {
 
   NProgress.configure({ showSpinner: false, trickleSpeed: 300, minimum: 0.3 });
 
-  const navItems = getSidebarNavItems(currentUser?.username);
+  const navItems = getSidebarNavItems(myProfile?.user?.username);
 
   const userAvatar =
     currentProfile?.avatar ||

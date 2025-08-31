@@ -28,17 +28,14 @@ export class Message {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    /** Người gửi */
     @ManyToOne(() => User)
     @JoinColumn({ name: 'sender_id' })
     sender: User;
 
-    /** Thuộc về cuộc trò chuyện nào */
     @ManyToOne(() => Conversation, (conversation) => conversation.messages, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'conversation_id' })
     conversation: Conversation;
 
-    /** Nội dung tin nhắn */
     @ApiProperty({ description: 'Message content', example: 'Hello!' })
     @Column({ type: 'text', nullable: true })
     content?: string;
@@ -49,7 +46,6 @@ export class Message {
     @OneToMany(() => MessageRead, (read) => read.message, { cascade: true })
     reads: MessageRead[];
 
-    /** Trạng thái tin nhắn */
     @ApiProperty({ enum: MessageStatus, example: MessageStatus.SENT })
     @Column({ type: 'enum', enum: MessageStatus, default: MessageStatus.SENT })
     status: MessageStatus;

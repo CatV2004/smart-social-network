@@ -15,6 +15,8 @@ import { SearchService } from '../search/search.service';
 import { UserSearchDto } from '../search/dtos/user-search.dto';
 import { UserSearchMapper } from './mappers/user-search.mapper';
 import { plainToInstance } from 'class-transformer';
+import { UserStatus } from './types/UserStatus';
+import { UpdateUserStatusDto } from './dtos/update-user-status.dto';
 
 
 @Injectable()
@@ -123,6 +125,16 @@ export class UsersService {
     }
   }
 
+  async updateStatus(userId: string, dto: UpdateUserStatusDto): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    user.status = dto.status;
+    return await this.userRepository.save(user);
+  }
+
   private async sendVerificationEmail(user: User): Promise<void> {
     if (!user.verificationToken) {
       throw new Error('Verification token is missing');
@@ -159,7 +171,7 @@ export class UsersService {
 
       if (!user) {
         const alreadyVerified = await this.userRepository.findOne({
-          where: { isVerified: true, verificationToken: IsNull() },
+          where: { status: UserStatus.ACTIVE, isVerified: true, verificationToken: IsNull() },
         });
         if (alreadyVerified) {
           this.logger.warn(`Token already used. User ${alreadyVerified.email} is verified.`);
@@ -251,7 +263,7 @@ export class UsersService {
   async getUserByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { email },
-      select: ['id', 'email', 'firstName', 'lastName', 'password', 'role', 'isVerified', 'isActive'],
+      select: ['id', 'email', 'firstName', 'lastName', 'password', 'role', 'isVerified', 'status'],
     });
   }
 
@@ -314,7 +326,7 @@ export class UsersService {
 
   async findAllActivePaged(options: { limit: number; offset: number }) {
     const [items, total] = await this.userRepository.findAndCount({
-      where: { isActive: true },
+      where: { status: UserStatus.ACTIVE },
       relations: ['profile'],
       take: options.limit,
       skip: options.offset,
@@ -333,4 +345,5 @@ export class UsersService {
       nextOffset
     };
   }
+
 }

@@ -1,7 +1,5 @@
 "use client";
 import { useState, useMemo } from "react";
-import { useAppSelector } from "@/redux/hooks";
-import { selectUserLoading } from "@/redux/features/user/userSelectors";
 import { useProfileBase } from "@/hooks/useProfileBase";
 import { useProfilePosts } from "@/hooks/useProfilePosts";
 import { useSavedPosts } from "@/hooks/useSavedPosts";
@@ -31,7 +29,6 @@ export default function ProfileClient({
   );
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const loadingUser = useAppSelector(selectUserLoading);
 
   const {
     user,
@@ -119,7 +116,7 @@ export default function ProfileClient({
     return <ErrorMessage message={profileError} onRetry={reloadProfile} />;
   }
 
-  if (loadingProfile || loadingUser) {
+  if (loadingProfile) {
     return <LoadingSkeleton />;
   }
 

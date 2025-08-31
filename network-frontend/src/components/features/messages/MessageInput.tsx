@@ -15,7 +15,7 @@ import { useMessages } from "@/hooks/chat/message/useMessages";
 import { markConversationAsRead } from "@/redux/features/chat/thunks/conversationThunks";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import debounce from "lodash.debounce";
-import { selectCurrentUser } from "@/redux/features/user/userSelectors";
+import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
 
 interface MessageInputProps {
   conversationId: string;
@@ -35,7 +35,7 @@ export function MessageInput({
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const currentUserId = useAppSelector(selectCurrentUser)?.id;
+  const currentUserId = useAppSelector(selectMyProfile)?.user.id;
 
   const { sendNewMessage, newMessages } = useMessages(conversationId);
 
@@ -108,7 +108,6 @@ export function MessageInput({
       sendTypingDebounced(false);
       onTyping?.(false);
     }
-
   };
 
   const handleEmojiClick = (emojiData: EmojiClickData) => {

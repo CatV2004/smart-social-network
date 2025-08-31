@@ -3,9 +3,7 @@ import { authApi } from '../../../lib/api/auth.api';
 import { setCookie, deleteCookie } from 'cookies-next';
 import { LoginPayload, RegisterPayload } from '../../../types/auth.d';
 import { setAuthError, clearAuth, setAuthLoading, setAuthTokens } from './authSlice';
-import { fetchCurrentUser } from '../user/userThunks';
 import { fetchMyProfile } from '../profile/profileThunks';
-import { clearUser } from '../user/userSlice';
 import { clearProfile } from '../profile/profileSlice';
 
 export const login = createAsyncThunk(
@@ -21,7 +19,6 @@ export const login = createAsyncThunk(
                 accessToken: data.accessToken,
                 refreshToken: data.refreshToken
             }));
-            await dispatch(fetchCurrentUser());
             await dispatch(fetchMyProfile());
 
             return data;
@@ -68,7 +65,6 @@ export const logout = createAsyncThunk(
             deleteCookie('accessToken');
             deleteCookie('refreshToken');
             dispatch(clearAuth());
-            dispatch(clearUser()); 
             dispatch(clearProfile());
         }
     }
