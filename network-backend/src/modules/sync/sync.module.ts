@@ -5,14 +5,19 @@ import { ResyncService } from './resync.service';
 import { PostsModule } from '../posts/posts.module';
 import { SearchModule } from '../search/search.module';
 import { UsersModule } from '../users/users.module';
+import { SyncController } from './sync.controller';
+import { RecommendationResyncService } from './recommendation-sync.service';
+import { AiModule } from '../ai/ai.module';
 
 @Module({
     imports: [
-        ScheduleModule.forRoot(), 
+        ScheduleModule.forRoot(),
         PostsModule,
         SearchModule,
         UsersModule,
+        AiModule
     ],
-    providers: [CleanupService, ResyncService],
+    controllers: [SyncController],
+    providers: [CleanupService, ResyncService, RecommendationResyncService],
 })
 export class SyncModule { }

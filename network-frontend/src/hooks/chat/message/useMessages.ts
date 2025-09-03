@@ -11,8 +11,9 @@ import {
     clearMessages,
     resetMessagesPagination,
 } from "@/redux/features/chat/slices/messageSlice";
+import { inCreaseUnreadCount, updateConversationLastMessage } from "@/redux/features/chat/slices/conversationSlice";
 
-export const useMessages = (conversationId: string) => {
+export const useMessages = (conversationId: string, userId?: string) => {
     const dispatch = useAppDispatch();
     const { messages, loading, error, pagination } = useAppSelector(
         (state) => state.message
@@ -73,10 +74,23 @@ export const useMessages = (conversationId: string) => {
 
     // Thêm tin nhắn từ socket
     const addNewMessage = useCallback(
-        (message: MessageResponse, conversationId: string) => {
+        (message: MessageResponse) => {
             dispatch(addMessage(message));
+
+            dispatch(
+                updateConversationLastMessage({
+                    conversationId: message.conversationId,
+                    lastMessage: message,
+                })
+            )
+            console.log("usêrID: ", userId)
+            console.log("message.sender.user?.id: ", message.sender.user?.id)
+
+            if (userId !== message.sender.user?.id) {
+                dispatch(inCreaseUnreadCount({ conversationId: message.conversationId }));
+            }
         },
-        [dispatch]
+        [dispatch, userId]
     );
 
     const loadMore = useCallback(() => {

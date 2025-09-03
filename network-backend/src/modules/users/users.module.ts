@@ -15,7 +15,7 @@ import { SearchModule } from '../search/search.module';
     forwardRef(() => AuthModule),
     forwardRef(() => ProfilesModule),
     MailModule,
-    SearchModule
+    SearchModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, BcryptService],

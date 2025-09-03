@@ -5,7 +5,9 @@ import { Phone, Video, Info, MoreVertical, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { conversationResponse } from "@/types/conversation";
 import { Badge } from "@/components/ui/badge";
-import { useOnlineUsers } from "@/hooks/chat/useOnlineUsers";
+import { useAppSelector } from "@/redux/hooks";
+import { selectIsUserOnline } from "@/redux/features/onlineStatus/onlineStatusSelectors";
+import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
 
 interface MessagesHeaderProps {
   conversation: conversationResponse | null;
@@ -14,14 +16,9 @@ interface MessagesHeaderProps {
 export function MessagesHeader({ conversation }: MessagesHeaderProps) {
   const displayName = conversation?.displayName;
   const displayAvatar = conversation?.displayAvatar;
-  const { onlineUsers } = useOnlineUsers();
-
-  console.log("conversation.targetUserId: ", conversation?.targetUserId);
-
-  const isOnline =
-    !conversation?.isGroup && conversation?.targetUserId
-      ? onlineUsers.includes(conversation.targetUserId)
-      : false;
+  const userId = useAppSelector(selectMyProfile)?.user.id;
+  const isOnline = useAppSelector(selectIsUserOnline(userId!));
+  console.log("isOnline", isOnline);
 
   return (
     <div className="border-b border-gray-200 p-4 flex items-center justify-between bg-white shadow-sm">

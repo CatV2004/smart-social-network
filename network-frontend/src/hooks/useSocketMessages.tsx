@@ -4,7 +4,10 @@ import { useEffect, useRef, useCallback } from "react";
 import { useSingleSocket } from "@/context/SingleSocketContext";
 import { MessageResponse } from "@/types/message";
 import { useAppDispatch } from "@/redux/hooks";
-import { inCreaseUnreadCount, updateConversationLastMessage } from "@/redux/features/chat/slices/conversationSlice";
+import {
+  inCreaseUnreadCount,
+  updateConversationLastMessage,
+} from "@/redux/features/chat/slices/conversationSlice";
 
 export function useSocketMessages() {
   const {
@@ -23,7 +26,7 @@ export function useSocketMessages() {
 
   // const handleGlobalMessage = useCallback(
   //   (message: MessageResponse) => {
-  //     console.log("Global message received for conversation update:", message);
+  //     console.log("Global new message:", message);
 
   //     dispatch(
   //       updateConversationLastMessage({
@@ -37,9 +40,29 @@ export function useSocketMessages() {
   //   [dispatch]
   // );
 
+  // const subscribeNewMessage = useCallback(
+  //   (callback: (msg: MessageResponse) => void) => {
+  //     // ✅ luôn bọc callback của bạn kèm global handler
+  //     const combinedCallback = (msg: MessageResponse) => {
+  //       handleGlobalMessage(msg); // global update
+  //       callback(msg); // custom logic (MessageContainer)
+  //     };
+
+  //     const unsubscribe = onNewMessage(combinedCallback);
+  //     messageListenersRef.current.add(unsubscribe);
+
+  //     return () => {
+  //       unsubscribe();
+  //       messageListenersRef.current.delete(unsubscribe);
+  //     };
+  //   },
+  //   [onNewMessage, handleGlobalMessage]
+  // );
   const subscribeNewMessage = useCallback(
-    (callback: (msg: any) => void) => {
-      const unsubscribe = onNewMessage(callback);
+    (callback: (msg: MessageResponse) => void) => {
+      const unsubscribe = onNewMessage((msg: MessageResponse) => {
+        callback(msg); // chỉ append message vào UI
+      });
       messageListenersRef.current.add(unsubscribe);
       return () => {
         unsubscribe();
@@ -62,10 +85,7 @@ export function useSocketMessages() {
   );
 
   useEffect(() => {
-    // const unsubscribe = onNewMessage(handleGlobalMessage);
-
     return () => {
-      // unsubscribe();
       messageListenersRef.current.forEach((unsubscribe) => unsubscribe());
       typingListenersRef.current.forEach((unsubscribe) => unsubscribe());
       messageListenersRef.current.clear();

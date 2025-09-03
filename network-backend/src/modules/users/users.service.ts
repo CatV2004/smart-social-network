@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, In, IsNull, Repository } from 'typeorm';
+import { EntityManager, In, IsNull, Not, Repository } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { BcryptService } from '@/modules/auth/bcrypt.service';
@@ -10,13 +10,13 @@ import { MailService } from '@/mail/mail.service';
 import dayjs from 'dayjs';
 import { ProfilesService } from '../profiles/profiles.service';
 import { v4 as uuidv4 } from 'uuid';
-import { log } from 'console';
 import { SearchService } from '../search/search.service';
 import { UserSearchDto } from '../search/dtos/user-search.dto';
 import { UserSearchMapper } from './mappers/user-search.mapper';
 import { plainToInstance } from 'class-transformer';
 import { UserStatus } from './types/UserStatus';
 import { UpdateUserStatusDto } from './dtos/update-user-status.dto';
+import { RecommendationProducer } from '../ai/recommendations/recommendations.producer';
 
 
 @Injectable()
@@ -62,6 +62,20 @@ export class UsersService {
     return plainToInstance(UserResponseDto, user, {
       excludeExtraneousValues: true,
     });
+  }
+
+  async findAllActiveNotAdmin(): Promise<User[]> {
+    const users = await this.userRepository.find({
+      where: {
+        status: UserStatus.ACTIVE,
+        role: Not(UserRole.ADMIN),
+      },
+    });
+
+    if (!users || users.length === 0) {
+      throw new BadRequestException('No active users found');
+    }
+    return users;
   }
 
   async createUser(dto: CreateUserDto): Promise<UserResponseDto> {
@@ -230,6 +244,7 @@ export class UsersService {
       }
 
       this.logger.log(`Email verified for ${user.email}`);
+
       return { message: 'Email successfully verified' };
     } catch (err) {
       this.logger.error("verifyEmail failed", err.stack || err);

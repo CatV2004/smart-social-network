@@ -17,6 +17,7 @@ import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
 export function MessageContainer() {
   const params = useParams();
   const conversationId = params.conversationId as string;
+  const userId = useAppSelector(selectMyProfile)?.user.id;
   const [selectedConversation, setSelectedConversation] =
     useState<conversationResponse | null>(null);
 
@@ -26,7 +27,7 @@ export function MessageContainer() {
     getConversationById,
   } = useConversation();
   const { messages, loading, loadMore, pagination, addNewMessage } =
-    useMessages(conversationId);
+    useMessages(conversationId, userId);
 
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const typingTimeoutRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
@@ -96,7 +97,9 @@ export function MessageContainer() {
 
   const handleNewMessage = useCallback(
     (newMessage: MessageResponse) => {
-      addNewMessage(newMessage, conversationId);
+      if (newMessage.conversationId === conversationId) {
+        addNewMessage(newMessage);
+      }
     },
     [addNewMessage, conversationId]
   );
@@ -259,9 +262,7 @@ export function MessageContainer() {
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-blue-50/30">
-      <MessagesHeader
-        conversation={selectedConversation}
-      />
+      <MessagesHeader conversation={selectedConversation} />
       <MessageList
         messages={messages}
         onLoadMore={loadMore}

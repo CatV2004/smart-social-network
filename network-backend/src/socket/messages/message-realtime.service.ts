@@ -12,11 +12,11 @@ export class MessageRealtimeService {
 
     async sendNewMessage(conversationId: string, message: MessageResponseDto, recipientIds: string[]) {
         try {
-            // this.socketGateway.sendToConversation(conversationId, message);
+            this.socketGateway.sendToConversation(conversationId, message);
             
-            recipientIds.forEach(userId => {
-                this.socketGateway.sendToUser(userId, message);
-            });
+            // recipientIds.forEach(userId => {
+            //     this.socketGateway.sendToUser(userId, message);
+            // });
             this.logger.log(`Sent message to conversation ${conversationId} and ${recipientIds.length} users`);
         } catch (error) {
             this.logger.error(`Failed to send realtime message: ${error.message}`);

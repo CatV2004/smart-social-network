@@ -15,19 +15,20 @@ export interface Post {
 }
 
 export const mockStories: Story[] = [
-  { id: 1, username: 'nvanA', avatarUrl: '/images/story_1.jpg' },
-  { id: 2, username: 'nvanB', avatarUrl: '/images/story_2.jpg' },
-  { id: 3, username: 'nvanC', avatarUrl: '/images/story_3.jpg' },
-  { id: 4, username: 'nvanD', avatarUrl: '/images/story_4.jpg' },
-  { id: 5, username: 'nvanE', avatarUrl: '/images/story_5.jpg' },
-  { id: 6, username: 'nvanF', avatarUrl: '/images/story_5.jpg' },
-  { id: 7, username: 'nvanG', avatarUrl: '/images/story_5.jpg' },
-  { id: 8, username: 'nvanH', avatarUrl: '/images/story_5.jpg' },
-  { id: 9, username: 'nvanI', avatarUrl: '/images/story_5.jpg' },
-  { id: 10, username: 'nvanK', avatarUrl: '/images/story_5.jpg' },
-  { id: 11, username: 'nvanL', avatarUrl: '/images/story_5.jpg' },
-  { id: 12, username: 'nvanM', avatarUrl: '/images/story_5.jpg' },
+  { id: 1, username: 'hoang.nguyen', avatarUrl: 'https://images.pexels.com/photos/12840685/pexels-photo-12840685.jpeg' },
+  { id: 2, username: 'anhthu_99', avatarUrl: 'https://images.pexels.com/photos/31932274/pexels-photo-31932274.jpeg' },
+  { id: 3, username: 'minhquan', avatarUrl: 'https://images.pexels.com/photos/11750442/pexels-photo-11750442.jpeg' },
+  { id: 4, username: 'trang.le', avatarUrl: 'https://images.pexels.com/photos/32263469/pexels-photo-32263469.jpeg' },
+  { id: 5, username: 'tuananh.official', avatarUrl: 'https://images.pexels.com/photos/32946073/pexels-photo-32946073.jpeg' },
+  { id: 6, username: 'huonggiang', avatarUrl: 'https://images.pexels.com/photos/32798951/pexels-photo-32798951.jpeg' },
+  { id: 7, username: 'phongvo', avatarUrl: 'https://images.pexels.com/photos/33598059/pexels-photo-33598059.jpeg' },
+  { id: 8, username: 'thao.tran', avatarUrl: 'https://images.pexels.com/photos/32263840/pexels-photo-32263840.jpeg' },
+  { id: 9, username: 'baohoang_23', avatarUrl: 'https://images.pexels.com/photos/33673049/pexels-photo-33673049.jpeg' },
+  { id: 10, username: 'linhngoc', avatarUrl: 'https://images.pexels.com/photos/27605480/pexels-photo-27605480.jpeg' },
+  { id: 11, username: 'datpham', avatarUrl: 'https://images.pexels.com/photos/33366135/pexels-photo-33366135.jpeg' },
+  { id: 12, username: 'myanh', avatarUrl: 'https://images.pexels.com/photos/32908788/pexels-photo-32908788.jpeg' },
 ];
+
 
 export const mockPosts: Post[] = [
   {

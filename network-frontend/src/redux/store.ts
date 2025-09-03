@@ -1,4 +1,3 @@
-// redux/store.ts
 import { configureStore, ThunkAction, Action, createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 import authReducer from './features/auth/authSlice';
 import profileReducer from './features/profile/profileSlice';
@@ -9,6 +8,9 @@ import followRequestsReducer from "./features/follow-request/followRequestSlice"
 import messageReducer from "./features/chat/slices/messageSlice";
 import memberReducer from "./features/chat/slices/memberSlice";
 import conversationReducer from "./features/chat/slices/conversationSlice";
+import onlineStatusReducer from "./features/onlineStatus/onlineStatusSlice";
+import recommendationReducer from "./features/recomment/recommendationSlice";
+import { enableMapSet } from 'immer';
 
 import { combineReducers } from 'redux';
 import storage from 'redux-persist/lib/storage';
@@ -57,9 +59,12 @@ const rootReducer = combineReducers({
     message: messageReducer,
     member: memberReducer,
     conversation: conversationReducer,
+    onlineStatus: onlineStatusReducer,
+    recommendations: recommendationReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
+enableMapSet();
 
 export const store = configureStore({
     reducer: persistedReducer,

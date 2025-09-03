@@ -1,6 +1,5 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { v4 as uuidv4 } from 'uuid';
 
 import {
   Column,
@@ -8,6 +7,7 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -15,7 +15,7 @@ import {
 import dayjs from 'dayjs';
 import { Profile } from '@/modules/profiles/entities/profile.entity';
 import { UserStatus } from '../types/UserStatus';
-// import { ConfigService } from '@nestjs/config';
+import { UserRecommendation } from '@/modules/ai/entities/user-recommention.entity';
 
 export enum UserRole {
   USER = 'USER',
@@ -101,6 +101,13 @@ export class User {
   @ApiProperty({ description: 'Deleted date of user', required: false, nullable: true })
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt?: Date | null;
+
+
+  @OneToMany(() => UserRecommendation, (rec) => rec.user)
+  sentRecommendations: UserRecommendation[];
+
+  @OneToMany(() => UserRecommendation, (rec) => rec.candidate)
+  receivedRecommendations: UserRecommendation[];
 
   isVerificationTokenValid(): boolean {
     return (

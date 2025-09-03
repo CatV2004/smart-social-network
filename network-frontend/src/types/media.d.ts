@@ -1,5 +1,10 @@
 export type MediaType = 'IMAGE' | 'VIDEO' | 'AUDIO';
 
+export interface UploadMediaPayload {
+  files: File[];      
+  postId: string;     
+  type: MediaType;  
+}
 
 export interface MediaInput {
   id?: string;           // media cũ

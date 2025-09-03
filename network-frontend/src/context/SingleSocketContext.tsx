@@ -10,11 +10,15 @@ import React, {
 } from "react";
 import { io, Socket } from "socket.io-client";
 import { getCookie } from "cookies-next";
-import { useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { selectIsAuthenticated } from "@/redux/features/auth/authSelectors";
 import { MessageResponse } from "@/types/message";
 import { Notification } from "@/types/notification";
 import { selectMyProfile } from "@/redux/features/profile/profileSelectors";
+import {
+  userWentOffline,
+  userWentOnline,
+} from "@/redux/features/onlineStatus/onlineStatusSlice";
 
 interface SingleSocketContextValue {
   socket: Socket | null;
@@ -57,6 +61,7 @@ export const SingleSocketProvider: React.FC<{
   const profile = useAppSelector(selectMyProfile);
   const socketRef = useRef<Socket | null>(null);
   const isConnectingRef = useRef(false);
+  const dispatch = useAppDispatch();
 
   const newMessageListenersRef = useRef<Map<string, (message: any) => void>>(
     new Map()
@@ -111,6 +116,24 @@ export const SingleSocketProvider: React.FC<{
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
+    });
+
+    const handleUserOnline = (data: { userId: string }) => {
+      dispatch(userWentOnline(data.userId));
+    };
+
+    const handleUserOffline = (data: { userId: string }) => {
+      dispatch(userWentOffline(data.userId));
+    };
+
+    newSocket.on("user_online", handleUserOnline);
+    newSocket.on("user_offline", handleUserOffline);
+
+    newSocket.on("connect", () => {
+      console.log("Connected to main socket with ID:", newSocket.id);
+      setIsConnected(true);
+      isConnectingRef.current = false;
+      newSocket.emit("join_notifications");
     });
 
     newSocket.on("connect", () => {
@@ -168,6 +191,8 @@ export const SingleSocketProvider: React.FC<{
       newNotificationsBatchListenersRef.current.forEach((callback) => {
         newSocket.off("new_notifications_batch", callback);
       });
+      newSocket.off("user_online", handleUserOnline);
+      newSocket.off("user_offline", handleUserOffline);
     };
   }, [isAuthenticated, profile?.user?.id]);
 

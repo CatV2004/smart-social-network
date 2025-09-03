@@ -29,6 +29,8 @@ import { SyncModule } from './modules/sync/sync.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { StatisticsModule } from './modules/statistics/statistics.module';
+import { AiModule } from './modules/ai/ai.module';
+import { QueueModule } from './modules/queue/queue.module';
 
 
 @Module({
@@ -82,7 +84,9 @@ import { StatisticsModule } from './modules/statistics/statistics.module';
     SyncModule,
     NotificationsModule,
     MessagesModule,
-    StatisticsModule
+    StatisticsModule,
+    AiModule,
+    QueueModule
   ],
   controllers: [AppController],
   providers: [

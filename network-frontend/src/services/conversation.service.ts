@@ -7,7 +7,7 @@ export const ConservationService = {
             id: message.id,
             content: message.content ?? "",
             createdAt: message.createdAt,
-            senderId: message.sender.id,
+            senderId: message.sender?.user?.id!,
             senderFullName: message.sender.user
                 ? `${message.sender.user.firstName} ${message.sender.user.lastName}`
                 : "Unknown",

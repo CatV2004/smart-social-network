@@ -52,7 +52,6 @@ const conversationSlice = createSlice({
             const { conversationId, lastMessage } = action.payload;
             const index = state.conversations.findIndex(c => c.id === conversationId);
             if (index !== -1) {
-                console.log("lastMessage in slice:", lastMessage)
                 state.conversations[index].lastMessage = ConservationService.mapToSummary(lastMessage);
                 state.conversations[index].updatedAt = lastMessage.createdAt;
                 const updatedConv = state.conversations.splice(index, 1)[0];

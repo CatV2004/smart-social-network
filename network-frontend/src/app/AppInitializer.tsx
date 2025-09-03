@@ -13,6 +13,7 @@ import {
 
 import { useSocketNotifications } from "@/hooks/useSocketNotifications";
 import { useSocketMessages } from "@/hooks/useSocketMessages";
+import { useSocketOnlineStatus } from "@/hooks/useSocketOnlineStatus";
 
 export default function AppInitializer({
   children,
@@ -23,6 +24,7 @@ export default function AppInitializer({
 
   useSocketNotifications();
   useSocketMessages();
+  useSocketOnlineStatus();
 
   const initializeApp = useCallback(async () => {
     const token = getCookie("accessToken");

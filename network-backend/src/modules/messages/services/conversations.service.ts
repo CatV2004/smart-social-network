@@ -136,6 +136,7 @@ export class ConversationsService {
                     this.messagesService.getUnreadCountsForUser(convoIds, userId),
                     this.messagesService.getLastMessagesForConversations(convoIds),
                 ]);
+                console.log("lastMessages: ", lastMessages)
 
                 return Promise.all(
                     convos.map(convo =>
@@ -150,7 +151,6 @@ export class ConversationsService {
             },
         );
     }
-
 
     async getMembers(conversationId: string, paginate: PaginationQueryDto) {
         const qb = this.memberRepo
@@ -193,6 +193,6 @@ export class ConversationsService {
 
         return !!existing;
     }
-    
+
 
 }

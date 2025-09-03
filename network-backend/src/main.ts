@@ -6,9 +6,20 @@ import { setupSwagger } from '@/swagger/swagger.config';
 import { json, urlencoded } from 'express';
 import { TransformInterceptor } from '@/common/interceptors/transform.interceptor';
 import { useContainer } from 'class-validator';
+import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.connectMicroservice({
+    transport: Transport.RMQ,
+    options: {
+      urls: [`amqp://${process.env.RABBITMQ_USER}:${process.env.RABBITMQ_PASS}@${process.env.RABBITMQ_HOST}:5672`],
+      queue: 'recommendation_queue',
+      queueOptions: { durable: true },
+    },
+  });
+
   app.useGlobalInterceptors(new TransformInterceptor());
   const configService = app.get(ConfigService);
   const bodyLimit = configService.get<string>('BODY_LIMIT') || '10mb';
@@ -27,6 +38,7 @@ async function bootstrap() {
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
+  await app.startAllMicroservices();
   await app.listen(configService.get<number>('PORT') || 3000);
 }
 

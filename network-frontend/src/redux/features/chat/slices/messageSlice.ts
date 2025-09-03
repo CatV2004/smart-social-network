@@ -100,11 +100,11 @@ const messageSlice = createSlice({
             })
             .addCase(sendMessage.fulfilled, (state, action) => {
                 state.loading = false
-                state.messages.unshift(action.payload);
-                if (state.pagination) {
-                    state.pagination.total += 1;
-                    state.pagination.totalPages = Math.ceil(state.pagination.total / state.pagination.limit);
-                }
+                // state.messages.unshift(action.payload);
+                // if (state.pagination) {
+                //     state.pagination.total += 1;
+                //     state.pagination.totalPages = Math.ceil(state.pagination.total / state.pagination.limit);
+                // }
             })
             .addCase(sendMessage.rejected, (state, action) => {
                 state.loading = false

@@ -27,6 +27,7 @@ services:
 
   db:
     image: postgres:17.3-alpine
+    container_name: db
     environment:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
@@ -35,7 +36,29 @@ services:
       - network-data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
+    command: >
+      postgres -c wal_level=logical
+               -c max_wal_senders=10
+               -c max_replication_slots=10
     restart: unless-stopped
+    networks:
+      - social.net
+
+  db-dw:
+    image: postgres:17.3-alpine
+    container_name: db-dw
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DBWH_USERNAME}
+      POSTGRES_PASSWORD: ${DBWH_PASSWORD}
+      POSTGRES_DB: ${DBWH_DATABASE}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_dw_data:/var/lib/postgresql/data
+      - ./dw/init:/docker-entrypoint-initdb.d
+    depends_on:
+      - db
     networks:
       - social.net
 
@@ -82,19 +105,9 @@ services:
     networks:
       - social.net
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:9.1.2
-    container_name: kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
-    ports:
-      - '5601:5601'
-    depends_on:
-      - elasticsearch
-    networks:
-      - social.net
-
 volumes:
+  pg_dw_data:
+    name: pg_dw_data
   network-data:
     name: network-data
   redis:
