@@ -52,5 +52,5 @@ export const useSocketNotifications = () => {
             unsubscribeNewNotification();
             unsubscribeNewNotificationsBatch();
         };
-    }, [onNewNotification, onNewNotificationsBatch, dispatch]);
+    }, [onNewNotification, onNewNotificationsBatch, isConnected, dispatch]);
 };

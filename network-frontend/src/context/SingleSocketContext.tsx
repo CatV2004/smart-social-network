@@ -30,8 +30,8 @@ interface SingleSocketContextValue {
   // Notifications methods
   joinNotifications: () => void;
   leaveNotifications: () => void;
-  markNotificationRead: (notificationId: string) => void;
-  markAllNotificationsRead: () => void;
+  // markNotificationRead: (notificationId: string) => void;
+  // markAllNotificationsRead: () => void;
   // Event listeners
   onNewMessage: (callback: (message: MessageResponse) => void) => () => void;
   onUserTyping: (
@@ -136,15 +136,6 @@ export const SingleSocketProvider: React.FC<{
       newSocket.emit("join_notifications");
     });
 
-    newSocket.on("connect", () => {
-      console.log("Connected to main socket with ID:", newSocket.id);
-      setIsConnected(true);
-      isConnectingRef.current = false;
-
-      // Auto join notifications khi connect
-      newSocket.emit("join_notifications");
-    });
-
     newSocket.on("disconnect", (reason) => {
       console.log("Disconnected from main socket:", reason);
       setIsConnected(false);
@@ -221,13 +212,13 @@ export const SingleSocketProvider: React.FC<{
     socketRef.current?.emit("leave_notifications");
   }, []);
 
-  const markNotificationRead = useCallback((notificationId: string) => {
-    socketRef.current?.emit("mark_notification_read", { notificationId });
-  }, []);
+  // const markNotificationRead = useCallback((notificationId: string) => {
+  //   socketRef.current?.emit("mark_notification_read", { notificationId });
+  // }, []);
 
-  const markAllNotificationsRead = useCallback(() => {
-    socketRef.current?.emit("mark_all_notifications_read");
-  }, []);
+  // const markAllNotificationsRead = useCallback(() => {
+  //   socketRef.current?.emit("mark_all_notifications_read");
+  // }, []);
 
   // Event listeners
   const onNewMessage = useCallback((callback: (message: any) => void) => {
@@ -318,8 +309,8 @@ export const SingleSocketProvider: React.FC<{
         sendTyping,
         joinNotifications,
         leaveNotifications,
-        markNotificationRead,
-        markAllNotificationsRead,
+        // markNotificationRead,
+        // markAllNotificationsRead,
         onNewMessage,
         onUserTyping,
         onNewNotification,
