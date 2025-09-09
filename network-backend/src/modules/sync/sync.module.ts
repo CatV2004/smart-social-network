@@ -8,6 +8,7 @@ import { UsersModule } from '../users/users.module';
 import { SyncController } from './sync.controller';
 import { RecommendationResyncService } from './recommendation-sync.service';
 import { AiModule } from '../ai/ai.module';
+import { PredictionResyncService } from './prediction-sync.service';
 
 @Module({
     imports: [
@@ -15,9 +16,10 @@ import { AiModule } from '../ai/ai.module';
         PostsModule,
         SearchModule,
         UsersModule,
-        AiModule
+        AiModule,
+        PostsModule,
     ],
     controllers: [SyncController],
-    providers: [CleanupService, ResyncService, RecommendationResyncService],
+    providers: [CleanupService, ResyncService, RecommendationResyncService, PredictionResyncService],
 })
 export class SyncModule { }

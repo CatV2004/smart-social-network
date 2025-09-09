@@ -5,7 +5,8 @@ import {
     faComment,
     faUserPlus,
     faReply,
-    faCheckCircle, // Thêm icon reply
+    faCheckCircle,
+    faExclamationTriangle, // Thêm icon reply
 } from "@fortawesome/free-solid-svg-icons";
 import { Notification, NotificationEnum } from "@/types/notification";
 
@@ -28,6 +29,8 @@ export const getNotificationIcon = (type: NotificationEnum) => {
             return faComment;
         case NotificationEnum.TAG:
             return faComment;
+        case NotificationEnum.POST_REMOVED:
+            return faExclamationTriangle;
         default:
             return faBell;
     }
@@ -52,6 +55,8 @@ export const getNotificationIconColor = (type: NotificationEnum) => {
             return "text-blue-500";
         case NotificationEnum.TAG:
             return "text-blue-500";
+        case NotificationEnum.POST_REMOVED:
+            return "text-red-600";
         default:
             return "text-gray-500";
     }
@@ -86,6 +91,9 @@ export const getNotificationMessage = (notification: Notification) => {
             return `${senderName} đã nhắc đến bạn trong một bình luận`;
         case NotificationEnum.TAG:
             return `${senderName} đã gắn thẻ bạn trong bài viết`;
+        case NotificationEnum.POST_REMOVED:
+            return notification.metadata?.message || "Bài viết của bạn đã bị xoá vì vi phạm";
+
         default:
             return notification.metadata?.message || "Bạn có một thông báo mới";
     }

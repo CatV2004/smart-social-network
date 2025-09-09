@@ -16,6 +16,7 @@ import dayjs from 'dayjs';
 import { Profile } from '@/modules/profiles/entities/profile.entity';
 import { UserStatus } from '../types/UserStatus';
 import { UserRecommendation } from '@/modules/ai/entities/user-recommention.entity';
+import { Report } from '@/modules/reports/entities/report.entity';
 
 export enum UserRole {
   USER = 'USER',
@@ -108,6 +109,9 @@ export class User {
 
   @OneToMany(() => UserRecommendation, (rec) => rec.candidate)
   receivedRecommendations: UserRecommendation[];
+
+  @OneToMany(() => Report, (report) => report.reporter)
+  reportsMade: Report[];
 
   isVerificationTokenValid(): boolean {
     return (

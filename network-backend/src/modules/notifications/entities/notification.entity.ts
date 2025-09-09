@@ -19,7 +19,7 @@ export class Notification {
     id: string;
 
     @ManyToOne(() => Profile, { eager: true })
-    sender: Profile;
+    sender?: Profile;
 
     @ManyToOne(() => Profile, { eager: true })
     @Index()
@@ -30,7 +30,7 @@ export class Notification {
     })
     type: NotificationType;
 
-    @ManyToOne(() => Post, { nullable: true })
+    @ManyToOne(() => Post, { nullable: true, onDelete: 'SET NULL' })
     post?: Post;
 
     @ManyToOne(() => Comment, { nullable: true })

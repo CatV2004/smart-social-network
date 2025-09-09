@@ -13,6 +13,7 @@ import { MediaType } from '../media/types/media.type';
 import { SearchService } from '../search/search.service';
 import { PostSearchDto } from '../search/dtos/post-search.dto';
 import dayjs from 'dayjs';
+import { PredictionProducer } from '../ai/predictions/prediction.producer';
 
 interface UpdatePostOptions {
   content?: string;
@@ -38,7 +39,6 @@ export class PostsService {
     private readonly dataSource: DataSource,
 
     private readonly searchService: SearchService,
-
   ) { }
   async create(dto: CreatePostDto, userId: string): Promise<Post> {
     const { content } = dto;
@@ -482,6 +482,17 @@ export class PostsService {
       .orderBy(`post.${sortBy}`, sortOrder as 'ASC' | 'DESC');
 
     return paginate(qb, page, limit, PostResponseDto);
+  }
+
+  async getPostsToCheck(limit = 50): Promise<Post[]> {
+    return await this.postRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.reports', 'report')
+      .where('post.deletedAt IS NULL')
+      .andWhere('report.id IS NULL')
+      .orderBy('post.createdAt', 'DESC')
+      .take(limit)
+      .getMany();
   }
 
 

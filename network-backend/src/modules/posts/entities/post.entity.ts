@@ -13,6 +13,7 @@ import { Media } from '@/modules/media/entities/media.entity';
 import { ReactionPost } from '@/modules/reactions/entities/reaction-post.entity';
 import { Comment } from '@/modules/comments/entities/comment.entity';
 import { SavePost } from '@/modules/save-posts/entities/save-post.entity';
+import { Report } from '@/modules/reports/entities/report.entity';
 
 @Entity({ name: 'posts' })
 export class Post {
@@ -51,6 +52,9 @@ export class Post {
 
     @Column({ default: false })
     isPinned: boolean;
+
+    @OneToMany(() => Report, (report) => report.post)
+    reports: Report[];
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;

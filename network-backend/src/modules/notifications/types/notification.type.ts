@@ -7,4 +7,5 @@ export enum NotificationType {
     TAG = 6,
     FOLLOW_REQUEST = 7,
     FOLLOW_REQUEST_ACCEPTED = 8,
+    POST_REMOVED = 9,
 }

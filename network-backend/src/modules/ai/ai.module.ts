@@ -9,6 +9,10 @@ import { RecommendationsConsumer } from './recommendations/recommendations.consu
 import { RecommendationProducer } from './recommendations/recommendations.producer';
 import { QueueModule } from '../queue/queue.module';
 import { ProfilesModule } from '../profiles/profiles.module';
+import { ReportsModule } from '../reports/reports.module';
+import { PredictionProducer } from './predictions/prediction.producer';
+import { PredictionsService } from './predictions/prediction.service';
+import { PredictionConsumer } from './predictions/prediction.consumer';
 
 @Module({
     imports: [
@@ -16,10 +20,11 @@ import { ProfilesModule } from '../profiles/profiles.module';
         HttpModule,
         UsersModule,
         QueueModule,
-        ProfilesModule
+        ProfilesModule,
+        ReportsModule
     ],
-    providers: [RecommendationsService, RecommendationProducer],
-    controllers: [RecommendationsController, RecommendationsConsumer],
-    exports: [RecommendationsService, RecommendationProducer],
+    providers: [RecommendationsService, RecommendationProducer, PredictionProducer, PredictionsService],
+    controllers: [RecommendationsController, RecommendationsConsumer, PredictionConsumer],
+    exports: [RecommendationsService, RecommendationProducer, PredictionProducer],
 })
 export class AiModule { }

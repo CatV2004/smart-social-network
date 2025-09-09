@@ -1,4 +1,3 @@
-// components/features/notification/NotificationItem.tsx
 "use client";
 
 import { motion } from "framer-motion";
@@ -36,6 +35,7 @@ export function NotificationItem({
 
   const isFollowRequest = notification.type === NotificationEnum.FOLLOW_REQUEST;
   const followId = notification.metadata?.id;
+  const isSystemNotification = !notification.sender;
 
   const handleDeleteNotification = async () => {
     try {
@@ -90,25 +90,33 @@ export function NotificationItem({
       transition={{ delay: index * 0.05 + 0.2 }}
       className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors duration-200 ${
         !notification.isRead ? "bg-blue-50" : ""
-      } ${isProcessing ? "opacity-70" : ""}`}
+      } ${isProcessing ? "opacity-70" : ""} ${
+        isSystemNotification ? "border-l-4 border-l-blue-500" : ""
+      }`}
       onClick={handleItemClick}
     >
       <div className="flex items-start gap-3 relative">
         {/* Avatar / Icon */}
         <div className="flex-shrink-0 relative">
-          {notification.sender?.avatar ? (
+          {!isSystemNotification && notification.sender?.avatar ? (
             <img
               src={notification.sender.avatar}
               alt="avatar"
               className="w-10 h-10 rounded-full object-cover"
             />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                isSystemNotification ? "bg-blue-100" : "bg-gray-200"
+              }`}
+            >
               <FontAwesomeIcon
                 icon={getNotificationIcon(notification.type)}
-                className={`w-4 h-4 ${getNotificationIconColor(
-                  notification.type
-                )}`}
+                className={`w-4 h-4 ${
+                  isSystemNotification
+                    ? "text-blue-600"
+                    : getNotificationIconColor(notification.type)
+                }`}
               />
             </div>
           )}

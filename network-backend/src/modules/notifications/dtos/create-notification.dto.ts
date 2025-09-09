@@ -5,7 +5,7 @@ import { NotificationType } from '../types/notification.type';
 export class CreateNotificationDto {
     @ApiProperty({ description: 'ID của người gửi' })
     @IsString()
-    senderId: string;
+    senderId?: string;
 
     @ApiProperty({ description: 'ID của người nhận' })
     @IsString()

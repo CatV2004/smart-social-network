@@ -10,6 +10,7 @@ import memberReducer from "./features/chat/slices/memberSlice";
 import conversationReducer from "./features/chat/slices/conversationSlice";
 import onlineStatusReducer from "./features/onlineStatus/onlineStatusSlice";
 import recommendationReducer from "./features/recomment/recommendationSlice";
+import reportReducer from "./features/report/reportSlice";
 import { enableMapSet } from 'immer';
 
 import { combineReducers } from 'redux';
@@ -61,6 +62,7 @@ const rootReducer = combineReducers({
     conversation: conversationReducer,
     onlineStatus: onlineStatusReducer,
     recommendations: recommendationReducer,
+    reports: reportReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

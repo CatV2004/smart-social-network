@@ -15,13 +15,30 @@ import { ConfigService } from '@nestjs/config';
                             `amqp://${config.get('RABBITMQ_USER')}:${config.get('RABBITMQ_PASS')}@${config.get('RABBITMQ_HOST')}:${config.get('RABBITMQ_PORT')}`
                         ],
                         queue: 'recommendation_queue',
-                        queueOptions: { 
-                            durable: true ,
+                        queueOptions: {
+                            durable: true,
+                        },
+                    },
+                }),
+            },
+            {
+                name: 'PREDICTION_QUEUE',  
+                inject: [ConfigService],
+                useFactory: (config: ConfigService) => ({
+                    transport: Transport.RMQ,
+                    options: {
+                        urls: [
+                            `amqp://${config.get('RABBITMQ_USER')}:${config.get('RABBITMQ_PASS')}@${config.get('RABBITMQ_HOST')}:${config.get('RABBITMQ_PORT')}`,
+                        ],
+                        queue: 'prediction_queue',
+                        queueOptions: {
+                            durable: true,
                         },
                     },
                 }),
             },
         ]),
+
     ],
     exports: [ClientsModule],
 })

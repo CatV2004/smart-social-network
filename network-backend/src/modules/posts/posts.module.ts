@@ -8,6 +8,7 @@ import { UsersModule } from '../users/users.module';
 import { FollowsModule } from '../follows/follows.module';
 import { MediaModule } from '../media/media.module';
 import { SearchModule } from '../search/search.module';
+import { AiModule } from '../ai/ai.module';
 
 @Module({
   imports: [

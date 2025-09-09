@@ -1,7 +1,7 @@
 export interface Notification {
     id: string;
     type: NotificationEnum;
-    sender: {
+    sender?: {
         id: string;
         user: {
             id: string;
@@ -32,6 +32,7 @@ export enum NotificationEnum {
     TAG = "TAG",
     FOLLOW_REQUEST = "FOLLOW_REQUEST",
     FOLLOW_REQUEST_ACCEPTED = "FOLLOW_REQUEST_ACCEPTED",
+    POST_REMOVED="POST_REMOVED"
 }
 
 export interface PostPreview {

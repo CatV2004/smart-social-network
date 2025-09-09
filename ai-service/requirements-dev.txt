@@ -1,0 +1,22 @@
+# Testing
+coverage==7.10.6
+pytest==7.4.0
+pytest-asyncio==0.21.0
+pytest-cov==4.1.0
+pytest-mock==3.11.1
+freezegun==1.2.2
+Faker==18.11.2
+
+# Dev tools
+ipython==9.5.0
+ipython_pygments_lexers==1.1.1
+jedi==0.19.2
+parso==0.8.5
+matplotlib-inline==0.1.7
+Pygments==2.19.2
+stack-data==0.6.3
+traitlets==5.14.3
+wcwidth==0.2.13
+decorator==5.2.1
+executing==2.2.1
+asttokens==3.0.0

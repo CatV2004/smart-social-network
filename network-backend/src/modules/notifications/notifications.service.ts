@@ -30,22 +30,19 @@ export class NotificationsService {
    * Tạo thông báo mới (generic)
    */
   async create(dto: CreateNotificationDto) {
+
     const receiverProfile = await this.profilesService.findByIdWithRelations(dto.receiverId, ['user']);
     const receiverUserId = receiverProfile.user.id;
-
-    // Kiểm tra user có online trong namespace notifications không
     const isReceiverOnline = this.notificationRealtimeService.isUserOnline(receiverUserId);
-
     try {
       const noti = this.notificationRepo.create({
-        sender: { id: dto.senderId } as any,
+        sender: dto.senderId ? ({ id: dto.senderId } as any) : null,
         receiver: { id: dto.receiverId } as any,
         type: dto.type,
         post: dto.postId ? ({ id: dto.postId } as any) : undefined,
         comment: dto.commentId ? ({ id: dto.commentId } as any) : undefined,
         metadata: dto.metadata,
       });
-
       const saved = await this.notificationRepo.save(noti);
 
       const loaded = await this.buildDetailQuery()
@@ -237,6 +234,25 @@ export class NotificationsService {
       receiverId,
       type: NotificationType.FOLLOW_REQUEST,
       metadata,
+    });
+  }
+
+  async notifyPostRemoved(
+    receiverId: string,
+    postId: string,
+    reason: string,
+  ) {
+    console.log("postId: ", postId)
+    const metadata = {
+      postId,
+      reason,
+      message: `Bài viết của bạn đã bị xóa vì vi phạm chuẩn mực cộng đồng: ${reason}`,
+    };
+
+    return this.create({
+      receiverId: receiverId,
+      type: NotificationType.POST_REMOVED,
+      metadata: metadata,
     });
   }
 
