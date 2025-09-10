@@ -1,10 +1,13 @@
-# Social Network Website Using Link Prediction Models for Follower Suggestions and Using ResNet50 for 
+# Social Network Website Using Link Prediction Models for Follower Suggestions and Using ResNet50 for Image Classification
 
 ![Logo](./network-frontend/public/icons/logo.png)
 
 ## Project Introduction
-We developed a social network website inspired by Instagram. The project includes a website for users and another for administrators using a NoSQL database. The user site provides all the basic features of a social network such as posting, liking, commenting on posts, as well as following, messaging, etc. between users. The admin site allows for statistical analysis and management of content such as posts, users, user reports, and more. In addition, using graph theory and link prediction algorithms, we employ four link prediction algorithms based on node similarity: Common Neighbor, Jaccard, Adamic-Adar, and Katz Index.
-* This project is used to serve as a final term project for two courses in the Information Systems department at UIT: Web Application Development - IS207 (9.5/10) and Social Network - IS353.O21 (9/10)
+We developed a social networking website inspired by Instagram, consisting of two main platforms: a user-facing site and an administrator site, both powered by a SQL database(PostgreSQL).
+
+The user site offers all the core functionalities of a modern social network, including posting, liking, commenting, following, and messaging between users. The admin site provides tools for statistical analysis and content management, such as overseeing posts, users, and user reports.
+
+In addition, the system incorporates concepts from graph theory and applies four node-similarity–based link prediction algorithms—Common Neighbor, Jaccard, Adamic-Adar, and Katz Index—to generate follower suggestions.
 
 ## Team Members
 
@@ -14,14 +17,19 @@ We developed a social network website inspired by Instagram. The project include
 
 ## Technologies Used
 
-- **Frontend**: React, Redux, Bootstrap
-- **Backend**: NodeJS, ExpressJS, FastAPI
-- **Real-time**: Socket.IO
-- **Database**: MongoDB
-- **Graph Theory & Link Prediction**: NetworkX
+- **Frontend**: Next.js, Redux, Tailwind CSS  
+- **Backend**: Node.js, NestJS, FastAPI  
+- **Real-time Communication**: Socket.IO  
+- **Database**: PostgreSQL  
+- **Cache**: Redis  
+- **Message Queue**: RabbitMQ  
+- **Search & Analytics**: Elasticsearch  
+- **Graph Theory & Link Prediction**: NetworkX  
+- **Computer Vision**: ResNet50  
 
-## Database Schema 
-![Schema](./demo/schema.png)
+
+## Class diagram 
+![diagram](./image_client/classdiagram.png)
 
 ## Main Features of the Website
 ----------------
@@ -29,7 +37,7 @@ We developed a social network website inspired by Instagram. The project include
 > * Login / Register (API Token)
 > * Create/Like/Comment/Report Posts
 > * Follow/Search/View Other Users' Profiles
-> * Real-time Notifications/Messaging/Calling
+> * Real-time Notifications/Messaging
 > * Manage Own Profile
 
 ### Main Features for Admins
@@ -43,33 +51,38 @@ We developed a social network website inspired by Instagram. The project include
 <details>
 <summary>User Interface</summary>
   
->* Login
+>* Register
 
-![SignUp](./demo/login.png)
+![SignUp](./image_client/register.png)
+
+>* Verify email
+
+![Verify](./image_client/register%20b2.png)
 
 >* Home Page
 
-![Home](./demo/home_page.png)
+![Home](./image_client/home.png)
 
 >* Create Post
 
-![Create Post](./demo/create_post.png)
+![Create Post](./image_client/b3%20tao%20post.png)
 
 >* Comment on Post
 
-![Comment Post](./demo/comment.png)
+![Comment Post](./image_client/reply.png)
 
 >* Search and Explore
 
-![Search Explore](./demo/seach_explore.png)
+![Search post](./image_client/kq_tim%20kiem%20theo%20post%201.png)
+![Search user](./image_client/kq_tim%20kiem%20theo%20user.png)
 
 >* Messaging
 
-![Message](./demo/message.png)
+![Message](./image_client/typing.png)
 
 >* Notifications and Profile
 
-![Notify Profile](./demo/notify_profile.png)
+![Notification](./image_client/Thông%20báo.png)
 </details>
 
 <details>
@@ -77,23 +90,15 @@ We developed a social network website inspired by Instagram. The project include
   
 >* Dashboard
 
-![Admin Dashboard](./demo/admin_dashboard.png)
-
->* Manage Posts
-
-![Admin Post](./demo/admin_post_detail.png)
+![Admin Dashboard](./image_client/dashboard2.png)
 
 >* Manage Users
 
-![Admin User](./demo/admin_users.png)
-
->* User Statistics and Send Email
-
-![Admin Send Mail](./demo/admin_sendmail.png)
+![Admin User](./image_client/quan%20ly%20user.png)
 
 >* Manage Post Reports
 
-![Admin Report](./demo/admin_report.png)
+![Admin Report](./image_client/report-post.png)
 </details>
 
 ## Installation Guide
@@ -102,13 +107,14 @@ We developed a social network website inspired by Instagram. The project include
 - Node.js
 - npm or yarn
 - Python 3.x (for FastAPI and NetworkX)
-- MongoDB (local or cloud instance)
+- PostgreSQL (local or cloud instance)
+
 
 ### Frontend Setup
 1. **Clone the repository and navigate to the client directory:**
    ```bash
-   git clone https://github.com/NHViet03/Web_Social_Network_with_Link_Prediction
-   cd /Web_Social_Network_with_Link_Prediction/client
+   git clone https://github.com/CatV2004/smart-social-network?
+   cd /smart-social-network/network-frontend
    
 2. **Install dependencies:**
    ```bash
@@ -118,26 +124,15 @@ We developed a social network website inspired by Instagram. The project include
    ```bash
    npm start
    
-4. **Navigate to the admin directory and install dependencies:**
-   ```bash
-   cd /Web_Social_Network_with_Link_Prediction/admin
-   npm install
-   
-5. **Start the admin frontend server:**
-   ```bash
-   npm start
-   
 ### Backend Setup
 1. **Navigate to the backend directory and Install dependencies:**
    ```bash
-   cd /Web_Social_Network_with_Link_Prediction
+   cd /smart-social-network/network-backend
    npm install
 
-2. **Set up environment variables, create a .env file with:**
+2. **Set up environment variables:**
    ```bash
-   MONGODB_URL=your_mongodb_connection_string
-   ACCESS_TOKEN_SECRET=your_access_key
-   REFRESH_TOKEN_SECRET=your_refresh_key
+   cp .env.example .env
 
 3. **Start the backend server:**
    ```bash
@@ -151,15 +146,12 @@ We developed a social network website inspired by Instagram. The project include
    
 2. **Navigate to the FastAPI directory:**
    ```bash
-   cd /Web_Social_Network_with_Link_Prediction/fastAPIServer
+   cd /smart-social-network/network-backend/ai-service
 
 3. **Start the FastAPI server::**
    ```bash
-   python -m uvicorn index:app --reload
+   uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload --log-level info
   
 ## Related Project
-- [Mobile-App_Social_Network](https://github.com/NHViet03/Mobile-App_Social_Network)
+- [Redesign-Microservice](https://github.com/)
 
-## References
-
-- [MERN Stack - Build a social media app](https://github.com/devat-youtuber/MERN-Stack-Build-a-social-media-app)
