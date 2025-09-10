@@ -28,8 +28,9 @@ In addition, the system incorporates concepts from graph theory and applies four
 - **Computer Vision**: ResNet50  
 
 
-## Class diagram 
-![diagram](./image_client/classdiagram.png)
+## Class Diagram
+[View Class Diagram](./image_client/classdiagram.jpg)
+
 
 ## Main Features of the Website
 ----------------
