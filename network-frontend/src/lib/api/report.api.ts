@@ -1,7 +1,7 @@
 import { ListResponse } from '@/types/pagination-meta';
 import axiosClient from './axiosClient';
 import { AxiosResponse } from 'axios';
-import { Report, ReportStatus } from '@/types/report';
+import { CreateReportPayload, Report, ReportStatus } from '@/types/report';
 
 const reportApi = {
   getReports: (
@@ -38,6 +38,12 @@ const reportApi = {
 
   rejectReport: (id: string): Promise<AxiosResponse<Report>> => {
     return axiosClient.patch(`/reports/${id}/reject`);
+  },
+
+  createReport: (
+    payload: CreateReportPayload
+  ): Promise<AxiosResponse<Report>> => {
+    return axiosClient.post('/reports', payload);
   },
 };
 

@@ -144,19 +144,14 @@ export const reportSlice = createSlice({
                 state.reportLoading[reportId] = true;
             })
             .addCase(approveReport.fulfilled, (state, action) => {
-                const reportId = action.meta.arg;
-                const index = state.reports.findIndex(r => r.id === reportId);
+                const updatedReport = action.payload;
+                const index = state.reports.findIndex(r => r.id === updatedReport.id);
 
                 if (index !== -1) {
-                    state.reports.splice(index, 1);
-
-                    if (state.pagination) {
-                        state.pagination.total = Math.max(0, state.pagination.total - 1);
-                        state.pagination.totalPages = Math.ceil(state.pagination.total / state.pagination.limit);
-                    }
+                    state.reports[index].status = updatedReport.status;
                 }
 
-                delete state.reportLoading[reportId];
+                delete state.reportLoading[updatedReport.id];
             })
             .addCase(approveReport.rejected, (state, action) => {
                 const reportId = action.meta.arg;

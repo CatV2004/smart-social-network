@@ -18,6 +18,7 @@ interface PostCardProps {
   onShare?: (postId: string) => void;
   onDelete?: (post: Post) => void;
   onEdit?: (post: Post) => void;
+  onReport?: (post: Post) => void;
   updatingPostId: string | null;
   isUpdating: boolean;
   isDeleting?: boolean;
@@ -33,6 +34,7 @@ export function PostCard({
   onShare,
   onDelete,
   onEdit,
+  onReport,
   isDeleting = false,
   hideOptions = false,
   updatingPostId,
@@ -99,6 +101,7 @@ export function PostCard({
               author={post.author}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onReport={onReport}
               isDeleting={isDeleting}
               hideOptions={hideOptions}
             />

@@ -48,8 +48,9 @@ export class NotificationsService {
       const loaded = await this.buildDetailQuery()
         .where('n.id = :id', { id: saved.id })
         .getOne();
-
+      console.log("loaded: ", loaded)
       const notiDto = NotificationMapper.toDto(loaded!);
+      console.log("nofiticationdto: ", notiDto)
 
 
       if (isReceiverOnline && saved) {
@@ -126,8 +127,9 @@ export class NotificationsService {
    * Đánh dấu tất cả thông báo của 1 user là đã đọc
    */
   async markAllAsRead(userId: string) {
+    const profileId = (await this.profilesService.getProfileByUserId(userId)).id
     await this.notificationRepo.update(
-      { receiver: { id: userId }, isRead: false },
+      { receiver: { id: profileId }, isRead: false },
       { isRead: true },
     );
     return { success: true };
@@ -250,6 +252,7 @@ export class NotificationsService {
     };
 
     return this.create({
+      postId: postId,
       receiverId: receiverId,
       type: NotificationType.POST_REMOVED,
       metadata: metadata,

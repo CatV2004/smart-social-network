@@ -11,6 +11,7 @@ import { ReportDto } from './dto/report-response.dto';
 import { plainToInstance } from 'class-transformer';
 import { PostsService } from '../posts/posts.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PostStatus } from '../posts/entities/post.entity';
 
 @Injectable()
 export class ReportsService {
@@ -161,18 +162,17 @@ export class ReportsService {
         }
 
         if (report.post) {
+            await this.postService.updateStatus(report.post.id, PostStatus.REPORTED);
             await this.notificationService.notifyPostRemoved(
                 report.post.author.id,
                 report.post.id,
                 report.reason || 'Nội dung vi phạm chuẩn mực cộng đồng',
             );
-            return this.postService.hardDeletePost(report.post.id);
         }
 
-        // report.status = ReportStatus.RESOLVED;
-        // return this.reportRepository.save(report);
+        report.status = ReportStatus.RESOLVED;
+        return this.reportRepository.save(report);
     }
-
 
     async rejectReport(reportId: string): Promise<Report> {
         const report = await this.reportRepository.findOne({ where: { id: reportId } });
@@ -189,4 +189,6 @@ export class ReportsService {
         const report = await this.findOne(id);
         return this.reportRepository.softRemove(report!);
     }
+
+
 }

@@ -15,6 +15,13 @@ import { Comment } from '@/modules/comments/entities/comment.entity';
 import { SavePost } from '@/modules/save-posts/entities/save-post.entity';
 import { Report } from '@/modules/reports/entities/report.entity';
 
+export enum PostStatus {
+    ACTIVE = 'active',
+    HIDDEN = 'hidden',
+    DELETED = 'deleted',
+    REPORTED = 'reported',
+}
+
 @Entity({ name: 'posts' })
 export class Post {
     @PrimaryGeneratedColumn('uuid')
@@ -55,6 +62,13 @@ export class Post {
 
     @OneToMany(() => Report, (report) => report.post)
     reports: Report[];
+
+    @Column({
+        type: 'enum',
+        enum: PostStatus,
+        default: PostStatus.ACTIVE,
+    })
+    status: PostStatus;
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;

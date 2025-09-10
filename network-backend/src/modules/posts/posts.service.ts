@@ -1,6 +1,6 @@
 import { BadRequestException, forwardRef, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreatePostDto } from './dtos/create-post.dto';
-import { Post } from './entities/post.entity';
+import { Post, PostStatus } from './entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, IsNull, LessThan, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { ProfilesService } from '../profiles/profiles.service';
@@ -64,6 +64,7 @@ export class PostsService {
     if (!post) {
       throw new NotFoundException('Post not found');
     }
+    await this.postRepository.update(id, { status: PostStatus.DELETED });
     await this.postRepository.softDelete(id);
   }
 
@@ -83,6 +84,7 @@ export class PostsService {
     }
 
     await this.postRepository.restore(postId);
+    await this.postRepository.update(postId, { status: PostStatus.ACTIVE });
     return this.postRepository.findOneBy({ id: postId });
   }
 
@@ -215,15 +217,14 @@ export class PostsService {
     }
   }
 
-  /**
-   * Hàm build query chung
-   */
   buildListQuery(profileId?: string): SelectQueryBuilder<Post> {
     const qb = this.postRepository
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.author', 'author')
       .leftJoinAndSelect('author.user', 'user')
-      .leftJoinAndSelect('post.media', 'media');
+      .leftJoinAndSelect('post.media', 'media')
+      .where('post.status = :status', { status: PostStatus.ACTIVE });
+
 
     if (profileId) {
       qb.leftJoin(
@@ -313,6 +314,7 @@ export class PostsService {
       .leftJoinAndSelect('author.user', 'user')
       .leftJoinAndSelect('post.media', 'media')
       .where('author.id = :profileId', { profileId })
+      .andWhere('post.status = :status', { status: PostStatus.ACTIVE })
       .orderBy(`post.${sortBy}`, sortOrder);
 
     return paginate(qb, page, limit, PostResponseDto);
@@ -335,6 +337,7 @@ export class PostsService {
       .leftJoinAndSelect('author.user', 'user')
       .leftJoinAndSelect('post.media', 'media')
       .where('user.username = :username', { username })
+      .andWhere('post.status = :status', { status: PostStatus.ACTIVE })
       .orderBy(`post.${sortBy}`, sortOrder);
 
     return paginate(qb, page, limit, PostResponseDto);
@@ -362,6 +365,7 @@ export class PostsService {
       .leftJoinAndSelect('post.author', 'author')
       .leftJoinAndSelect('author.user', 'user')
       .leftJoinAndSelect('post.media', 'media')
+      .where('post.status = :status', { status: PostStatus.ACTIVE })
       .orderBy(`post.${sortBy}`, sortOrder);
 
     return paginate(qb, page, limit, PostResponseDto);
@@ -451,7 +455,10 @@ export class PostsService {
 
     // Lấy batch bài viết chưa soft-delete
     const items = await this.postRepository.find({
-      where: { deletedAt: IsNull() },
+      where: {
+        deletedAt: IsNull(),
+        status: PostStatus.ACTIVE,
+      },
       order: { createdAt: 'DESC' },
       take: limit,
       skip: offset,
@@ -489,11 +496,20 @@ export class PostsService {
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.reports', 'report')
       .where('post.deletedAt IS NULL')
+      .andWhere('post.status = :status', { status: PostStatus.ACTIVE })
       .andWhere('report.id IS NULL')
       .orderBy('post.createdAt', 'DESC')
       .take(limit)
       .getMany();
   }
 
+  async updateStatus(id: string, status: PostStatus) {
+    const post = await this.postRepository.findOne({ where: { id } });
 
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    return await this.postRepository.update(id, { status });
+  }
 }

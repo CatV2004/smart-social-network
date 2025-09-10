@@ -6,10 +6,6 @@ export class CreateReportDto {
     @IsOptional()
     postId?: string; 
 
-    @IsUUID()
-    @IsOptional()
-    userId?: string; 
-
     @IsEnum(ReportType)
     type: ReportType;
 

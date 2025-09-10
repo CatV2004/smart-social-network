@@ -1,4 +1,3 @@
-// components/features/post/PostList.tsx
 import { Post } from "@/types/post";
 import { PostCard } from "./PostCard";
 import LoadingSkeleton from "@/components/common/LoadingSkeleton";
@@ -13,6 +12,7 @@ interface PostListProps {
   onSharePost?: (postId: string) => void;
   onDeletePost: (post: Post) => void;
   onEditPost: (post: Post) => void;
+  onReportPost: (post: Post) => void;
   deletingPostId?: string | null;
   updatingPostId?: string | null;
   isUpdating: boolean;
@@ -27,6 +27,7 @@ export function PostList({
   onSharePost,
   onDeletePost,
   onEditPost,
+  onReportPost,
   deletingPostId,
   updatingPostId = null,
   isUpdating = false,
@@ -72,6 +73,7 @@ export function PostList({
               onDelete={onDeletePost}
               isDeleting={post.id === deletingPostId}
               onEdit={onEditPost}
+              onReport={onReportPost}
               updatingPostId={updatingPostId}
               isUpdating={isUpdating}
             />

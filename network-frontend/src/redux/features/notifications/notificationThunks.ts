@@ -30,7 +30,6 @@ export const fetchNotifications = createAsyncThunk<
 );
 
 
-// Lấy số lượng chưa đọc
 export const fetchUnreadCount = createAsyncThunk<number>(
     "notifications/fetchUnreadCount",
     async () => {
@@ -38,7 +37,6 @@ export const fetchUnreadCount = createAsyncThunk<number>(
     }
 );
 
-// Cập nhật 1 notification (VD: mark as read)
 export const updateNotification = createAsyncThunk<
     Notification,
     { notificationId: string; payload: UpdateNotificationPayload }

@@ -91,7 +91,8 @@ export function NotificationsOverlay({
     dispatch(markAllNotificationsAsRead())
       .unwrap()
       .then(() => {
-        dispatch(markAllAsReadLocal());
+        // dispatch(markAllAsReadLocal());
+        console.log("mark all success")
       })
       .catch((error) => {
         console.error("Failed to mark all as read:", error);

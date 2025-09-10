@@ -1,6 +1,12 @@
 import { Post } from './post';
 import { User } from './user';
 
+export interface CreateReportPayload {
+  postId?: string;
+  type: ReportType;
+  reason: string;
+}
+
 export interface Prediction {
   label: string;
   probability: number;

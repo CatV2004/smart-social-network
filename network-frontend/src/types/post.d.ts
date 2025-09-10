@@ -4,6 +4,13 @@ import { AuthorProfile } from "./profile";
 
 export type MediaItem = ImageMedia | VideoMedia | AudioMedia;
 
+export enum PostStatus {
+  ACTIVE = 'active',
+  HIDDEN = 'hidden',
+  DELETED = 'deleted',
+  REPORTED = 'reported',
+}
+
 export interface Post {
   id: string;
   content: string;
@@ -15,6 +22,7 @@ export interface Post {
   commentsCount: number;
   isReacted: boolean;
   isSaved: boolean;
+  status?: PostStatus;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;
@@ -59,6 +67,6 @@ export interface UpdatePostPayload {
   content?: string;
   mediaToDelete?: string[];
   mediaToUpdate?: MediaUpdatePayload[];
-  files?: File[]; 
+  files?: File[];
   isPinned?: boolean;
 }
